@@ -1,0 +1,206 @@
+/* First Byte — Lead Engine (demo).
+ * OFF by default. Nothing renders for normal visitors.
+ * Activate the hidden demo control panel:   /?demo=1   (turn off: /?demo=0)
+ * Force lead capture on/off directly:        /?leads=on  |  /?leads=off
+ * Real submissions POST to /api/contact (Resend) -> reach the owner's inbox.
+ */
+(function () {
+  "use strict";
+  var qs = new URLSearchParams(location.search);
+  if (qs.has("demo")) { qs.get("demo") === "0" ? localStorage.removeItem("fblm_demo") : localStorage.setItem("fblm_demo", "1"); }
+  if (qs.has("leads")) { localStorage.setItem("fblm_leads", qs.get("leads") === "off" ? "off" : "on"); }
+
+  var DEMO = localStorage.getItem("fblm_demo") === "1";
+  var LEADS = localStorage.getItem("fblm_leads") === "on"; // OFF by default
+  if (!DEMO && !LEADS) return; // normal visitors: do nothing
+
+  var FEAT_DEFAULT = { hello: 1, fab: 1, mobile: 1, exit: 1, scroll: 1, social: 1, spin: 1 };
+  var FEAT = Object.assign({}, FEAT_DEFAULT, JSON.parse(localStorage.getItem("fblm_feat") || "{}"));
+  var PHONE = "+1-713-578-0634", PHONE_D = "(713) 578-0634";
+  var fired = {};
+
+  function track(ev, data) { try { window.dataLayer = window.dataLayer || []; window.dataLayer.push(Object.assign({ event: "lead_engine_" + ev }, data || {})); } catch (e) {} }
+  function el(html) { var d = document.createElement("div"); d.innerHTML = html.trim(); return d.firstChild; }
+  function once(k) { if (fired[k]) return false; fired[k] = 1; return true; }
+
+  /* ---------------- Modal (shared offer + multi-step form) ---------------- */
+  var overlay;
+  function monthEnd() { var n = new Date(); return new Date(n.getFullYear(), n.getMonth() + 1, 0, 23, 59, 59); }
+  function buildModal() {
+    if (overlay) return overlay;
+    overlay = el('<div class="fblm-overlay" role="dialog" aria-modal="true"></div>');
+    overlay.innerHTML =
+      '<div class="fblm-modal">' +
+      '<button class="fblm-close" aria-label="Close">&times;</button>' +
+      '<span class="fblm-badge">Free • Limited this month</span>' +
+      '<h2>Get your <span class="a">free 2026 growth plan</span></h2>' +
+      '<p class="fblm-sub">A no-obligation website + local-SEO audit for your business — what\'s working, what\'s leaking leads, and the 3 fastest wins. ($500 value.)</p>' +
+      '<div class="fblm-count" data-count></div>' +
+      '<div class="fblm-steps"><i class="on"></i><i></i><i></i></div>' +
+      '<form class="fblm-form" novalidate>' +
+        '<input class="fblm-hp" type="text" name="company" tabindex="-1" autocomplete="off" aria-hidden="true">' +
+        '<input type="hidden" name="_goal" value="">' +
+        '<div class="fblm-step on" data-step="0">' +
+          '<div class="fblm-field"><label>What do you most want to fix?</label></div>' +
+          '<div class="fblm-choices">' +
+            '<button type="button" data-goal="Get more leads / calls">📈 Get more leads &amp; calls</button>' +
+            '<button type="button" data-goal="New or rebuilt website">🎨 A new / better website</button>' +
+            '<button type="button" data-goal="Rank higher on Google">🔍 Rank higher on Google</button>' +
+            '<button type="button" data-goal="Not sure — need a plan">🤝 Not sure, I want a plan</button>' +
+          '</div>' +
+        '</div>' +
+        '<div class="fblm-step" data-step="1">' +
+          '<div class="fblm-field"><label>Your name</label><input name="name" autocomplete="name" placeholder="Jane Smith"></div>' +
+          '<div class="fblm-field"><label>Email</label><input name="email" type="email" autocomplete="email" placeholder="you@business.com"></div>' +
+          '<button type="button" class="fblm-cta" data-next>Continue &rarr;</button>' +
+        '</div>' +
+        '<div class="fblm-step" data-step="2">' +
+          '<div class="fblm-field"><label>Best phone (for your free audit call)</label><input name="phone" type="tel" autocomplete="tel" placeholder="(713) 555-0123"></div>' +
+          '<div class="fblm-field"><label>Anything we should know? (optional)</label><textarea name="message" rows="2" placeholder="Tell us about your business"></textarea></div>' +
+          '<button type="submit" class="fblm-cta">🚀 Send me my free plan</button>' +
+        '</div>' +
+        '<div class="fblm-msg" role="status" aria-live="polite"></div>' +
+      '</form>' +
+      '<p class="fblm-fine">No spam, ever. Or call <a href="tel:' + PHONE + '">' + PHONE_D + '</a> now.</p>' +
+      '</div>';
+    document.body.appendChild(overlay);
+
+    var form = overlay.querySelector(".fblm-form"), msg = overlay.querySelector(".fblm-msg");
+    var steps = overlay.querySelectorAll(".fblm-step"), dots = overlay.querySelectorAll(".fblm-steps i");
+    function goStep(n) { steps.forEach(function (s, i) { s.classList.toggle("on", i === n); }); dots.forEach(function (d, i) { d.classList.toggle("on", i <= n); }); }
+    overlay.querySelectorAll("[data-goal]").forEach(function (b) {
+      b.addEventListener("click", function () { form._goal.value = b.dataset.goal; track("step", { step: 1, goal: b.dataset.goal }); goStep(1); });
+    });
+    overlay.querySelector("[data-next]").addEventListener("click", function () {
+      if (!form.name.value.trim() || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email.value)) { msg.className = "fblm-msg err"; msg.textContent = "Please add your name and a valid email."; return; }
+      msg.textContent = ""; track("step", { step: 2 }); goStep(2);
+    });
+    overlay.querySelector(".fblm-close").addEventListener("click", closeModal);
+    overlay.addEventListener("click", function (e) { if (e.target === overlay) closeModal(); });
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var btn = form.querySelector('button[type=submit]'); btn.disabled = true; msg.className = "fblm-msg"; msg.textContent = "Sending…";
+      var fd = new FormData();
+      fd.append("name", form.name.value); fd.append("email", form.email.value); fd.append("phone", form.phone.value); fd.append("company", form.company.value);
+      fd.append("message", "[Lead Engine • " + (form._goal.value || "popup") + "] " + (form.message.value || ""));
+      track("submit", { goal: form._goal.value });
+      fetch("/api/contact", { method: "POST", headers: { Accept: "application/json" }, body: fd })
+        .then(function (r) { return r.json().catch(function () { return { ok: r.ok }; }); })
+        .then(function (d) {
+          if (d.ok) { overlay.querySelector(".fblm-modal").innerHTML = '<button class="fblm-close" aria-label="Close">&times;</button><div style="text-align:center;padding:1rem 0"><div style="font-size:3rem">🎉</div><h2>You\'re in!</h2><p class="fblm-sub">Your free plan is on the way. We\'ll reach out within one business day — or call <a style="color:#01f6f2" href="tel:' + PHONE + '">' + PHONE_D + '</a>.</p></div>'; overlay.querySelector(".fblm-close").addEventListener("click", closeModal); track("success"); }
+          else { msg.className = "fblm-msg err"; msg.textContent = d.error || "Something went wrong — please call us."; btn.disabled = false; }
+        })
+        .catch(function () { msg.className = "fblm-msg err"; msg.textContent = "Network error — please call " + PHONE_D + "."; btn.disabled = false; });
+    });
+    startCountdown(overlay.querySelector("[data-count]"));
+    return overlay;
+  }
+  function openModal(src) { buildModal(); requestAnimationFrame(function () { overlay.classList.add("fblm-show"); }); track("open", { source: src || "?" }); }
+  function closeModal() { if (overlay) overlay.classList.remove("fblm-show"); }
+
+  function startCountdown(node) {
+    function tick() {
+      var ms = monthEnd() - new Date(); if (ms < 0) ms = 0;
+      var d = Math.floor(ms / 864e5), h = Math.floor(ms / 36e5) % 24, m = Math.floor(ms / 6e4) % 60, s = Math.floor(ms / 1e3) % 60;
+      node.innerHTML = [["Days", d], ["Hrs", h], ["Min", m], ["Sec", s]].map(function (x) { return '<div><b>' + String(x[1]).padStart(2, "0") + '</b><span>' + x[0] + '</span></div>'; }).join("");
+    }
+    tick(); setInterval(tick, 1000);
+  }
+
+  /* ---------------- Individual mechanisms ---------------- */
+  function helloBar() {
+    if (!FEAT.hello) return;
+    var bar = el('<div class="fblm-hellobar"><span>🎯 <b>This month only:</b> free website + SEO audit for ' + new Date().toLocaleString("en-US", { month: "long" }) + ' — limited spots.</span><button>Claim mine</button><button class="fblm-x" aria-label="Dismiss">&times;</button></div>');
+    document.body.appendChild(bar);
+    bar.querySelector("button").addEventListener("click", function () { openModal("hellobar"); });
+    bar.querySelector(".fblm-x").addEventListener("click", function () { bar.classList.remove("fblm-show"); });
+    setTimeout(function () { bar.classList.add("fblm-show"); }, 600);
+  }
+  function fab() {
+    if (!FEAT.fab) return;
+    var b = el('<button class="fblm-fab">💬 Get my free plan</button>');
+    b.addEventListener("click", function () { openModal("fab"); });
+    document.body.appendChild(b);
+  }
+  function mobileBar() {
+    if (!FEAT.mobile) return;
+    var b = el('<div class="fblm-mobilebar"><a class="fblm-call" href="tel:' + PHONE + '">📞 Call now</a><button class="fblm-quote">⚡ Free quote</button></div>');
+    b.querySelector(".fblm-quote").addEventListener("click", function () { openModal("mobilebar"); });
+    document.body.appendChild(b);
+  }
+  function exitIntent() {
+    if (!FEAT.exit) return;
+    document.addEventListener("mouseout", function (e) { if (e.clientY <= 0 && once("exit")) openModal("exit-intent"); });
+    // mobile proxy: fast scroll to top
+    var ly = window.scrollY;
+    window.addEventListener("scroll", function () { if (window.innerWidth < 768 && window.scrollY < ly - 240 && window.scrollY < 400 && once("exit")) openModal("exit-intent-mobile"); ly = window.scrollY; }, { passive: true });
+  }
+  function scrollOffer() {
+    if (!FEAT.scroll) return;
+    function onScroll() {
+      var p = window.scrollY / (document.body.scrollHeight - window.innerHeight);
+      if (p > 0.5 && once("scroll")) { openModal("scroll-50"); window.removeEventListener("scroll", onScroll); }
+    }
+    window.addEventListener("scroll", onScroll, { passive: true });
+  }
+  function socialProof() {
+    if (!FEAT.social) return;
+    /* DEMO DATA — sample events. On a live site this MUST be wired to real
+       recent leads; fabricated social proof is deceptive (and unlawful in
+       some jurisdictions). Shown here to demonstrate the mechanism only. */
+    var samples = [
+      ["Mike R.", "Conroe", "requested a free audit"],
+      ["Sarah L.", "Spring", "booked a strategy call"],
+      ["The Hiya Team", "The Woodlands", "started a website project"],
+      ["Carlos M.", "Katy", "claimed the monthly offer"],
+      ["Jen P.", "Tomball", "requested a quote"],
+      ["A local restaurant", "Houston", "asked about more reviews"]
+    ];
+    var i = 0, node = el('<div class="fblm-toast" data-demo="sample-data"></div>');
+    document.body.appendChild(node);
+    function show() {
+      var s = samples[i % samples.length]; i++;
+      node.innerHTML = '<div><span class="fblm-t-name">' + s[0] + '</span> in ' + s[1] + ' ' + s[2] + '.</div><div class="fblm-t-time">a few minutes ago • verified lead</div>';
+      node.classList.add("fblm-show");
+      setTimeout(function () { node.classList.remove("fblm-show"); }, 5200);
+    }
+    setTimeout(function () { show(); setInterval(show, 12000); }, 4000);
+  }
+
+  function activate() {
+    track("activate", { features: FEAT });
+    helloBar(); fab(); mobileBar(); exitIntent(); scrollOffer(); socialProof();
+  }
+
+  /* ---------------- Demo control panel ---------------- */
+  function panel() {
+    var p = el('<div class="fblm-panel"><button class="fblm-collapse" title="Minimize">_</button>' +
+      '<h4>⚡ Lead Engine — Demo</h4><p class="fblm-p-sub">Owner preview. Off by default for real visitors.</p>' +
+      '<div class="fblm-body">' +
+      '<div class="fblm-master"><span>Lead Capture</span><label class="fblm-switch"><input type="checkbox" id="fblm-master"><span class="fblm-slider"></span></label></div>' +
+      '<div class="fblm-feats"></div>' +
+      '<button class="fblm-cta" id="fblm-preview" style="margin-top:.7rem;padding:.6rem;font-size:.9rem">Preview the popup ▶</button>' +
+      '<p class="fblm-note">Real submissions are emailed to the owner via Resend. Social-proof toasts use sample data in this demo.</p>' +
+      '</div></div>');
+    var feats = [["hello", "Hello bar (top offer)"], ["fab", "Floating CTA button"], ["mobile", "Sticky mobile call bar"], ["exit", "Exit-intent popup"], ["scroll", "Scroll-triggered offer"], ["social", "Social-proof toasts"]];
+    var fc = p.querySelector(".fblm-feats");
+    feats.forEach(function (f) {
+      var row = el('<label class="fblm-feat"><input type="checkbox" data-f="' + f[0] + '"' + (FEAT[f[0]] ? " checked" : "") + '> ' + f[1] + '</label>');
+      fc.appendChild(row);
+    });
+    document.body.appendChild(p);
+    var master = p.querySelector("#fblm-master"); master.checked = LEADS;
+    master.addEventListener("change", function () { localStorage.setItem("fblm_leads", master.checked ? "on" : "off"); location.reload(); });
+    fc.querySelectorAll("input").forEach(function (cb) {
+      cb.addEventListener("change", function () { FEAT[cb.dataset.f] = cb.checked ? 1 : 0; localStorage.setItem("fblm_feat", JSON.stringify(FEAT)); if (LEADS) location.reload(); });
+    });
+    p.querySelector("#fblm-preview").addEventListener("click", function () { openModal("preview"); });
+    p.querySelector(".fblm-collapse").addEventListener("click", function () { p.classList.toggle("fblm-min"); });
+  }
+
+  function init() {
+    if (LEADS) activate();
+    if (DEMO) panel();
+  }
+  if (document.readyState !== "loading") init(); else document.addEventListener("DOMContentLoaded", init);
+})();
