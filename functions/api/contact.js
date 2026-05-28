@@ -1,9 +1,12 @@
 // Cloudflare Pages Function — POST /api/contact
 // Sends contact-form submissions as email via the Resend API.
-// Required env vars (set in Pages → Settings → Environment variables):
-//   RESEND_API_KEY  (secret)  — your Resend API key
-//   CONTACT_TO      — recipient address, e.g. hello@firstbyte.agency
-//   CONTACT_FROM    — verified Resend sender, e.g. "First Byte <noreply@firstbyte.agency>"
+// Env vars (set in Pages → Settings → Environment variables):
+//   RESEND_API_KEY  (secret, REQUIRED) — your Resend API key
+//   CONTACT_TO      (optional) — recipient; defaults to sean@firstbyte.agency
+//   CONTACT_FROM    (optional) — verified Resend sender; defaults below
+//                    (must be on a domain you've verified in Resend)
+const DEFAULT_TO = "sean@firstbyte.agency";
+const DEFAULT_FROM = "First Byte <noreply@firstbyte.agency>";
 
 export async function onRequestPost(context) {
   const { request, env } = context;
@@ -22,9 +25,11 @@ export async function onRequestPost(context) {
       return respond(request, false, "Please add your name, a valid email, and a message.", 400);
     }
 
-    if (!env.RESEND_API_KEY || !env.CONTACT_TO || !env.CONTACT_FROM) {
+    if (!env.RESEND_API_KEY) {
       return respond(request, false, "Email isn’t configured yet. Please call us at (713) 578-0634.", 500);
     }
+    const to = env.CONTACT_TO || DEFAULT_TO;
+    const from = env.CONTACT_FROM || DEFAULT_FROM;
 
     const text = `Name: ${name}\nEmail: ${email}\nPhone: ${phone || "—"}\n\n${message}`;
     const html = `<h2>New website enquiry</h2>
@@ -41,8 +46,8 @@ export async function onRequestPost(context) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: env.CONTACT_FROM,
-        to: [env.CONTACT_TO],
+        from,
+        to: [to],
         reply_to: email,
         subject: `New website enquiry from ${name}`,
         text,
