@@ -15,8 +15,8 @@ OUT = os.path.join(ROOT, "site")
 START = "<!-- fb-lead-engine -->"
 END = "<!-- /fb-lead-engine -->"
 BLOCK = (START +
-         '<link rel="stylesheet" href="/assets/leadmode.css?v=3">'
-         '<script src="/assets/leadmode.js?v=3" defer></script>' + END)
+         '<link rel="stylesheet" href="/assets/leadmode.css?v=4">'
+         '<script src="/assets/leadmode.js?v=4" defer></script>' + END)
 
 
 def main():

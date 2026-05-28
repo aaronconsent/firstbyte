@@ -14,7 +14,7 @@
   var LEADS = localStorage.getItem("fblm_leads") === "on"; // OFF by default
   if (!DEMO && !LEADS) return; // normal visitors: do nothing
 
-  var FEAT_DEFAULT = { hello: 1, fab: 1, mobile: 1, exit: 1, scroll: 1, social: 1, spin: 1 };
+  var FEAT_DEFAULT = { hello: 1, fab: 1, mobile: 1, exit: 1, scroll: 1, social: 1, poker: 1 };
   var FEAT = Object.assign({}, FEAT_DEFAULT, JSON.parse(localStorage.getItem("fblm_feat") || "{}"));
   var PHONE = "+1-713-578-0634", PHONE_D = "(713) 578-0634";
   // Owner: replace with your real Calendly (or other) booking link.
@@ -38,10 +38,11 @@
       '<h2>Get your <span class="a">free 2026 growth plan</span></h2>' +
       '<p class="fblm-sub">A no-obligation website + local-SEO audit for your business — what\'s working, what\'s leaking leads, and the 3 fastest wins. ($500 value.)</p>' +
       '<div class="fblm-count" data-count></div>' +
-      '<div class="fblm-spinstage fblm-hidden fblm-wheelwrap">' +
-        '<div class="fblm-wheel"></div>' +
-        '<button type="button" class="fblm-cta" data-spin>🎁 Spin to win your bonus</button>' +
-        '<p class="fblm-spinresult fblm-hidden" style="margin:.9rem 0 0;font-size:1.05rem"></p>' +
+      '<div class="fblm-pokerstage fblm-hidden fblm-poker">' +
+        '<div class="fblm-row" data-dealer></div><div class="fblm-rowlabel">Dealer</div>' +
+        '<div class="fblm-row" data-player></div><div class="fblm-rowlabel" data-holdhint>Your hand</div>' +
+        '<button type="button" class="fblm-cta" data-deal>🃏 Deal me in</button>' +
+        '<p class="fblm-spinresult fblm-hidden" style="margin:.9rem 0 0;font-size:1rem;line-height:1.5" data-pkresult></p>' +
       '</div>' +
       '<div class="fblm-steps"><i class="on"></i><i></i><i></i></div>' +
       '<form class="fblm-form" novalidate>' +
@@ -76,51 +77,96 @@
     var steps = overlay.querySelectorAll(".fblm-step"), dots = overlay.querySelectorAll(".fblm-steps i");
     function goStep(n) { steps.forEach(function (s, i) { s.classList.toggle("on", i === n); }); dots.forEach(function (d, i) { d.classList.toggle("on", i <= n); }); }
     // Spin-to-win pre-stage (gamified). Everyone wins a genuinely offered prize.
-    if (FEAT.spin) {
-      var spinStage = overlay.querySelector(".fblm-spinstage"), wheel = overlay.querySelector(".fblm-wheel"),
+    if (FEAT.poker) {
+      var pkStage = overlay.querySelector(".fblm-pokerstage"),
           stepsBar = overlay.querySelector(".fblm-steps"), h2 = overlay.querySelector(".fblm-modal h2"),
-          sub = overlay.querySelector(".fblm-sub");
-      h2.innerHTML = 'Spin to win your <span class="a">free bonus</span> 🎁';
-      sub.textContent = "Everyone wins something. Give it a spin, then claim your prize.";
-      spinStage.classList.remove("fblm-hidden"); stepsBar.classList.add("fblm-hidden"); form.classList.add("fblm-hidden");
-      // Real, deliverable prizes ($100–$500 value). short = wheel label, full = reveal, w = weight.
+          sub = overlay.querySelector(".fblm-sub"),
+          dealerRow = overlay.querySelector("[data-dealer]"), playerRow = overlay.querySelector("[data-player]"),
+          holdHint = overlay.querySelector("[data-holdhint]"), dealBtn = overlay.querySelector("[data-deal]"),
+          pkResult = overlay.querySelector("[data-pkresult]");
+      h2.innerHTML = 'Beat the dealer, <span class="a">win a prize</span> 🃏';
+      sub.textContent = "Play one hand of 5-card draw. Every player wins a real prize — beat the dealer and it upgrades.";
+      pkStage.classList.remove("fblm-hidden"); stepsBar.classList.add("fblm-hidden"); form.classList.add("fblm-hidden");
+
+      var SUITS = ["♠", "♥", "♦", "♣"], RANKS = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"];
+      // Real, deliverable prizes ordered low->high ($150–$500). Index by hand strength.
       var PRIZES = [
-        { short: "Website Audit", full: "Free Website Audit", val: 500, w: 1 },
-        { short: "$250 Off", full: "$250 off your first project", val: 250, w: 2 },
-        { short: "GBP Tune-Up", full: "Free Google Business Profile Tune-Up", val: 300, w: 2 },
-        { short: "Strategy Call", full: "Free 30-Minute Strategy Call", val: 150, w: 3 },
-        { short: "Competitor Report", full: "Free Competitor Analysis Report", val: 350, w: 2 },
-        { short: "Brand Review", full: "Free Brand Mini-Review", val: 200, w: 3 }
+        { full: "Free 30-Minute Strategy Call", val: 150 },
+        { full: "Free Brand Mini-Review", val: 200 },
+        { full: "$250 off your first project", val: 250 },
+        { full: "Free Google Business Profile Tune-Up", val: 300 },
+        { full: "Free Competitor Analysis Report", val: 350 },
+        { full: "Free Website Audit", val: 500 }
       ];
-      var seg = 360 / PRIZES.length;
-      wheel.style.background = "conic-gradient(from -" + (seg / 2) + "deg," +
-        PRIZES.map(function (p, i) { return (i % 2 ? "#0f0d10" : "#01f6f2") + " " + (i * seg) + "deg " + ((i + 1) * seg) + "deg"; }).join(",") + ")";
-      wheel.innerHTML = PRIZES.map(function (p, i) {
-        var col = i % 2 ? "#fff" : "#04201f";
-        return '<span class="fblm-wlabel" style="transform:rotate(' + (i * seg) + 'deg)">' +
-          '<b style="transform:translateX(-50%) rotate(' + (-i * seg) + 'deg);color:' + col + '">' + p.short + '</b></span>';
-      }).join("") + '<span class="fblm-wheel-hub">🎁</span>';
-      var spun = false;
-      overlay.querySelector("[data-spin]").addEventListener("click", function () {
-        if (spun) return; spun = true; this.disabled = true;
-        // weighted winner — everyone wins a real prize
-        var pool = []; PRIZES.forEach(function (p, i) { for (var k = 0; k < p.w; k++) pool.push(i); });
-        var wi = pool[Math.floor(Math.random() * pool.length)], prize = PRIZES[wi];
-        track("spin", { prize: prize.full });
-        var jitter = (Math.random() - 0.5) * (seg - 12);
-        var deg = 360 * 5 + (360 - wi * seg) + jitter;
-        wheel.style.transform = "rotate(" + deg + "deg)";
-        setTimeout(function () {
-          var res = overlay.querySelector(".fblm-spinresult"); res.classList.remove("fblm-hidden");
-          res.innerHTML = '🎉 You won <b style="color:#01f6f2">' + prize.full + '</b> &mdash; a <b>$' + prize.val + ' value!</b>';
-          form._goal.value = "Spin-to-win prize: " + prize.full + " ($" + prize.val + " value)";
-          track("spin_win", { prize: prize.full, value: prize.val });
+      var CAT2PRIZE = [0, 1, 2, 3, 4, 4, 5, 5, 5];
+      var CATNAME = ["High Card", "a Pair", "Two Pair", "Three of a Kind", "a Straight", "a Flush", "a Full House", "Four of a Kind", "a Straight Flush"];
+
+      function newDeck() { var d = []; for (var s = 0; s < 4; s++) for (var r = 2; r <= 14; r++) d.push({ s: s, r: r }); for (var i = d.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = d[i]; d[i] = d[j]; d[j] = t; } return d; }
+      function cardEl(card, down) {
+        var red = card.s === 1 || card.s === 2;
+        return el('<div class="fblm-cardwrap"><div class="fblm-card' + (down ? " down" : "") + '">' +
+          '<div class="face' + (red ? " red" : "") + '"><span>' + RANKS[card.r - 2] + '</span><span>' + SUITS[card.s] + '</span></div>' +
+          '<div class="back"></div></div></div>');
+      }
+      function evalHand(cards) {
+        var rs = cards.map(function (c) { return c.r; }).sort(function (a, b) { return b - a; });
+        var cnt = {}; rs.forEach(function (r) { cnt[r] = (cnt[r] || 0) + 1; });
+        var groups = Object.keys(cnt).map(function (r) { return { r: +r, c: cnt[r] }; }).sort(function (a, b) { return b.c - a.c || b.r - a.r; });
+        var flush = cards.every(function (c) { return c.s === cards[0].s; });
+        var uniq = rs.filter(function (v, i) { return rs.indexOf(v) === i; });
+        var sHigh = 0;
+        if (uniq.length === 5) { if (uniq[0] - uniq[4] === 4) sHigh = uniq[0]; else if (uniq[0] === 14 && uniq[1] === 5 && uniq[4] === 2) sHigh = 5; }
+        var pat = groups.map(function (g) { return g.c; }).join(""), cat, score, gr = groups.map(function (g) { return g.r; });
+        if (sHigh && flush) { cat = 8; score = [sHigh]; }
+        else if (pat === "41") { cat = 7; score = gr; }
+        else if (pat === "32") { cat = 6; score = gr; }
+        else if (flush) { cat = 5; score = rs; }
+        else if (sHigh) { cat = 4; score = [sHigh]; }
+        else if (pat === "311") { cat = 3; score = gr; }
+        else if (pat === "221") { cat = 2; score = gr; }
+        else if (pat === "2111") { cat = 1; score = gr; }
+        else { cat = 0; score = rs; }
+        return { cat: cat, score: score };
+      }
+      function cmp(a, b) { if (a.cat !== b.cat) return a.cat - b.cat; for (var i = 0; i < 5; i++) { var x = a.score[i] || 0, y = b.score[i] || 0; if (x !== y) return x - y; } return 0; }
+
+      var deck, player, dealer, held, phase = "predeal";
+      function render(revealDealer) {
+        dealerRow.innerHTML = ""; dealer.forEach(function (c) { dealerRow.appendChild(cardEl(c, !revealDealer)); });
+        playerRow.innerHTML = "";
+        player.forEach(function (c, idx) {
+          var w = cardEl(c, false), card = w.querySelector(".fblm-card");
+          if (held[idx]) card.classList.add("held");
+          if (phase === "draw") { w.style.cursor = "pointer"; w.title = "Tap to hold"; w.addEventListener("click", function () { held[idx] = !held[idx]; card.classList.toggle("held"); }); }
+          playerRow.appendChild(w);
+        });
+        Array.prototype.slice.call(overlay.querySelectorAll(".fblm-cardwrap")).forEach(function (w, i) { setTimeout(function () { w.classList.add("in"); }, 55 * i); });
+      }
+      dealBtn.addEventListener("click", function () {
+        if (phase === "predeal") {
+          deck = newDeck(); player = []; dealer = [];
+          for (var i = 0; i < 5; i++) { player.push(deck.pop()); dealer.push(deck.pop()); }
+          held = [false, false, false, false, false]; phase = "draw"; render(false);
+          holdHint.textContent = "Tap cards to HOLD, then draw"; dealBtn.textContent = "🔄 Draw & reveal dealer"; track("poker_deal");
+        } else if (phase === "draw") {
+          phase = "done"; dealBtn.disabled = true;
+          for (var k = 0; k < 5; k++) { if (!held[k]) player[k] = deck.pop(); }
+          render(true); holdHint.textContent = "";
+          var pe = evalHand(player), de = evalHand(dealer), c = cmp(pe, de), idx = CAT2PRIZE[pe.cat], won = c > 0;
+          if (won) idx = Math.min(idx + 1, PRIZES.length - 1);
+          var prize = PRIZES[idx];
+          var verdict = c > 0 ? "You beat the dealer! 🎉" : (c < 0 ? "Dealer edged you — but you still win! 🎁" : "A tie — you still win! 🎁");
+          track("poker_result", { player: pe.cat, dealer: de.cat, win: won, prize: prize.full, value: prize.val });
+          pkResult.classList.remove("fblm-hidden");
+          pkResult.innerHTML = 'You: <b>' + CATNAME[pe.cat] + '</b> &nbsp;·&nbsp; Dealer: <b>' + CATNAME[de.cat] + '</b><br>' + verdict +
+            '<br>Prize: <b style="color:#01f6f2">' + prize.full + '</b> ($' + prize.val + ' value)' + (won ? ' <b>— upgraded!</b>' : '');
+          form._goal.value = "Poker game prize: " + prize.full + " ($" + prize.val + " value)";
           setTimeout(function () {
-            spinStage.classList.add("fblm-hidden"); stepsBar.classList.remove("fblm-hidden"); form.classList.remove("fblm-hidden");
+            pkStage.classList.add("fblm-hidden"); stepsBar.classList.remove("fblm-hidden"); form.classList.remove("fblm-hidden");
             h2.innerHTML = 'Claim your <span class="a">' + prize.full + '</span> 🎁';
             sub.textContent = "Worth $" + prize.val + " — where should we send it?"; goStep(1);
-          }, 1800);
-        }, 4700);
+          }, 2800);
+        }
       });
     }
     overlay.querySelectorAll("[data-goal]").forEach(function (b) {
@@ -262,7 +308,7 @@
       '<button class="fblm-cta" id="fblm-preview" style="margin-top:.7rem;padding:.6rem;font-size:.9rem">Preview the popup ▶</button>' +
       '<p class="fblm-note">Real submissions are emailed to the owner via Resend. Social-proof toasts use sample data in this demo.</p>' +
       '</div></div>');
-    var feats = [["hello", "Hello bar (top offer)"], ["fab", "Floating CTA button"], ["mobile", "Sticky mobile call bar"], ["exit", "Exit-intent popup"], ["scroll", "Scroll-triggered offer"], ["spin", "Spin-to-win wheel (in popup)"], ["social", "Social-proof toasts"]];
+    var feats = [["hello", "Hello bar (top offer)"], ["fab", "Floating CTA button"], ["mobile", "Sticky mobile call bar"], ["exit", "Exit-intent popup"], ["scroll", "Scroll-triggered offer"], ["poker", "Poker challenge (in popup)"], ["social", "Social-proof toasts"]];
     var fc = p.querySelector(".fblm-feats");
     feats.forEach(function (f) {
       var row = el('<label class="fblm-feat"><input type="checkbox" data-f="' + f[0] + '"' + (FEAT[f[0]] ? " checked" : "") + '> ' + f[1] + '</label>');
