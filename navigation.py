@@ -13,6 +13,7 @@ OUT = os.path.join(ROOT, "site")
 
 NAV_LINKS = [
     ("Services", "/services/"),
+    ("Industries", "/industries/"),
     ("Service Areas", "/service-areas/"),
     ("Blog", "/blog/"),
     ("Contact", "/contact/"),
@@ -30,6 +31,7 @@ SERVICES_FOOTER = [
 COMPANY_FOOTER = [
     ("Home", "/"),
     ("Services", "/services/"),
+    ("Industries", "/industries/"),
     ("Service Areas", "/service-areas/"),
     ("Blog", "/blog/"),
     ("Contact", "/contact/"),
