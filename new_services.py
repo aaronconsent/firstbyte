@@ -9,6 +9,7 @@ geo_pages.py/hubs.py. Re-run enhance.py after for sitemap + schema.
 import json
 import theme_ui as tu
 from geo_pages import SERVICES, CITIES
+from industries import INDUSTRIES
 
 BASE = tu.BASE
 NEW = ["seo", "paid-advertising", "public-relations"]
@@ -35,6 +36,8 @@ def build(slug):
     bullets = "".join(f"<li>{tu.esc(b)}</li>" for b in svc["benefits"])
     area_links = " · ".join(
         f'<a href="/{slug}-{cs}-tx/">{tu.esc(c["name"])}</a>' for cs, c in CITIES.items())
+    industry_links = " · ".join(
+        f'<a href="/industries/{isl}/">{tu.esc(idata["name"])}</a>' for isl, idata in INDUSTRIES.items())
     faqs = faqs_for(svc)
 
     inner = (
@@ -51,6 +54,9 @@ def build(slug):
         + '<section class="fb-section"><div class="fb-wrap">'
           f'<div class="fb-section-head"><h2 class="fb-h2">{tu.esc(name)} across Greater Houston</h2></div>'
           f'<p class="fb-prose" style="margin:0 auto;text-align:center;">Based in The Woodlands, we also serve: {area_links}.</p></div></section>'
+        + '<section class="fb-section"><div class="fb-wrap">'
+          f'<div class="fb-section-head"><h2 class="fb-h2">{tu.esc(name)} by industry</h2></div>'
+          f'<p class="fb-prose" style="margin:0 auto;text-align:center;">We tailor {tu.esc(name.lower())} to your industry, including: {industry_links}.</p></div></section>'
         + '<section class="fb-section"><div class="fb-wrap">'
           f'<div class="fb-section-head"><h2 class="fb-h2">{tu.esc(name)} FAQs</h2></div>'
           f'{tu.faqlist(faqs)}</div></section>'

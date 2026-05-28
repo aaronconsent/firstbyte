@@ -153,6 +153,14 @@ def areas_block(svc):
             f'<p>Based in The Woodlands, we also serve: {links}.</p>\n')
 
 
+def industries_block(svc):
+    from industries import INDUSTRIES
+    links = " · ".join(f'<a href="/industries/{s}/">{esc(d["name"])}</a>'
+                       for s, d in INDUSTRIES.items())
+    return (f'<h2{STYLE}>{esc(svc["name"])} by industry</h2>\n'
+            f'<p>We tailor {esc(svc["name"].lower())} to your industry, including: {links}.</p>\n')
+
+
 def faq_cta_cell(svc):
     faqs = ""
     for q, a in svc["faqs"]:
@@ -161,6 +169,7 @@ def faq_cta_cell(svc):
         '<!-- seo-landing -->\n'
         f'<div class="cell small-12 service-faq"{STYLE}>\n'
         f'{areas_block(svc)}'
+        f'{industries_block(svc)}'
         f'<h2>{esc(svc["name"])} FAQs</h2>\n'
         f'{faqs}'
         f'<p{STYLE}>Ready to grow your business in The Woodlands? '
