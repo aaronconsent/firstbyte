@@ -128,12 +128,13 @@ def local_business_jsonld():
 
 def inject_block(html, marker, block):
     """Replace an existing data-seo-enhance block with `marker`, else insert
-    before </head>. Idempotent."""
-    pat = re.compile(
-        r'\s*<(?:script|meta)[^>]*data-seo-enhance="%s"[^>]*>(?:.*?</script>)?' % re.escape(marker),
-        re.S | re.I,
-    )
-    html = pat.sub("", html)
+    before </head>. Idempotent. Removes script- and meta-form blocks
+    precisely so it never spans into unrelated <script>…</script> regions."""
+    m = re.escape(marker)
+    html = re.sub(r'\s*<script[^>]*data-seo-enhance="%s"[^>]*>.*?</script>' % m,
+                  "", html, flags=re.S | re.I)
+    html = re.sub(r'\s*<meta[^>]*data-seo-enhance="%s"[^>]*>' % m,
+                  "", html, flags=re.I)
     return html.replace("</head>", "  " + block + "\n</head>", 1)
 
 
