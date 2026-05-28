@@ -107,6 +107,14 @@ STYLE = """<style>
 /* Button text must stay legible regardless of surrounding link-color rules */
 a.button-primary,a.button-primary:hover,a.button-primary:focus{color:#000 !important;}
 a.button-secondary,a.button-secondary:hover,a.button-secondary:focus{color:#fff !important;}
+/* Blog post + pagination polish */
+.fb-h1--article{font-size:clamp(1.9rem,4vw,3rem) !important;max-width:46rem;margin-left:auto;margin-right:auto;}
+.fb-postmeta{color:hsla(0,0%,100%,.55);font-size:.9rem;margin:.25rem 0 0;}
+.fb-pagination{display:flex;justify-content:center;align-items:center;gap:.5rem;flex-wrap:wrap;margin-top:3rem;}
+.fb-pagination a,.fb-pagination span{min-width:2.4rem;text-align:center;padding:.5rem .8rem;border:1px solid rgba(255,255,255,.14);border-radius:.6rem;color:hsla(0,0%,100%,.8);text-decoration:none;font-size:.9rem;}
+.fb-pagination a:hover{border-color:#01f6f2;color:#01f6f2;}
+.fb-pagination .cur{background:#01f6f2;color:#000;border-color:#01f6f2;font-weight:600;}
+.fb-pagination .disabled{opacity:.35;pointer-events:none;}
 </style>"""
 
 

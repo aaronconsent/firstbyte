@@ -130,16 +130,58 @@ def article_schema(post):
             + json.dumps(data, ensure_ascii=False, separators=(",", ":")) + "</script>")
 
 
+PER_PAGE = 12
+
+
+def postcard(p):
+    return (f'<a class="fb-card fb-postcard" href="/blog/{p["slug"]}/">'
+            f'<div class="date">{tu.esc(p["date"])}</div>'
+            f'<h3>{tu.esc(p["title"])}</h3>'
+            f'<p>{tu.esc(p["excerpt"])}</p>'
+            f'<span class="fb-more">Read more &rarr;</span></a>')
+
+
+def reading_time(post):
+    words = sum(len(re.sub(r"<[^>]+>", "", t).split()) for _k, t in post["body"])
+    return max(1, round(words / 200))
+
+
+def page_href(n):
+    return "/blog/" if n == 1 else f"/blog/page/{n}/"
+
+
+def pagination(cur, total):
+    if total <= 1:
+        return ""
+    out = ['<nav class="fb-pagination" aria-label="Blog pages">']
+    out.append(f'<a class="{"disabled" if cur == 1 else ""}" href="{page_href(cur-1)}">&larr; Prev</a>'
+               if cur > 1 else '<span class="disabled">&larr; Prev</span>')
+    for n in range(1, total + 1):
+        out.append(f'<span class="cur">{n}</span>' if n == cur else f'<a href="{page_href(n)}">{n}</a>')
+    out.append(f'<a href="{page_href(cur+1)}">Next &rarr;</a>'
+               if cur < total else '<span class="disabled">Next &rarr;</span>')
+    out.append("</nav>")
+    return "".join(out)
+
+
 def build_post(post):
     url = f"{BASE}/blog/{post['slug']}/"
+    related = [p for p in reversed(POSTS) if p["slug"] != post["slug"]][:3]
+    related_cards = "".join(postcard(p) for p in related)
     inner = (
-        tu.hero("Article", tu.esc(post["title"]), post["excerpt"])
+        '<section class="fb-hero"><div class="fb-wrap">'
+        '<span class="fb-badge">Article</span>'
+        f'<h1 class="fb-h1 fb-h1--article">{tu.esc(post["title"])}</h1>'
+        f'<p class="fb-postmeta">{tu.esc(post["date"])} · {reading_time(post)} min read · First Byte</p>'
+        '</div></section>'
         + '<section class="fb-section"><div class="fb-wrap"><article class="fb-article">'
-        + f'<p class="fb-meta">Published {tu.esc(post["date"])} · First Byte</p>'
         + render_body(post["body"])
         + f'<p style="margin-top:2rem;"><a class="button-primary" href="{tu.CONTACT}">Let’s Talk</a></p>'
         + '<a class="fb-backlink" href="/blog/">&larr; Back to all articles</a>'
         + '</article></div></section>'
+        + '<section class="fb-section"><div class="fb-wrap">'
+          '<div class="fb-section-head"><h2 class="fb-h2">Keep reading</h2></div>'
+          f'<div class="fb-grid">{related_cards}</div></div></section>'
         + tu.cta("Ready to grow your business?",
                  "Let’s talk about putting these ideas to work for you.")
     )
@@ -148,37 +190,40 @@ def build_post(post):
 
 
 def build_index():
-    cards = ""
-    for p in reversed(POSTS):  # newest first
-        cards += (f'<a class="fb-card fb-postcard" href="/blog/{p["slug"]}/">'
-                  f'<div class="date">{tu.esc(p["date"])}</div>'
-                  f'<h3>{tu.esc(p["title"])}</h3>'
-                  f'<p>{tu.esc(p["excerpt"])}</p>'
-                  f'<span class="fb-more">Read more &rarr;</span></a>')
-    inner = (
-        tu.hero("Blog", 'First Byte <span class="accent">Blog</span>',
-                "Marketing, web design, and growth insights for businesses in The Woodlands and Greater Houston.")
-        + f'<section class="fb-section"><div class="fb-wrap"><div class="fb-grid">{cards}</div></div></section>'
-        + tu.cta("Want results like these?", "Let’s talk about growing your business.")
-    )
+    posts = list(reversed(POSTS))  # newest first
+    pages = [posts[i:i + PER_PAGE] for i in range(0, len(posts), PER_PAGE)]
+    total = len(pages)
     desc = "Marketing, web design, and growth insights for The Woodlands & Greater Houston businesses, from the First Byte team."
-    schema = ('<script type="application/ld+json" data-seo-enhance="geo">'
-              + json.dumps({"@context": "https://schema.org", "@type": "Blog",
-                            "@id": BASE + "/blog/#blog", "name": "First Byte Blog",
-                            "url": BASE + "/blog/",
-                            "publisher": {"@id": BASE + "/#localbusiness"}},
-                           ensure_ascii=False, separators=(",", ":")) + "</script>")
-    page = tu.render(inner, "Blog | First Byte", BASE + "/blog/", desc, schema)
-    tu.write(["blog"], page)
+    for idx, chunk in enumerate(pages):
+        pageno = idx + 1
+        url = BASE + page_href(pageno)
+        cards = "".join(postcard(p) for p in chunk)
+        sub = ("Marketing, web design, and growth insights for businesses in The Woodlands and Greater Houston."
+               if pageno == 1 else f"More articles from First Byte — page {pageno} of {total}.")
+        inner = (
+            tu.hero("Blog", 'First Byte <span class="accent">Blog</span>', sub)
+            + f'<section class="fb-section"><div class="fb-wrap"><div class="fb-grid">{cards}</div>'
+              f'{pagination(pageno, total)}</div></section>'
+            + tu.cta("Want results like these?", "Let’s talk about growing your business.")
+        )
+        schema = ('<script type="application/ld+json" data-seo-enhance="geo">'
+                  + json.dumps({"@context": "https://schema.org", "@type": "Blog",
+                                "@id": BASE + "/blog/#blog", "name": "First Byte Blog",
+                                "url": BASE + "/blog/",
+                                "publisher": {"@id": BASE + "/#localbusiness"}},
+                               ensure_ascii=False, separators=(",", ":")) + "</script>")
+        title = "Blog | First Byte" if pageno == 1 else f"Blog (Page {pageno}) | First Byte"
+        page = tu.render(inner, title, url, desc, schema)
+        tu.write(["blog"] if pageno == 1 else ["blog", "page", str(pageno)], page)
+    return total
 
 
 def main():
-    build_index()
-    print("  built /blog/")
+    n = build_index()
+    print(f"  built /blog/ (+{n - 1} paginated pages)")
     for p in POSTS:
         build_post(p)
-        print(f"  built /blog/{p['slug']}/")
-    print(f"\nBlog pages built: {len(POSTS) + 1}")
+    print(f"\nBlog pages built: {len(POSTS)} posts + {n} index page(s)")
 
 
 if __name__ == "__main__":
