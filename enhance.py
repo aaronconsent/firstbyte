@@ -25,13 +25,13 @@ BUSINESS = {
                    "The Woodlands, TX helping brands grow through web design, "
                    "SEO, branding, paid advertising, PR and influencer marketing.",
     "telephone": "+1-713-578-0634",
-    "streetAddress": "9000 Six Pines Dr",
+    # Service-area business (home-based): no public street address.
     "addressLocality": "The Woodlands",
     "addressRegion": "TX",
-    "postalCode": "77380",
     "addressCountry": "US",
     "lat": 30.1693,
     "lng": -95.4646,
+    "serviceRadius_m": 48000,  # ~30 mi service radius around The Woodlands
     "logo": BASE + "/wp-content/uploads/2025/02/474564578_122209849448190241_1671659700825052575_n.jpg",
     "sameAs": [
         "https://www.facebook.com/FirstByteAgency",
@@ -105,13 +105,15 @@ def local_business_jsonld():
         "priceRange": "$$",
         "address": {
             "@type": "PostalAddress",
-            "streetAddress": b["streetAddress"],
             "addressLocality": b["addressLocality"],
             "addressRegion": b["addressRegion"],
-            "postalCode": b["postalCode"],
             "addressCountry": b["addressCountry"],
         },
-        "geo": {"@type": "GeoCoordinates", "latitude": b["lat"], "longitude": b["lng"]},
+        "serviceArea": {
+            "@type": "GeoCircle",
+            "geoMidpoint": {"@type": "GeoCoordinates", "latitude": b["lat"], "longitude": b["lng"]},
+            "geoRadius": str(b["serviceRadius_m"]),
+        },
         "areaServed": [{"@type": "City", "name": c} for c in b["areaServed"]],
         "sameAs": b["sameAs"],
         "hasOfferCatalog": {
@@ -248,10 +250,10 @@ def write_llms():
 
 > {b['description']}
 
-First Byte is a digital marketing and advertising agency located at
-{b['streetAddress']}, {b['addressLocality']}, {b['addressRegion']} {b['postalCode']}.
-Phone: (713) 578-0634. We serve {', '.join(b['areaServed'])} and the Greater
-Houston area.
+First Byte is a digital marketing and advertising agency based in
+{b['addressLocality']}, {b['addressRegion']}, serving clients across the
+Greater Houston area. Phone: (713) 578-0634. Service areas:
+{', '.join(b['areaServed'])}.
 
 ## Services
 """ + "".join(f"- {s}\n" for s in b["services"]) + f"""

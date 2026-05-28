@@ -78,7 +78,7 @@ def build_service_areas():
         links = [(svc["name"], f"/{sslug}-{cslug}-tx/") for sslug, svc in SERVICES.items()]
         cards += city_card(f'{city["name"]}, TX', CITY_BLURB.get(cslug, ""), links)
 
-    map_q = "9000+Six+Pines+Dr,+The+Woodlands,+TX+77380"
+    map_q = "The+Woodlands,+TX"  # service-area region, not a home address
     map_embed = (f'<div class="fb-map"><iframe title="First Byte service area map" loading="lazy" '
                  f'referrerpolicy="no-referrer-when-downgrade" '
                  f'src="https://www.google.com/maps?q={map_q}&z=10&output=embed"></iframe></div>')
