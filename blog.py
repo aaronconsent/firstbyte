@@ -9,7 +9,9 @@ import os
 import re
 import json
 import html as htmllib
+from datetime import date, timedelta
 import theme_ui as tu
+import blog_posts
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(ROOT, "site")
@@ -18,9 +20,9 @@ TEMPLATE = os.path.join(OUT, "work_tax", "web-design-development", "index.html")
 CONTACT = "/contact/"
 S = ' style="margin-top:2.5rem;"'
 
-# Each post: slug, title, date, excerpt, list of (kind, text) content blocks.
+# Each post: slug, title, excerpt, list of (kind, text) content blocks.
 # kind: 'p' paragraph (HTML allowed for links), 'h2' subhead.
-POSTS = [
+ORIGINALS = [
     {
         "slug": "how-much-does-a-website-cost-the-woodlands",
         "title": "How Much Does a Website Cost in The Woodlands, TX? (2026 Guide)",
@@ -86,6 +88,15 @@ POSTS = [
     },
 ]
 
+# Full library: 49 cornerstone posts + 3 originals = 52, chronological (oldest
+# first). Assign one publish date per week ending the most recent Thursday so
+# the archive spans ~12 months.
+POSTS = list(blog_posts.POSTS) + ORIGINALS
+_LAST = date(2026, 5, 21)
+_START = _LAST - timedelta(weeks=len(POSTS) - 1)
+for _i, _p in enumerate(POSTS):
+    _p["date"] = (_START + timedelta(weeks=_i)).isoformat()
+
 
 def esc(s):
     return htmllib.escape(s)
@@ -138,7 +149,7 @@ def build_post(post):
 
 def build_index():
     cards = ""
-    for p in POSTS:
+    for p in reversed(POSTS):  # newest first
         cards += (f'<a class="fb-card fb-postcard" href="/blog/{p["slug"]}/">'
                   f'<div class="date">{tu.esc(p["date"])}</div>'
                   f'<h3>{tu.esc(p["title"])}</h3>'
