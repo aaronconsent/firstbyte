@@ -9,6 +9,7 @@ import os
 import re
 import json
 import html as htmllib
+import theme_ui as tu
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(ROOT, "site")
@@ -90,35 +91,13 @@ def esc(s):
     return htmllib.escape(s)
 
 
-def shell(inner, head_repl):
-    with open(TEMPLATE, encoding="utf-8") as f:
-        tpl = f.read()
-    prefix = tpl.split('<main class="main-content">', 1)[0]
-    suffix = tpl.split("</main>", 1)[1]
-    page = prefix + inner + suffix
-    # strip inherited schema + markers
-    page = re.sub(r'\s*<script[^>]*class="aioseo-schema"[^>]*>.*?</script>', "", page, flags=re.S | re.I)
-    page = re.sub(r'\s*<script[^>]*data-seo-enhance="(faq|geo)"[^>]*>.*?</script>', "", page, flags=re.S | re.I)
-    page = re.sub(r'\s*<meta[^>]*data-seo-enhance="(description|geo-og)"[^>]*>', "", page)
-    title, canonical, desc, schema = head_repl
-    page = re.sub(r"<title>[^<]*</title>", f"<title>{esc(title)}</title>", page, count=1)
-    page = re.sub(r'<link rel="canonical" href="[^"]*"\s*/?>',
-                  f'<link rel="canonical" href="{canonical}" />', page, count=1)
-    metas = (f'<meta name="description" content="{esc(desc)}" data-seo-enhance="description" />\n'
-             f'  <meta property="og:title" content="{esc(title)}" data-seo-enhance="geo-og" />\n'
-             f'  <meta property="og:description" content="{esc(desc)}" data-seo-enhance="geo-og" />\n'
-             f'  <meta property="og:url" content="{canonical}" data-seo-enhance="geo-og" />')
-    page = page.replace("</head>", "  " + metas + "\n  " + schema + "\n</head>", 1)
-    return page
-
-
 def render_body(blocks):
     out = ""
     for kind, text in blocks:
         if kind == "h2":
-            out += f"<h2{S}>{esc(text)}</h2>\n"
+            out += f"<h2>{tu.esc(text)}</h2>"
         else:
-            out += f"<p>{text}</p>\n"  # links pre-escaped in source
+            out += f"<p>{text}</p>"  # links pre-escaped in source
     return out
 
 
@@ -142,47 +121,35 @@ def article_schema(post):
 
 def build_post(post):
     url = f"{BASE}/blog/{post['slug']}/"
-    inner = f"""<main class="main-content">
-\t<div class="grid-container">
-\t\t<div class="grid-x grid-padding-x posts-list">
-\t\t\t<div class="cell small-12">
-\t\t\t\t<h1 class="page-title page-title--archive"><span>{esc(post['title'])}</span></h1>
-\t\t\t</div>
-\t\t\t<div class="cell small-12"{S}>
-<p class="preview__meta">Published {esc(post['date'])} by First Byte</p>
-{render_body(post['body'])}<p{S}><a class="button-secondary" href="{CONTACT}">Let’s Talk</a></p>
-<p{S}><a href="/blog/">&larr; Back to all articles</a></p>
-\t\t\t</div>
-\t\t</div>
-\t</div>
-</main>"""
-    page = shell(inner, (post["title"] + " | First Byte", url, post["excerpt"], article_schema(post)))
-    outdir = os.path.join(OUT, "blog", post["slug"])
-    os.makedirs(outdir, exist_ok=True)
-    with open(os.path.join(outdir, "index.html"), "w", encoding="utf-8") as f:
-        f.write(page)
+    inner = (
+        tu.hero("Article", tu.esc(post["title"]), post["excerpt"])
+        + '<section class="fb-section"><div class="fb-wrap"><article class="fb-article">'
+        + f'<p class="fb-meta">Published {tu.esc(post["date"])} · First Byte</p>'
+        + render_body(post["body"])
+        + f'<p style="margin-top:2rem;"><a class="button-primary" href="{tu.CONTACT}">Let’s Talk</a></p>'
+        + '<a class="fb-backlink" href="/blog/">&larr; Back to all articles</a>'
+        + '</article></div></section>'
+        + tu.cta("Ready to grow your business?",
+                 "Let’s talk about putting these ideas to work for you.")
+    )
+    page = tu.render(inner, post["title"] + " | First Byte", url, post["excerpt"], article_schema(post))
+    tu.write(["blog", post["slug"]], page)
 
 
 def build_index():
-    items = ""
+    cards = ""
     for p in POSTS:
-        items += (f'<article class="preview"{S}>\n'
-                  f'<h2 class="preview__title"><a href="/blog/{p["slug"]}/">{esc(p["title"])}</a></h2>\n'
-                  f'<p class="preview__meta">{esc(p["date"])}</p>\n'
-                  f'<p>{esc(p["excerpt"])}</p>\n'
-                  f'<p><a href="/blog/{p["slug"]}/">Read more &rarr;</a></p>\n</article>\n')
-    inner = f"""<main class="main-content">
-\t<div class="grid-container">
-\t\t<div class="grid-x grid-padding-x posts-list">
-\t\t\t<div class="cell small-12">
-\t\t\t\t<h1 class="page-title page-title--archive"><span>First Byte Blog</span></h1>
-\t\t\t</div>
-\t\t\t<div class="cell small-12"{S}>
-<p>Marketing, web design, and growth tips for businesses in The Woodlands and Greater Houston.</p>
-{items}\t\t\t</div>
-\t\t</div>
-\t</div>
-</main>"""
+        cards += (f'<a class="fb-card fb-postcard" href="/blog/{p["slug"]}/">'
+                  f'<div class="date">{tu.esc(p["date"])}</div>'
+                  f'<h3>{tu.esc(p["title"])}</h3>'
+                  f'<p>{tu.esc(p["excerpt"])}</p>'
+                  f'<span class="fb-more">Read more &rarr;</span></a>')
+    inner = (
+        tu.hero("Blog", 'First Byte <span class="accent">Blog</span>',
+                "Marketing, web design, and growth insights for businesses in The Woodlands and Greater Houston.")
+        + f'<section class="fb-section"><div class="fb-wrap"><div class="fb-grid">{cards}</div></div></section>'
+        + tu.cta("Want results like these?", "Let’s talk about growing your business.")
+    )
     desc = "Marketing, web design, and growth insights for The Woodlands & Greater Houston businesses, from the First Byte team."
     schema = ('<script type="application/ld+json" data-seo-enhance="geo">'
               + json.dumps({"@context": "https://schema.org", "@type": "Blog",
@@ -190,10 +157,8 @@ def build_index():
                             "url": BASE + "/blog/",
                             "publisher": {"@id": BASE + "/#localbusiness"}},
                            ensure_ascii=False, separators=(",", ":")) + "</script>")
-    page = shell(inner, ("Blog | First Byte", BASE + "/blog/", desc, schema))
-    os.makedirs(os.path.join(OUT, "blog"), exist_ok=True)
-    with open(os.path.join(OUT, "blog", "index.html"), "w", encoding="utf-8") as f:
-        f.write(page)
+    page = tu.render(inner, "Blog | First Byte", BASE + "/blog/", desc, schema)
+    tu.write(["blog"], page)
 
 
 def main():

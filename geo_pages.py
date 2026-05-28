@@ -13,6 +13,7 @@ import os
 import re
 import json
 import html as htmllib
+import theme_ui as tu
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(ROOT, "site")
@@ -113,10 +114,6 @@ def inner_main(svc_slug, svc, city_slug, city):
     cn = city["name"]
     h1 = f"{svc['name']} in {cn}, TX"
     opener = svc["opener"].format(city=cn)
-    value = svc["value"]
-    context = city["context"]
-    why = city["why"]
-    benefits = "".join(f"<li>{esc(b)}</li>\n" for b in svc["benefits"])
     fq, fa = svc["faq"]
     faqs = [
         (fq.format(city=cn), fa.format(city=cn)),
@@ -125,28 +122,25 @@ def inner_main(svc_slug, svc, city_slug, city):
         (f"Will this help my {cn} business get found online?",
          f"That's the goal of every engagement. We build with local search in mind so {cn} customers find you first."),
     ]
-    faq_html = "".join(f'<h3{S}>{esc(q)}</h3>\n<p>{esc(a)}</p>\n' for q, a in faqs)
-    return f"""<main class="main-content">
-\t<div class="grid-container">
-\t\t<div class="grid-x grid-padding-x posts-list">
-\t\t\t<div class="cell small-12">
-\t\t\t\t<h1 class="page-title page-title--archive"><span>{esc(h1)}</span></h1>
-\t\t\t</div>
-\t\t\t<div class="cell small-12"{S}>
-<p>{esc(opener)} {esc(value)}</p>
-<p>{esc(context)}</p>
-<h2{S}>What's included</h2>
-<ul>
-{benefits}</ul>
-<h2{S}>Why {esc(cn)} businesses choose First Byte</h2>
-<p>{esc(why)} See our <a href="{svc['main']}">{esc(svc['name'].lower())} work</a>, then <a href="{CONTACT}">get in touch</a>.</p>
-<p{S}><a class="button-secondary" href="{CONTACT}">Let’s Talk</a></p>
-<h2{S}>{esc(svc['name'])} in {esc(cn)} — FAQs</h2>
-{faq_html}<p{S}>Ready to grow your {esc(cn)} business? <a class="button-secondary" href="{CONTACT}">Let’s Talk</a></p>
-\t\t\t</div>
-\t\t</div>
-\t</div>
-</main>""", h1, faqs
+    bullets = "".join(f"<li>{tu.esc(b)}</li>" for b in svc["benefits"])
+    h1_html = f'{tu.esc(svc["name"])} in <span class="accent">{tu.esc(cn)}, TX</span>'
+    lead = f"{opener} {svc['value']}"
+    inner = (
+        tu.hero(svc["name"], h1_html, lead)
+        + f'<section class="fb-section"><div class="fb-wrap fb-narrow"><div class="fb-prose">'
+          f'<p>{tu.esc(city["context"])}</p>'
+          f'<p>{tu.esc(city["why"])} See our <a href="{svc["main"]}">{tu.esc(svc["name"].lower())} work</a>, '
+          f'then <a href="{tu.CONTACT}">get in touch</a>.</p></div></div></section>'
+        + f'<section class="fb-section"><div class="fb-wrap">'
+          f'<div class="fb-section-head"><h2 class="fb-h2">What’s included</h2></div>'
+          f'<ul class="fb-checklist">{bullets}</ul></div></section>'
+        + f'<section class="fb-section"><div class="fb-wrap">'
+          f'<div class="fb-section-head"><h2 class="fb-h2">{tu.esc(svc["name"])} in {tu.esc(cn)} — FAQs</h2></div>'
+          f'{tu.faqlist(faqs)}</div></section>'
+        + tu.cta(f"Ready to grow your {cn} business?",
+                 "Let’s talk about what First Byte can do for you.")
+    )
+    return inner, h1, faqs
 
 
 def page_schema(url, svc, city, h1, faqs):
@@ -173,37 +167,15 @@ def page_schema(url, svc, city, h1, faqs):
 
 
 def build(svc_slug, svc, city_slug, city):
-    template = os.path.join(OUT, svc["main"].strip("/"), "index.html")
-    with open(template, encoding="utf-8") as f:
-        tpl = f.read()
-    prefix = tpl.split('<main class="main-content">', 1)[0]
-    suffix = tpl.split("</main>", 1)[1]
-
     inner, h1, faqs = inner_main(svc_slug, svc, city_slug, city)
-    page = prefix + inner + suffix
-
     url = f"{BASE}/{svc_slug}-{city_slug}-tx/"
     title = f"{h1} | First Byte"
     cn = city["name"]
     desc = (f"{svc['name']} for {cn}, TX businesses. First Byte helps {cn} "
             f"companies grow with {svc['name'].lower()} that drives real results. Let's talk.")
-
-    page = re.sub(r'\s*<script[^>]*class="aioseo-schema"[^>]*>.*?</script>', "", page, flags=re.S | re.I)
-    page = re.sub(r'\s*<script[^>]*data-seo-enhance="(faq|geo)"[^>]*>.*?</script>', "", page, flags=re.S | re.I)
-    page = re.sub(r'\s*<meta[^>]*data-seo-enhance="(description|geo-og)"[^>]*>', "", page)
-    page = re.sub(r"<title>[^<]*</title>", f"<title>{esc(title)}</title>", page, count=1)
-    page = re.sub(r'<link rel="canonical" href="[^"]*"\s*/?>',
-                  f'<link rel="canonical" href="{url}" />', page, count=1)
-    metas = (f'<meta name="description" content="{esc(desc)}" data-seo-enhance="description" />\n'
-             f'  <meta property="og:title" content="{esc(title)}" data-seo-enhance="geo-og" />\n'
-             f'  <meta property="og:description" content="{esc(desc)}" data-seo-enhance="geo-og" />\n'
-             f'  <meta property="og:url" content="{url}" data-seo-enhance="geo-og" />')
-    page = page.replace("</head>", "  " + metas + "\n  " + page_schema(url, svc, city, h1, faqs) + "\n</head>", 1)
-
-    outdir = os.path.join(OUT, f"{svc_slug}-{city_slug}-tx")
-    os.makedirs(outdir, exist_ok=True)
-    with open(os.path.join(outdir, "index.html"), "w", encoding="utf-8") as f:
-        f.write(page)
+    template = os.path.join(OUT, svc["main"].strip("/"), "index.html")
+    page = tu.render(inner, title, url, desc, page_schema(url, svc, city, h1, faqs), template=template)
+    tu.write([f"{svc_slug}-{city_slug}-tx"], page)
 
 
 def main():
