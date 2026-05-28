@@ -110,6 +110,16 @@ SERVICES = {
 
 STYLE = ' style="margin-top:2.5rem;"'
 
+# Map service-page key -> geo URL slug; cities for the geo matrix.
+GEO_SLUG = {
+    "web-design-development": "web-design",
+    "performance-marketing": "performance-marketing",
+    "brand-development": "brand-development",
+    "influencer-marketing": "influencer-marketing",
+}
+GEO_CITIES = [("spring", "Spring"), ("conroe", "Conroe"), ("montgomery", "Montgomery"),
+              ("tomball", "Tomball"), ("magnolia", "Magnolia"), ("houston", "Houston")]
+
 
 def esc(s):
     return htmllib.escape(s)
@@ -129,6 +139,15 @@ def intro_cell(svc):
     )
 
 
+def areas_block(svc):
+    slug = GEO_SLUG.get(svc["slug"])
+    if not slug:
+        return ""
+    links = " · ".join(f'<a href="/{slug}-{cs}-tx/">{esc(cn)}</a>' for cs, cn in GEO_CITIES)
+    return (f'<h2{STYLE}>{esc(svc["name"])} across Greater Houston</h2>\n'
+            f'<p>Based in The Woodlands, we also serve: {links}.</p>\n')
+
+
 def faq_cta_cell(svc):
     faqs = ""
     for q, a in svc["faqs"]:
@@ -136,6 +155,7 @@ def faq_cta_cell(svc):
     return (
         '<!-- seo-landing -->\n'
         f'<div class="cell small-12 service-faq"{STYLE}>\n'
+        f'{areas_block(svc)}'
         f'<h2>{esc(svc["name"])} FAQs</h2>\n'
         f'{faqs}'
         f'<p{STYLE}>Ready to grow your business in The Woodlands? '

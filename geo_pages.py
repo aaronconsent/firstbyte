@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
-"""Generate Web Design geo/service-area landing pages for nearby cities.
+"""Generate the full service x city geo landing-page matrix.
 
-Clones the theme shell from the Web Design service page and injects unique,
-city-specific copy + schema. Idempotent: regenerates each page from the
-template every run. Output: site/web-design-<city>-tx/index.html
+4 services x 6 cities = 24 unique pages at /{service}-{city}-tx/.
+Each page combines a unique per-combination opener + per-city context +
+per-service value + service benefits + city-specific FAQ, so no two pages
+are near-duplicates (avoids doorway-page penalties).
 
-Run after enhance.py + service_pages.py:  python3 geo_pages.py
-Then re-run enhance.py once to refresh sitemap.xml and site-wide schema.
+Clones the theme shell from the matching service page. Idempotent.
+Run after service_pages.py; re-run enhance.py after to refresh sitemap.
 """
 import os
 import re
@@ -16,191 +17,202 @@ import html as htmllib
 ROOT = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(ROOT, "site")
 BASE = "https://firstbyte.agency"
-TEMPLATE = os.path.join(OUT, "work_tax", "web-design-development", "index.html")
 CONTACT = "/contact/"
-MAIN_SERVICE = "/work_tax/web-design-development/"
+S = ' style="margin-top:2.5rem;"'
 
-STYLE = ' style="margin-top:2.5rem;"'
-
-# Each city gets genuinely unique copy (no doorway duplication).
-CITIES = {
-    "spring": {
-        "city": "Spring",
-        "intro": [
-            "Spring businesses compete in one of the fastest-growing corridors in Texas — and a website that loads slow or looks dated quietly sends those customers to the competitor down I-45. First Byte builds custom web design for Spring, TX companies that turns local searches into booked calls.",
-            "We're right next door in The Woodlands, so we understand the Spring market firsthand: the mix of established neighborhoods, new development, and small businesses fighting for visibility against national chains. Every site we build is engineered to rank locally and convert the traffic it earns.",
+SERVICES = {
+    "web-design": {
+        "name": "Web Design",
+        "main": "/work_tax/web-design-development/",
+        "value": "First Byte builds custom, fast, mobile-first websites engineered to turn local searches into phone calls and form fills — no templates, with SEO baked in from day one.",
+        "benefits": [
+            "Custom, conversion-focused design built around your goals",
+            "Mobile-first and lightning fast (tuned for Core Web Vitals)",
+            "Local SEO built in so you rank in your city and beyond",
+            "Easy-to-manage CMS your team can actually update",
+            "Ongoing support from a local team that knows the market",
         ],
-        "why": "Spring's growth means more competition for the same local searches. A fast, conversion-focused website is how local businesses win the click before a national brand does — and First Byte builds exactly that, with local SEO baked in.",
-        "faqs": [
-            ("Do you build websites for businesses in Spring, TX?",
-             "Yes. We're based in neighboring The Woodlands and regularly build and optimize websites for Spring businesses across every industry."),
-            ("How much does web design cost in Spring?",
-             "Most Spring small-business websites range from a few thousand dollars to the low five figures depending on scope. Book a call and we'll give you a fixed quote."),
-            ("Will my Spring business show up in local Google searches?",
-             "That's the goal of every build — we optimize your site and structure for local search so Spring customers find you first."),
-        ],
+        "faq": ("How much does web design cost in {city}?",
+                "Most {city} small-business websites range from a few thousand dollars to the low five figures depending on scope. Book a call for a fixed quote."),
+        "opener": "A slow or dated website quietly sends {city} customers to your competitors every day.",
     },
-    "conroe": {
-        "city": "Conroe",
-        "intro": [
-            "As the seat of Montgomery County and one of the fastest-growing cities in the country, Conroe is full of opportunity — and full of businesses competing for it. First Byte designs and builds web sites for Conroe, TX companies that load fast, look professional, and are built to generate leads.",
-            "From downtown Conroe to the Lake Conroe waterfront, local buyers are searching on their phones before they ever pick one. We make sure your business is the one they find, trust, and call.",
+    "performance-marketing": {
+        "name": "Performance Marketing",
+        "main": "/work_tax/performance-marketing/",
+        "value": "First Byte runs Google and Meta ad campaigns measured against leads and revenue — not vanity metrics — and builds the landing pages and tracking to prove every dollar's ROI.",
+        "benefits": [
+            "Google & Meta ad management, end to end",
+            "Landing pages built to convert the traffic you pay for",
+            "Conversion tracking and transparent, lead-focused reporting",
+            "Continuous A/B testing and optimization",
+            "Local and national targeting that reaches the right buyers",
         ],
-        "why": "Conroe's rapid growth rewards businesses that look established online. A polished, fast website signals trust to new residents and visitors who don't know the local players yet — and First Byte builds sites that earn that trust instantly.",
-        "faqs": [
-            ("Do you work with Conroe, TX businesses?",
-             "Absolutely. First Byte serves Conroe and all of Montgomery County from our base in The Woodlands."),
-            ("How long does a Conroe website take to launch?",
-             "Typically 4–8 weeks from kickoff, depending on scope and how fast your content is ready."),
-            ("Can you help my Conroe business rank on Google?",
-             "Yes — local SEO is built into every site so Conroe and Lake Conroe customers can find you in search and on the map."),
-        ],
+        "faq": ("What ad budget do {city} businesses need to start?",
+                "We recommend a minimum monthly media budget so campaigns gather enough data to optimize, then right-size it to the {city} market on a strategy call."),
+        "opener": "Ad spend without strategy is just expensive guessing for {city} businesses.",
     },
-    "montgomery": {
-        "city": "Montgomery",
-        "intro": [
-            "Montgomery blends small-town Texas charm with a steady stream of visitors and new residents drawn to Lake Conroe and the historic district. For local businesses, a strong website is the difference between being discovered and being overlooked. First Byte builds custom web design for Montgomery, TX that does exactly that.",
-            "We craft fast, mobile-friendly sites that capture the character of your business while ranking for the searches your customers actually make — whether they're locals or weekenders exploring the lake.",
+    "brand-development": {
+        "name": "Brand Development",
+        "main": "/work_tax/brand-development/",
+        "value": "First Byte builds memorable brands — strategy, naming, logo, voice and a full visual identity — that command trust and scale cleanly across every channel.",
+        "benefits": [
+            "Brand strategy and market positioning",
+            "Logo and complete visual identity",
+            "Messaging and brand voice",
+            "Brand guidelines that keep your team consistent",
+            "Collateral and launch support",
         ],
-        "why": "In a destination market like Montgomery, much of your traffic is mobile and ready to act. A website that loads instantly and makes it easy to call or book is what converts that visitor into a customer — and that's how First Byte builds.",
-        "faqs": [
-            ("Do you design websites for Montgomery, TX businesses?",
-             "Yes. First Byte serves Montgomery and the Lake Conroe area from nearby The Woodlands."),
-            ("I run a small Montgomery business — is a custom site worth it?",
-             "For most local businesses, yes. A fast, well-built site pays for itself in leads and credibility. We scope every project to your budget."),
-            ("Will my site work well for mobile visitors?",
-             "Every First Byte website is mobile-first — critical in a market like Montgomery where most searches happen on a phone."),
-        ],
+        "faq": ("Can you refresh an existing {city} brand?",
+                "Absolutely. We do both ground-up brand builds and strategic refreshes for established {city} businesses."),
+        "opener": "In {city}, a strong brand is the difference between being a choice and being the choice.",
     },
-    "houston": {
-        "city": "Houston",
-        "intro": [
-            "Houston is one of the most competitive markets in the country — which means an average website simply won't cut through. First Byte builds custom web design for Houston, TX businesses that's fast, conversion-focused, and engineered to compete with brands spending far more.",
-            "Whether you serve a neighborhood or the whole metro, we build sites that rank for the searches that matter, load in a blink, and turn visitors into customers. No templates, no fluff — just websites that work as hard as you do.",
+    "influencer-marketing": {
+        "name": "Influencer Marketing",
+        "main": "/work_tax/influencer-marketing/",
+        "value": "First Byte runs influencer campaigns end to end — sourcing and vetting the right creators, managing the partnership, and measuring real conversions, not just reach.",
+        "benefits": [
+            "Creator sourcing and vetting based on real audience fit",
+            "Campaign strategy and hands-on management",
+            "Content collaboration and approvals",
+            "Performance tracking tied to your goals",
+            "FTC-compliant partnerships that protect your brand",
         ],
-        "why": "In a market as large and competitive as Houston, technical performance and conversion design are what separate the businesses that grow online from the ones that get buried. First Byte builds for both — speed that satisfies Google and design that satisfies your customers.",
-        "faqs": [
-            ("Do you build websites for Houston businesses?",
-             "Yes. First Byte is based in The Woodlands and builds and optimizes websites for businesses across Greater Houston."),
-            ("How do you help a Houston site stand out in a competitive market?",
-             "Through fast, custom design, conversion-focused structure, and SEO built in from day one — so you compete on substance, not just ad budget."),
-            ("How much does web design cost in Houston?",
-             "It depends on scope; most projects range from a few thousand to the low five figures. Book a call for a fixed quote tailored to your goals."),
-        ],
+        "faq": ("Does influencer marketing work for {city} businesses?",
+                "Yes. Local and micro-influencers often drive the highest conversion for {city} service businesses because their audiences trust them and are nearby."),
+        "opener": "The right creator can put your {city} brand in front of thousands of engaged local buyers.",
     },
 }
 
-BENEFITS = [
-    "Custom, conversion-focused design built around your goals",
-    "Mobile-first and lightning fast (tuned for Core Web Vitals)",
-    "Local SEO built in so you rank in your city and beyond",
-    "Easy-to-manage CMS your team can actually update",
-    "Ongoing support from a local team that knows the market",
-]
+CITIES = {
+    "spring": {"name": "Spring",
+               "context": "Spring sits in one of the fastest-growing corridors in Texas, just south of The Woodlands along I-45, where local businesses compete hard for the same customers against national chains.",
+               "why": "Spring's growth means more competition for the same local searches, so looking established and loading fast is how local businesses win the click first."},
+    "conroe": {"name": "Conroe",
+               "context": "As the seat of Montgomery County and one of the fastest-growing cities in the country, Conroe is full of opportunity — and full of businesses competing for it, from downtown to the Lake Conroe waterfront.",
+               "why": "Conroe's rapid growth rewards businesses that look established online, signaling trust to the new residents and visitors who don't yet know the local players."},
+    "montgomery": {"name": "Montgomery",
+                   "context": "Montgomery blends small-town Texas charm with a steady stream of visitors and new residents drawn to Lake Conroe and its historic district.",
+                   "why": "In a destination market like Montgomery, much of the audience is mobile and ready to act, so a fast site that makes it easy to call or book is what converts."},
+    "tomball": {"name": "Tomball",
+                "context": "Tomball pairs its historic small-town roots with rapid suburban growth on the northwest edge of Houston, drawing both longtime locals and new families.",
+                "why": "Tomball's mix of established and new residents means businesses that show up clearly online capture customers who are still choosing who to trust."},
+    "magnolia": {"name": "Magnolia",
+                 "context": "Magnolia is a fast-growing community where established local businesses and a wave of new arrivals compete for the same customers along the FM-1488 corridor.",
+                 "why": "Magnolia's steady growth rewards businesses that invest early in visibility, before the market gets more crowded."},
+    "houston": {"name": "Houston",
+                "context": "Houston is one of the largest and most competitive markets in the country, where an average online presence simply gets buried.",
+                "why": "In a market as large as Houston, technical performance and conversion design separate the businesses that grow online from the ones that disappear."},
+}
 
 
 def esc(s):
     return htmllib.escape(s)
 
 
-def inner_main(slug, d):
-    city = d["city"]
-    h1 = f"Web Design in {city}, TX"
-    paras = "".join(f"<p>{esc(p)}</p>\n" for p in d["intro"])
-    bullets = "".join(f"<li>{esc(b)}</li>\n" for b in BENEFITS)
-    faqs = "".join(f'<h3{STYLE}>{esc(q)}</h3>\n<p>{esc(a)}</p>\n' for q, a in d["faqs"])
+def inner_main(svc_slug, svc, city_slug, city):
+    cn = city["name"]
+    h1 = f"{svc['name']} in {cn}, TX"
+    opener = svc["opener"].format(city=cn)
+    value = svc["value"]
+    context = city["context"]
+    why = city["why"]
+    benefits = "".join(f"<li>{esc(b)}</li>\n" for b in svc["benefits"])
+    fq, fa = svc["faq"]
+    faqs = [
+        (fq.format(city=cn), fa.format(city=cn)),
+        (f"Do you work with businesses in {cn}, TX?",
+         f"Yes — First Byte is based in nearby The Woodlands and regularly delivers {svc['name'].lower()} for {cn} businesses across every industry."),
+        (f"Will this help my {cn} business get found online?",
+         f"That's the goal of every engagement. We build with local search in mind so {cn} customers find you first."),
+    ]
+    faq_html = "".join(f'<h3{S}>{esc(q)}</h3>\n<p>{esc(a)}</p>\n' for q, a in faqs)
     return f"""<main class="main-content">
 \t<div class="grid-container">
 \t\t<div class="grid-x grid-padding-x posts-list">
 \t\t\t<div class="cell small-12">
 \t\t\t\t<h1 class="page-title page-title--archive"><span>{esc(h1)}</span></h1>
 \t\t\t</div>
-\t\t\t<div class="cell small-12"{STYLE}>
-{paras}<h2{STYLE}>What's included</h2>
+\t\t\t<div class="cell small-12"{S}>
+<p>{esc(opener)} {esc(value)}</p>
+<p>{esc(context)}</p>
+<h2{S}>What's included</h2>
 <ul>
-{bullets}</ul>
-<h2{STYLE}>Why {esc(city)} businesses choose First Byte</h2>
-<p>{esc(d["why"])}</p>
-<p{STYLE}>See examples of our <a href="{MAIN_SERVICE}">web design work</a>, then <a href="{CONTACT}">get in touch</a> to talk about your project.</p>
-<p{STYLE}><a class="button-secondary" href="{CONTACT}">Let’s Talk</a></p>
-<h2{STYLE}>Web Design in {esc(city)} — FAQs</h2>
-{faqs}<p{STYLE}>Ready to grow your {esc(city)} business? <a class="button-secondary" href="{CONTACT}">Let’s Talk</a></p>
+{benefits}</ul>
+<h2{S}>Why {esc(cn)} businesses choose First Byte</h2>
+<p>{esc(why)} See our <a href="{svc['main']}">{esc(svc['name'].lower())} work</a>, then <a href="{CONTACT}">get in touch</a>.</p>
+<p{S}><a class="button-secondary" href="{CONTACT}">Let’s Talk</a></p>
+<h2{S}>{esc(svc['name'])} in {esc(cn)} — FAQs</h2>
+{faq_html}<p{S}>Ready to grow your {esc(cn)} business? <a class="button-secondary" href="{CONTACT}">Let’s Talk</a></p>
 \t\t\t</div>
 \t\t</div>
 \t</div>
-</main>"""
+</main>""", h1, faqs
 
 
-def page_schema(slug, d):
-    url = f"{BASE}/web-design-{slug}-tx/"
-    city = d["city"]
+def page_schema(url, svc, city, h1, faqs):
     graph = {
         "@context": "https://schema.org",
         "@graph": [
             {"@type": "WebPage", "@id": url + "#webpage", "url": url,
-             "name": f"Web Design in {city}, TX | First Byte",
+             "name": f"{h1} | First Byte",
              "isPartOf": {"@id": BASE + "/#website"},
              "about": {"@id": BASE + "/#localbusiness"}},
             {"@type": "BreadcrumbList", "@id": url + "#breadcrumb",
              "itemListElement": [
                  {"@type": "ListItem", "position": 1, "name": "Home", "item": BASE + "/"},
-                 {"@type": "ListItem", "position": 2, "name": "Web Design", "item": BASE + MAIN_SERVICE},
-                 {"@type": "ListItem", "position": 3, "name": f"Web Design {city}", "item": url}]},
+                 {"@type": "ListItem", "position": 2, "name": svc["name"], "item": BASE + svc["main"]},
+                 {"@type": "ListItem", "position": 3, "name": h1, "item": url}]},
             {"@type": "FAQPage", "@id": url + "#faq",
-             "mainEntity": [
-                 {"@type": "Question", "name": q,
-                  "acceptedAnswer": {"@type": "Answer", "text": a}}
-                 for q, a in d["faqs"]]},
+             "mainEntity": [{"@type": "Question", "name": q,
+                             "acceptedAnswer": {"@type": "Answer", "text": a}}
+                            for q, a in faqs]},
         ],
     }
     return ('<script type="application/ld+json" data-seo-enhance="geo">'
             + json.dumps(graph, ensure_ascii=False, separators=(",", ":")) + "</script>")
 
 
-def build(slug, d):
-    with open(TEMPLATE, encoding="utf-8") as f:
+def build(svc_slug, svc, city_slug, city):
+    template = os.path.join(OUT, svc["main"].strip("/"), "index.html")
+    with open(template, encoding="utf-8") as f:
         tpl = f.read()
     prefix = tpl.split('<main class="main-content">', 1)[0]
     suffix = tpl.split("</main>", 1)[1]
 
-    page = prefix + inner_main(slug, d) + suffix
+    inner, h1, faqs = inner_main(svc_slug, svc, city_slug, city)
+    page = prefix + inner + suffix
 
-    url = f"{BASE}/web-design-{slug}-tx/"
-    city = d["city"]
-    title = f"Web Design in {city}, TX | First Byte"
-    desc = (f"Custom web design and development for {city}, TX businesses. "
-            f"First Byte builds fast, conversion-focused websites that turn "
-            f"local visitors into customers. Let's talk.")
+    url = f"{BASE}/{svc_slug}-{city_slug}-tx/"
+    title = f"{h1} | First Byte"
+    cn = city["name"]
+    desc = (f"{svc['name']} for {cn}, TX businesses. First Byte helps {cn} "
+            f"companies grow with {svc['name'].lower()} that drives real results. Let's talk.")
 
-    # remove inherited schema scripts (AIOSEO @graph, web-design faq/geo)
-    page = re.sub(r'\s*<script[^>]*class="aioseo-schema"[^>]*>.*?</script>',
-                  "", page, flags=re.S | re.I)
-    page = re.sub(r'\s*<script[^>]*data-seo-enhance="(faq|geo)"[^>]*>.*?</script>',
-                  "", page, flags=re.S | re.I)
-
-    # head: title, canonical, description
+    page = re.sub(r'\s*<script[^>]*class="aioseo-schema"[^>]*>.*?</script>', "", page, flags=re.S | re.I)
+    page = re.sub(r'\s*<script[^>]*data-seo-enhance="(faq|geo)"[^>]*>.*?</script>', "", page, flags=re.S | re.I)
+    page = re.sub(r'\s*<meta[^>]*data-seo-enhance="(description|geo-og)"[^>]*>', "", page)
     page = re.sub(r"<title>[^<]*</title>", f"<title>{esc(title)}</title>", page, count=1)
     page = re.sub(r'<link rel="canonical" href="[^"]*"\s*/?>',
                   f'<link rel="canonical" href="{url}" />', page, count=1)
-    page = re.sub(r'\s*<meta[^>]*data-seo-enhance="description"[^>]*>', "", page)
     metas = (f'<meta name="description" content="{esc(desc)}" data-seo-enhance="description" />\n'
              f'  <meta property="og:title" content="{esc(title)}" data-seo-enhance="geo-og" />\n'
              f'  <meta property="og:description" content="{esc(desc)}" data-seo-enhance="geo-og" />\n'
              f'  <meta property="og:url" content="{url}" data-seo-enhance="geo-og" />')
-    page = re.sub(r'\s*<meta[^>]*data-seo-enhance="geo-og"[^>]*>', "", page)
-    page = page.replace("</head>", "  " + metas + "\n  " + page_schema(slug, d) + "\n</head>", 1)
+    page = page.replace("</head>", "  " + metas + "\n  " + page_schema(url, svc, city, h1, faqs) + "\n</head>", 1)
 
-    outdir = os.path.join(OUT, f"web-design-{slug}-tx")
+    outdir = os.path.join(OUT, f"{svc_slug}-{city_slug}-tx")
     os.makedirs(outdir, exist_ok=True)
     with open(os.path.join(outdir, "index.html"), "w", encoding="utf-8") as f:
         f.write(page)
 
 
 def main():
-    for slug, d in CITIES.items():
-        build(slug, d)
-        print(f"  built /web-design-{slug}-tx/")
-    print(f"\nGeo pages built: {len(CITIES)}")
+    n = 0
+    for svc_slug, svc in SERVICES.items():
+        for city_slug, city in CITIES.items():
+            build(svc_slug, svc, city_slug, city)
+            n += 1
+    print(f"Geo matrix pages built: {n} (4 services x 6 cities)")
 
 
 if __name__ == "__main__":
