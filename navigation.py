@@ -23,6 +23,9 @@ SERVICES_FOOTER = [
     ("Performance Marketing", "/work_tax/performance-marketing/"),
     ("Brand Development", "/work_tax/brand-development/"),
     ("Influencer Marketing", "/work_tax/influencer-marketing/"),
+    ("SEO", "/services/seo/"),
+    ("Paid Advertising", "/services/paid-advertising/"),
+    ("Public Relations", "/services/public-relations/"),
 ]
 COMPANY_FOOTER = [
     ("Home", "/"),

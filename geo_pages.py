@@ -82,6 +82,51 @@ SERVICES = {
                 "Yes. Local and micro-influencers often drive the highest conversion for {city} service businesses because their audiences trust them and are nearby."),
         "opener": "The right creator can put your {city} brand in front of thousands of engaged local buyers.",
     },
+    "seo": {
+        "name": "SEO",
+        "main": "/services/seo/",
+        "value": "First Byte gets your business found on Google — local SEO, technical optimization, and content that ranks and brings in customers month after month.",
+        "benefits": [
+            "Local SEO and Google Business Profile optimization",
+            "Technical SEO and Core Web Vitals",
+            "Keyword and content strategy",
+            "On-page optimization that targets buyer intent",
+            "Transparent ranking and traffic reporting",
+        ],
+        "faq": ("How long does SEO take to work in {city}?",
+                "Local SEO usually shows movement in 3–6 months and compounds from there. We prioritize the fastest local wins first for {city} businesses."),
+        "opener": "If customers can't find you on Google, growth in {city} stalls before it starts.",
+    },
+    "paid-advertising": {
+        "name": "Paid Advertising",
+        "main": "/services/paid-advertising/",
+        "value": "First Byte runs Google, Local Services, and social ad campaigns that put your offer in front of ready-to-buy customers and prove their return down to the dollar.",
+        "benefits": [
+            "Google Search and Local Services Ads",
+            "Meta (Facebook & Instagram) advertising",
+            "Conversion-focused landing pages",
+            "Full conversion tracking and attribution",
+            "Transparent, ROI-focused reporting",
+        ],
+        "faq": ("How fast will paid ads bring {city} leads?",
+                "Paid campaigns can generate {city} leads within days of launch, then improve as we optimize toward your best-performing audiences over the first 30–60 days."),
+        "opener": "Want new customers in {city} this week, not next quarter?",
+    },
+    "public-relations": {
+        "name": "Public Relations",
+        "main": "/services/public-relations/",
+        "value": "First Byte builds your reputation and visibility — media coverage, local press, and a brand story that earns trust and keeps you top of mind.",
+        "benefits": [
+            "Media outreach and press releases",
+            "Local press and community visibility",
+            "Online reputation management",
+            "Thought-leadership content",
+            "Crisis communication support",
+        ],
+        "faq": ("Is PR worth it for a small {city} business?",
+                "Yes — local press and a strong reputation build the trust that turns {city} searchers into customers, and it amplifies every other channel you run."),
+        "opener": "Great {city} businesses deserve to be known, not just found.",
+    },
 }
 
 CITIES = {
@@ -103,6 +148,48 @@ CITIES = {
     "houston": {"name": "Houston",
                 "context": "Houston is one of the largest and most competitive markets in the country, where an average online presence simply gets buried.",
                 "why": "In a market as large as Houston, technical performance and conversion design separate the businesses that grow online from the ones that disappear."},
+    "kingwood": {"name": "Kingwood",
+                 "context": "Kingwood, the 'Livable Forest,' is an affluent, family-oriented community on Houston's northeast edge where residents expect polish and reliability from the businesses they hire.",
+                 "why": "Kingwood customers research before they buy, so a professional, fast website and strong reviews are what earn the click and the call."},
+    "humble": {"name": "Humble",
+               "context": "Humble sits at a busy crossroads near Bush Intercontinental Airport, mixing established local businesses with constant new traffic and growth.",
+               "why": "In a high-traffic hub like Humble, being easy to find and quick to act on is what turns passersby and searchers into customers."},
+    "atascocita": {"name": "Atascocita",
+                   "context": "Atascocita is one of the fastest-growing communities in the Houston area, with a young, expanding population of families near Lake Houston.",
+                   "why": "Atascocita's steady influx of new residents rewards businesses that show up first in local search, before competitors are even on the radar."},
+    "cypress": {"name": "Cypress",
+                "context": "Cypress is a booming northwest Houston suburb where rapid residential growth has created strong, ongoing demand for local services.",
+                "why": "Cypress's growth means new customers searching every day — businesses with solid local SEO capture that demand instead of leaving it on the table."},
+    "katy": {"name": "Katy",
+             "context": "Katy is a thriving, family-heavy suburb west of Houston known for its top schools and one of the region's most competitive local business markets.",
+             "why": "Katy's competitive market rewards businesses that stand out with a fast, modern site and a strong reputation, not just a listing."},
+    "sugar-land": {"name": "Sugar Land",
+                   "context": "Sugar Land is an affluent, master-planned city in Fort Bend County with discerning customers and established, professional competition.",
+                   "why": "Sugar Land buyers expect credibility, so a polished online presence and genuine social proof are what win their business."},
+    "pearland": {"name": "Pearland",
+                 "context": "Pearland is one of the fastest-growing cities in Texas, a large and expanding market south of Houston with plenty of room for local businesses to grow.",
+                 "why": "Pearland's scale and growth mean real opportunity for businesses that invest in being found across the city, not just one neighborhood."},
+    "willis": {"name": "Willis",
+               "context": "Willis sits just north of Conroe near Lake Conroe, a smaller community seeing steady growth as the metro expands northward.",
+               "why": "In a growing small town like Willis, early investment in local visibility lets a business own its market before it gets crowded."},
+    "shenandoah": {"name": "Shenandoah",
+                   "context": "Shenandoah is a small but commercially dense city right beside The Woodlands, packed with retail, dining, and service businesses along I-45.",
+                   "why": "With heavy commercial competition in a tiny footprint, Shenandoah businesses live or die by how well they rank and convert online."},
+    "porter": {"name": "Porter",
+               "context": "Porter is a fast-developing community northeast of Houston near the Grand Parkway, drawing new families and businesses as the area expands.",
+               "why": "Porter's rapid development means a wave of new customers — visibility now is how local businesses capture that growth early."},
+    "new-caney": {"name": "New Caney",
+                  "context": "New Caney is a growing community near the Valley Ranch and Grand Parkway corridor, with new retail and residential development reshaping the area.",
+                  "why": "As New Caney grows, the businesses that show up first in local search build a lead that's hard for newcomers to catch."},
+    "huntsville": {"name": "Huntsville",
+                   "context": "Huntsville, home to Sam Houston State University, blends a steady student population with a established local community north of the metro.",
+                   "why": "Huntsville's mix of students and locals rewards businesses that are easy to find on a phone and quick to respond."},
+    "pinehurst": {"name": "Pinehurst",
+                  "context": "Pinehurst is a growing community west of The Woodlands along the FM-1488 corridor, sharing in the area's strong residential expansion.",
+                  "why": "Pinehurst's growth alongside Magnolia and The Woodlands makes early local visibility a smart, low-cost advantage."},
+    "oak-ridge-north": {"name": "Oak Ridge North",
+                        "context": "Oak Ridge North is a small, established city directly south of The Woodlands with a dense mix of local businesses along the I-45 corridor.",
+                        "why": "In a compact, competitive market like Oak Ridge North, a fast site and strong reviews are what tip a nearby searcher your way."},
 }
 
 
@@ -184,7 +271,7 @@ def main():
         for city_slug, city in CITIES.items():
             build(svc_slug, svc, city_slug, city)
             n += 1
-    print(f"Geo matrix pages built: {n} (4 services x 6 cities)")
+    print(f"Geo matrix pages built: {n}")
 
 
 if __name__ == "__main__":

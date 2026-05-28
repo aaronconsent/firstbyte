@@ -14,12 +14,18 @@ ICONS = {
     "performance-marketing": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-5 4 4 8-8"/><path d="M21 8v5M21 8h-5"/></svg>',
     "brand-development": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.5 5.5L20 11l-5.5 2.5L12 19l-2.5-5.5L4 11l5.5-2.5z"/></svg>',
     "influencer-marketing": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v3a1 1 0 0 0 1 1h3l5 4V6L7 10H4a1 1 0 0 0-1 1z"/><path d="M16 8a4 4 0 0 1 0 8"/></svg>',
+    "seo": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>',
+    "paid-advertising": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>',
+    "public-relations": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h4l8-4v16l-8-4H3z"/><path d="M15 8a3 3 0 0 1 0 6"/></svg>',
 }
 TAGLINE = {
     "web-design": "Fast, custom websites that turn visitors into customers.",
     "performance-marketing": "Google & Meta ads measured against leads and revenue.",
     "brand-development": "Memorable brands that command trust and scale.",
     "influencer-marketing": "Creator-led campaigns that convert real audiences.",
+    "seo": "Get found on Google and stay there, month after month.",
+    "paid-advertising": "Ready-to-buy customers in front of your offer, fast.",
+    "public-relations": "Build a reputation that earns trust and attention.",
 }
 WOODLANDS = {"name": "The Woodlands",
              "blurb": "Our home base — a master-planned community and one of Houston's premier business hubs."}
@@ -30,6 +36,20 @@ CITY_BLURB = {
     "tomball": "Historic roots meeting rapid suburban growth northwest of Houston.",
     "magnolia": "A fast-growing community along the booming FM-1488 corridor.",
     "houston": "One of the largest, most competitive markets in the country.",
+    "kingwood": "The affluent 'Livable Forest' on Houston's northeast edge.",
+    "humble": "A busy crossroads hub near Bush Intercontinental Airport.",
+    "atascocita": "One of the area's fastest-growing communities near Lake Houston.",
+    "cypress": "A booming northwest Houston suburb with strong local demand.",
+    "katy": "A thriving, family-heavy and competitive market west of Houston.",
+    "sugar-land": "An affluent, master-planned city in Fort Bend County.",
+    "pearland": "One of the fastest-growing cities in Texas, south of Houston.",
+    "willis": "A growing community north of Conroe near Lake Conroe.",
+    "shenandoah": "A commercially dense city right beside The Woodlands.",
+    "porter": "A fast-developing community near the Grand Parkway.",
+    "new-caney": "A growing corridor near Valley Ranch and the Grand Parkway.",
+    "huntsville": "A university town blending students and locals up north.",
+    "pinehurst": "A growing community west of The Woodlands on FM-1488.",
+    "oak-ridge-north": "A compact, business-dense city just south of The Woodlands.",
 }
 
 

@@ -118,7 +118,12 @@ GEO_SLUG = {
     "influencer-marketing": "influencer-marketing",
 }
 GEO_CITIES = [("spring", "Spring"), ("conroe", "Conroe"), ("montgomery", "Montgomery"),
-              ("tomball", "Tomball"), ("magnolia", "Magnolia"), ("houston", "Houston")]
+              ("tomball", "Tomball"), ("magnolia", "Magnolia"), ("houston", "Houston"),
+              ("kingwood", "Kingwood"), ("humble", "Humble"), ("atascocita", "Atascocita"),
+              ("cypress", "Cypress"), ("katy", "Katy"), ("sugar-land", "Sugar Land"),
+              ("pearland", "Pearland"), ("willis", "Willis"), ("shenandoah", "Shenandoah"),
+              ("porter", "Porter"), ("new-caney", "New Caney"), ("huntsville", "Huntsville"),
+              ("pinehurst", "Pinehurst"), ("oak-ridge-north", "Oak Ridge North")]
 
 
 def esc(s):
