@@ -104,6 +104,9 @@ STYLE = """<style>
 .fb-formmsg.err{color:#ff7a7a;}
 .fb-formcard button[type=submit]{cursor:pointer;}
 .fb-formcard button[disabled]{opacity:.6;cursor:default;}
+/* Button text must stay legible regardless of surrounding link-color rules */
+a.button-primary,a.button-primary:hover,a.button-primary:focus{color:#000 !important;}
+a.button-secondary,a.button-secondary:hover,a.button-secondary:focus{color:#fff !important;}
 </style>"""
 
 
