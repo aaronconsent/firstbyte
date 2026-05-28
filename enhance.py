@@ -16,6 +16,9 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(ROOT, "site")
 BASE = "https://firstbyte.agency"
 TODAY = date.today().isoformat()
+# Set to Sean's GA4 Measurement ID (e.g. "G-XXXXXXXXXX") to enable analytics
+# site-wide. Left empty = no analytics injected.
+GA4_ID = ""
 
 # ---- Business facts (verified from the live site) -------------------------
 BUSINESS = {
@@ -177,6 +180,14 @@ def enhance_page(path):
     block = ('<script type="application/ld+json" data-seo-enhance="localbusiness">'
              + local_business_jsonld() + "</script>")
     html = inject_block(html, "localbusiness", block)
+
+    # 1b) GA4 analytics (only when an ID is configured)
+    if GA4_ID:
+        ga = (f'<script async src="https://www.googletagmanager.com/gtag/js?id={GA4_ID}" data-seo-enhance="ga4"></script>'
+              f'<script data-seo-enhance="ga4">window.dataLayer=window.dataLayer||[];'
+              f'function gtag(){{dataLayer.push(arguments);}}gtag("js",new Date());'
+              f'gtag("config","{GA4_ID}");</script>')
+        html = inject_block(html, "ga4", ga)
 
     # 2) Meta description if missing
     if "<meta name=\"description\"" not in re.sub(

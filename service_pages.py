@@ -185,6 +185,25 @@ def faq_jsonld(svc):
             + "</script>")
 
 
+def service_jsonld(svc):
+    url = f"https://firstbyte.agency/work_tax/{svc['slug']}/"
+    cities = ["The Woodlands", "Spring", "Conroe", "Montgomery", "Tomball",
+              "Magnolia", "Houston"]
+    data = {
+        "@context": "https://schema.org",
+        "@type": "Service",
+        "@id": url + "#service",
+        "name": svc["name"],
+        "serviceType": svc["name"],
+        "url": url,
+        "provider": {"@id": "https://firstbyte.agency/#localbusiness"},
+        "areaServed": [{"@type": "City", "name": c} for c in cities],
+    }
+    return ('<script type="application/ld+json" data-seo-enhance="service">'
+            + json.dumps(data, ensure_ascii=False, separators=(",", ":"))
+            + "</script>")
+
+
 def transform(slug, svc):
     path = os.path.join(OUT, "work_tax", slug, "index.html")
     if not os.path.exists(path):
@@ -217,9 +236,9 @@ def transform(slug, svc):
     h = h.replace("<!-- END of Archive Content -->",
                   faq_cta_cell(svc) + "\n<!-- END of Archive Content -->", 1)
 
-    # 7) FAQ schema for AEO (replace existing marked block)
-    h = re.sub(r'\s*<script[^>]*data-seo-enhance="faq"[^>]*>.*?</script>', "", h, flags=re.S)
-    h = h.replace("</head>", "  " + faq_jsonld(svc) + "\n</head>", 1)
+    # 7) FAQ + Service schema for AEO (replace existing marked blocks)
+    h = re.sub(r'\s*<script[^>]*data-seo-enhance="(faq|service)"[^>]*>.*?</script>', "", h, flags=re.S)
+    h = h.replace("</head>", "  " + faq_jsonld(svc) + "\n  " + service_jsonld(svc) + "\n</head>", 1)
 
     if h != orig:
         with open(path, "w", encoding="utf-8") as f:
