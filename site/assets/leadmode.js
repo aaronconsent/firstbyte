@@ -130,7 +130,7 @@
       }
       function cmp(a, b) { if (a.cat !== b.cat) return a.cat - b.cat; for (var i = 0; i < 5; i++) { var x = a.score[i] || 0, y = b.score[i] || 0; if (x !== y) return x - y; } return 0; }
 
-      var deck, player, dealer, held, phase = "predeal";
+      var deck, player, dealer, held, phase = "predeal", wonPrize = null;
       function render(revealDealer) {
         dealerRow.innerHTML = ""; dealer.forEach(function (c) { dealerRow.appendChild(cardEl(c, !revealDealer)); });
         playerRow.innerHTML = "";
@@ -149,23 +149,24 @@
           held = [false, false, false, false, false]; phase = "draw"; render(false);
           holdHint.textContent = "Tap cards to HOLD, then draw"; dealBtn.textContent = "🔄 Draw & reveal dealer"; track("poker_deal");
         } else if (phase === "draw") {
-          phase = "done"; dealBtn.disabled = true;
+          phase = "reveal";
           for (var k = 0; k < 5; k++) { if (!held[k]) player[k] = deck.pop(); }
           render(true); holdHint.textContent = "";
           var pe = evalHand(player), de = evalHand(dealer), c = cmp(pe, de), idx = CAT2PRIZE[pe.cat], won = c > 0;
           if (won) idx = Math.min(idx + 1, PRIZES.length - 1);
-          var prize = PRIZES[idx];
+          wonPrize = PRIZES[idx];
           var verdict = c > 0 ? "You beat the dealer! 🎉" : (c < 0 ? "Dealer edged you — but you still win! 🎁" : "A tie — you still win! 🎁");
-          track("poker_result", { player: pe.cat, dealer: de.cat, win: won, prize: prize.full, value: prize.val });
+          track("poker_result", { player: pe.cat, dealer: de.cat, win: won, prize: wonPrize.full, value: wonPrize.val });
           pkResult.classList.remove("fblm-hidden");
           pkResult.innerHTML = 'You: <b>' + CATNAME[pe.cat] + '</b> &nbsp;·&nbsp; Dealer: <b>' + CATNAME[de.cat] + '</b><br>' + verdict +
-            '<br>Prize: <b style="color:#01f6f2">' + prize.full + '</b> ($' + prize.val + ' value)' + (won ? ' <b>— upgraded!</b>' : '');
-          form._goal.value = "Poker game prize: " + prize.full + " ($" + prize.val + " value)";
-          setTimeout(function () {
-            pkStage.classList.add("fblm-hidden"); stepsBar.classList.remove("fblm-hidden"); form.classList.remove("fblm-hidden");
-            h2.innerHTML = 'Claim your <span class="a">' + prize.full + '</span> 🎁';
-            sub.textContent = "Worth $" + prize.val + " — where should we send it?"; goStep(1);
-          }, 2800);
+            '<br>You won <b style="color:#01f6f2">' + wonPrize.full + '</b> ($' + wonPrize.val + ' value)' + (won ? ' <b>— upgraded!</b>' : '');
+          // Wait for the player to claim — no auto-advance.
+          dealBtn.textContent = "🎁 Claim my prize →"; phase = "claim";
+        } else if (phase === "claim") {
+          track("poker_claim", { prize: wonPrize.full, value: wonPrize.val });
+          pkStage.classList.add("fblm-hidden"); stepsBar.classList.remove("fblm-hidden"); form.classList.remove("fblm-hidden");
+          h2.innerHTML = 'Claim your <span class="a">' + wonPrize.full + '</span> 🎁';
+          sub.textContent = "Worth $" + wonPrize.val + " — where should we send it?"; goStep(1);
         }
       });
     }
