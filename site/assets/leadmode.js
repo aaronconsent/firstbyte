@@ -17,6 +17,8 @@
   var FEAT_DEFAULT = { hello: 1, fab: 1, mobile: 1, exit: 1, scroll: 1, social: 1, spin: 1 };
   var FEAT = Object.assign({}, FEAT_DEFAULT, JSON.parse(localStorage.getItem("fblm_feat") || "{}"));
   var PHONE = "+1-713-578-0634", PHONE_D = "(713) 578-0634";
+  // Owner: replace with your real Calendly (or other) booking link.
+  var CALENDLY = "https://calendly.com/firstbyte-agency/free-audit";
   var fired = {};
 
   function track(ev, data) { try { window.dataLayer = window.dataLayer || []; window.dataLayer.push(Object.assign({ event: "lead_engine_" + ev }, data || {})); } catch (e) {} }
@@ -36,6 +38,11 @@
       '<h2>Get your <span class="a">free 2026 growth plan</span></h2>' +
       '<p class="fblm-sub">A no-obligation website + local-SEO audit for your business — what\'s working, what\'s leaking leads, and the 3 fastest wins. ($500 value.)</p>' +
       '<div class="fblm-count" data-count></div>' +
+      '<div class="fblm-spinstage fblm-hidden fblm-wheelwrap">' +
+        '<div class="fblm-wheel"></div>' +
+        '<button type="button" class="fblm-cta" data-spin>🎁 Spin to win your bonus</button>' +
+        '<p class="fblm-spinresult fblm-hidden" style="margin:.9rem 0 0;font-size:1.05rem"></p>' +
+      '</div>' +
       '<div class="fblm-steps"><i class="on"></i><i></i><i></i></div>' +
       '<form class="fblm-form" novalidate>' +
         '<input class="fblm-hp" type="text" name="company" tabindex="-1" autocomplete="off" aria-hidden="true">' +
@@ -68,6 +75,30 @@
     var form = overlay.querySelector(".fblm-form"), msg = overlay.querySelector(".fblm-msg");
     var steps = overlay.querySelectorAll(".fblm-step"), dots = overlay.querySelectorAll(".fblm-steps i");
     function goStep(n) { steps.forEach(function (s, i) { s.classList.toggle("on", i === n); }); dots.forEach(function (d, i) { d.classList.toggle("on", i <= n); }); }
+    // Spin-to-win pre-stage (gamified). Everyone wins a genuinely offered prize.
+    if (FEAT.spin) {
+      var spinStage = overlay.querySelector(".fblm-spinstage"), wheel = overlay.querySelector(".fblm-wheel"),
+          stepsBar = overlay.querySelector(".fblm-steps"), h2 = overlay.querySelector(".fblm-modal h2"),
+          sub = overlay.querySelector(".fblm-sub");
+      h2.innerHTML = 'Spin to win your <span class="a">free bonus</span> 🎁';
+      sub.textContent = "Everyone wins something. Give it a spin, then claim your prize.";
+      spinStage.classList.remove("fblm-hidden"); stepsBar.classList.add("fblm-hidden"); form.classList.add("fblm-hidden");
+      wheel.style.background = "conic-gradient(#01f6f2 0 60deg,#0f0d10 60deg 120deg,#23fff4 120deg 180deg,#0f0d10 180deg 240deg,#00d4ff 240deg 300deg,#0f0d10 300deg 360deg)";
+      var spun = false;
+      overlay.querySelector("[data-spin]").addEventListener("click", function () {
+        if (spun) return; spun = true; this.disabled = true; track("spin");
+        wheel.style.transform = "rotate(" + (360 * 5 + Math.floor(Math.random() * 360)) + "deg)";
+        setTimeout(function () {
+          var res = overlay.querySelector(".fblm-spinresult"); res.classList.remove("fblm-hidden");
+          res.innerHTML = '🎉 You won: <b style="color:#01f6f2">Free audit + priority onboarding!</b>';
+          form._goal.value = "Spin-to-win: free audit + priority onboarding";
+          setTimeout(function () {
+            spinStage.classList.add("fblm-hidden"); stepsBar.classList.remove("fblm-hidden"); form.classList.remove("fblm-hidden");
+            h2.innerHTML = 'Claim your <span class="a">free bonus</span> 🎁'; sub.textContent = "Where should we send it?"; goStep(1);
+          }, 1500);
+        }, 4700);
+      });
+    }
     overlay.querySelectorAll("[data-goal]").forEach(function (b) {
       b.addEventListener("click", function () { form._goal.value = b.dataset.goal; track("step", { step: 1, goal: b.dataset.goal }); goStep(1); });
     });
@@ -87,7 +118,20 @@
       fetch("/api/contact", { method: "POST", headers: { Accept: "application/json" }, body: fd })
         .then(function (r) { return r.json().catch(function () { return { ok: r.ok }; }); })
         .then(function (d) {
-          if (d.ok) { overlay.querySelector(".fblm-modal").innerHTML = '<button class="fblm-close" aria-label="Close">&times;</button><div style="text-align:center;padding:1rem 0"><div style="font-size:3rem">🎉</div><h2>You\'re in!</h2><p class="fblm-sub">Your free plan is on the way. We\'ll reach out within one business day — or call <a style="color:#01f6f2" href="tel:' + PHONE + '">' + PHONE_D + '</a>.</p></div>'; overlay.querySelector(".fblm-close").addEventListener("click", closeModal); track("success"); }
+          if (d.ok) {
+            overlay.querySelector(".fblm-modal").innerHTML =
+              '<button class="fblm-close" aria-label="Close">&times;</button>' +
+              '<div style="text-align:center;padding:.5rem 0">' +
+              '<div style="font-size:3rem">🎉</div>' +
+              '<h2>You\'re in!</h2>' +
+              '<p class="fblm-sub">Your free plan is reserved. <b style="color:#fff">Skip the wait</b> — grab a time on the calendar right now and we\'ll walk through it live.</p>' +
+              '<a class="fblm-cta" style="display:inline-block;text-decoration:none;max-width:300px" href="' + CALENDLY + '" target="_blank" rel="noopener" data-book>📅 Book your free call now</a>' +
+              '<p class="fblm-fine">Prefer the phone? Call <a href="tel:' + PHONE + '">' + PHONE_D + '</a>.</p>' +
+              '</div>';
+            overlay.querySelector(".fblm-close").addEventListener("click", closeModal);
+            var bk = overlay.querySelector("[data-book]"); if (bk) bk.addEventListener("click", function () { track("book_click"); });
+            track("success");
+          }
           else { msg.className = "fblm-msg err"; msg.textContent = d.error || "Something went wrong — please call us."; btn.disabled = false; }
         })
         .catch(function () { msg.className = "fblm-msg err"; msg.textContent = "Network error — please call " + PHONE_D + "."; btn.disabled = false; });
@@ -143,24 +187,36 @@
     }
     window.addEventListener("scroll", onScroll, { passive: true });
   }
+  function relTime(ts) {
+    var s = Math.max(1, Math.floor((Date.now() - ts) / 1000));
+    if (s < 60) return s + " seconds ago";
+    var m = Math.floor(s / 60); if (m < 60) return m + (m === 1 ? " minute ago" : " minutes ago");
+    var h = Math.floor(m / 60); if (h < 24) return h + (h === 1 ? " hour ago" : " hours ago");
+    return Math.floor(h / 24) + " days ago";
+  }
   function socialProof() {
     if (!FEAT.social) return;
-    /* DEMO DATA — sample events. On a live site this MUST be wired to real
-       recent leads; fabricated social proof is deceptive (and unlawful in
-       some jurisdictions). Shown here to demonstrate the mechanism only. */
-    var samples = [
-      ["Mike R.", "Conroe", "requested a free audit"],
-      ["Sarah L.", "Spring", "booked a strategy call"],
-      ["The Hiya Team", "The Woodlands", "started a website project"],
-      ["Carlos M.", "Katy", "claimed the monthly offer"],
-      ["Jen P.", "Tomball", "requested a quote"],
-      ["A local restaurant", "Houston", "asked about more reviews"]
+    /* Sample fallback — clearly labeled. Fabricated social proof is deceptive
+       (and unlawful in some places), so on a live site the toasts pull REAL
+       recent leads from /api/recent-leads (backed by Cloudflare KV). The
+       sample data only shows when no real data is available (e.g. local demo). */
+    var SAMPLES = [
+      { name: "Mike R.", text: "in Conroe requested a free audit", real: false },
+      { name: "Sarah L.", text: "in Spring booked a strategy call", real: false },
+      { name: "Carlos M.", text: "in Katy claimed the monthly offer", real: false },
+      { name: "Jen P.", text: "in Tomball requested a quote", real: false }
     ];
-    var i = 0, node = el('<div class="fblm-toast" data-demo="sample-data"></div>');
+    var data = SAMPLES, node = el('<div class="fblm-toast"></div>');
     document.body.appendChild(node);
+    fetch("/api/recent-leads").then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+      if (j && j.length) data = j.map(function (x) { return { name: x.n, text: x.a, ts: x.t, real: true }; });
+    }).catch(function () {});
+    var i = 0;
     function show() {
-      var s = samples[i % samples.length]; i++;
-      node.innerHTML = '<div><span class="fblm-t-name">' + s[0] + '</span> in ' + s[1] + ' ' + s[2] + '.</div><div class="fblm-t-time">a few minutes ago • verified lead</div>';
+      var s = data[i % data.length]; i++;
+      var when = s.real ? relTime(s.ts) + " • verified lead" : "recently • sample";
+      node.dataset.kind = s.real ? "live" : "sample";
+      node.innerHTML = '<div><span class="fblm-t-name">' + s.name + '</span> ' + s.text + '.</div><div class="fblm-t-time">' + when + '</div>';
       node.classList.add("fblm-show");
       setTimeout(function () { node.classList.remove("fblm-show"); }, 5200);
     }
@@ -182,7 +238,7 @@
       '<button class="fblm-cta" id="fblm-preview" style="margin-top:.7rem;padding:.6rem;font-size:.9rem">Preview the popup ▶</button>' +
       '<p class="fblm-note">Real submissions are emailed to the owner via Resend. Social-proof toasts use sample data in this demo.</p>' +
       '</div></div>');
-    var feats = [["hello", "Hello bar (top offer)"], ["fab", "Floating CTA button"], ["mobile", "Sticky mobile call bar"], ["exit", "Exit-intent popup"], ["scroll", "Scroll-triggered offer"], ["social", "Social-proof toasts"]];
+    var feats = [["hello", "Hello bar (top offer)"], ["fab", "Floating CTA button"], ["mobile", "Sticky mobile call bar"], ["exit", "Exit-intent popup"], ["scroll", "Scroll-triggered offer"], ["spin", "Spin-to-win wheel (in popup)"], ["social", "Social-proof toasts"]];
     var fc = p.querySelector(".fblm-feats");
     feats.forEach(function (f) {
       var row = el('<label class="fblm-feat"><input type="checkbox" data-f="' + f[0] + '"' + (FEAT[f[0]] ? " checked" : "") + '> ' + f[1] + '</label>');

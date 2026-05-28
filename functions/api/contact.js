@@ -58,6 +58,16 @@ export async function onRequestPost(context) {
     if (!res.ok) {
       return respond(request, false, "Couldn’t send your message. Please call us at (713) 578-0634.", 502);
     }
+    // Record an anonymized entry for social-proof toasts (only if KV is bound).
+    try {
+      if (env.LEADS_KV) {
+        const first = (name.split(/\s+/)[0] || "Someone").slice(0, 40);
+        const raw = await env.LEADS_KV.get("recent");
+        const list = raw ? JSON.parse(raw) : [];
+        list.unshift({ n: first, a: "requested a free plan", t: Date.now() });
+        await env.LEADS_KV.put("recent", JSON.stringify(list.slice(0, 20)));
+      }
+    } catch (_e) { /* never block the lead on logging */ }
     return respond(request, true, "Thanks! We’ll be in touch shortly.", 200);
   } catch (_e) {
     return respond(request, false, "Something went wrong. Please try again or call (713) 578-0634.", 500);
