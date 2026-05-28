@@ -83,19 +83,43 @@
       h2.innerHTML = 'Spin to win your <span class="a">free bonus</span> 🎁';
       sub.textContent = "Everyone wins something. Give it a spin, then claim your prize.";
       spinStage.classList.remove("fblm-hidden"); stepsBar.classList.add("fblm-hidden"); form.classList.add("fblm-hidden");
-      wheel.style.background = "conic-gradient(#01f6f2 0 60deg,#0f0d10 60deg 120deg,#23fff4 120deg 180deg,#0f0d10 180deg 240deg,#00d4ff 240deg 300deg,#0f0d10 300deg 360deg)";
+      // Real, deliverable prizes ($100–$500 value). short = wheel label, full = reveal, w = weight.
+      var PRIZES = [
+        { short: "Website Audit", full: "Free Website Audit", val: 500, w: 1 },
+        { short: "$250 Off", full: "$250 off your first project", val: 250, w: 2 },
+        { short: "GBP Tune-Up", full: "Free Google Business Profile Tune-Up", val: 300, w: 2 },
+        { short: "Strategy Call", full: "Free 30-Minute Strategy Call", val: 150, w: 3 },
+        { short: "Competitor Report", full: "Free Competitor Analysis Report", val: 350, w: 2 },
+        { short: "Brand Review", full: "Free Brand Mini-Review", val: 200, w: 3 }
+      ];
+      var seg = 360 / PRIZES.length;
+      wheel.style.background = "conic-gradient(from -" + (seg / 2) + "deg," +
+        PRIZES.map(function (p, i) { return (i % 2 ? "#0f0d10" : "#01f6f2") + " " + (i * seg) + "deg " + ((i + 1) * seg) + "deg"; }).join(",") + ")";
+      wheel.innerHTML = PRIZES.map(function (p, i) {
+        var col = i % 2 ? "#fff" : "#04201f";
+        return '<span class="fblm-wlabel" style="transform:rotate(' + (i * seg) + 'deg)">' +
+          '<b style="transform:translateX(-50%) rotate(' + (-i * seg) + 'deg);color:' + col + '">' + p.short + '</b></span>';
+      }).join("") + '<span class="fblm-wheel-hub">🎁</span>';
       var spun = false;
       overlay.querySelector("[data-spin]").addEventListener("click", function () {
-        if (spun) return; spun = true; this.disabled = true; track("spin");
-        wheel.style.transform = "rotate(" + (360 * 5 + Math.floor(Math.random() * 360)) + "deg)";
+        if (spun) return; spun = true; this.disabled = true;
+        // weighted winner — everyone wins a real prize
+        var pool = []; PRIZES.forEach(function (p, i) { for (var k = 0; k < p.w; k++) pool.push(i); });
+        var wi = pool[Math.floor(Math.random() * pool.length)], prize = PRIZES[wi];
+        track("spin", { prize: prize.full });
+        var jitter = (Math.random() - 0.5) * (seg - 12);
+        var deg = 360 * 5 + (360 - wi * seg) + jitter;
+        wheel.style.transform = "rotate(" + deg + "deg)";
         setTimeout(function () {
           var res = overlay.querySelector(".fblm-spinresult"); res.classList.remove("fblm-hidden");
-          res.innerHTML = '🎉 You won: <b style="color:#01f6f2">Free audit + priority onboarding!</b>';
-          form._goal.value = "Spin-to-win: free audit + priority onboarding";
+          res.innerHTML = '🎉 You won <b style="color:#01f6f2">' + prize.full + '</b> &mdash; a <b>$' + prize.val + ' value!</b>';
+          form._goal.value = "Spin-to-win prize: " + prize.full + " ($" + prize.val + " value)";
+          track("spin_win", { prize: prize.full, value: prize.val });
           setTimeout(function () {
             spinStage.classList.add("fblm-hidden"); stepsBar.classList.remove("fblm-hidden"); form.classList.remove("fblm-hidden");
-            h2.innerHTML = 'Claim your <span class="a">free bonus</span> 🎁'; sub.textContent = "Where should we send it?"; goStep(1);
-          }, 1500);
+            h2.innerHTML = 'Claim your <span class="a">' + prize.full + '</span> 🎁';
+            sub.textContent = "Worth $" + prize.val + " — where should we send it?"; goStep(1);
+          }, 1800);
         }, 4700);
       });
     }

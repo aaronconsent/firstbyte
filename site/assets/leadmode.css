@@ -92,8 +92,13 @@
 .fblm-wheelwrap{text-align:center;}
 .fblm-wheel{width:220px;height:220px;margin:0 auto 1rem;border-radius:50%;position:relative;
   transition:transform 4.5s cubic-bezier(.13,.9,.2,1);border:6px solid #23fff4;box-shadow:0 0 30px rgba(1,246,242,.35);}
-.fblm-wheel::after{content:"";position:absolute;top:-14px;left:50%;transform:translateX(-50%);
+.fblm-wheel::after{content:"";position:absolute;top:-14px;left:50%;transform:translateX(-50%);z-index:3;
   border:8px solid transparent;border-top-color:#fff;}
+.fblm-wlabel{position:absolute;left:50%;top:0;height:50%;transform-origin:bottom center;pointer-events:none;z-index:2;}
+.fblm-wlabel b{position:absolute;top:12px;left:0;transform:translateX(-50%);white-space:nowrap;
+  font-size:.64rem;font-weight:800;line-height:1;text-shadow:0 1px 2px rgba(0,0,0,.25);}
+.fblm-wheel-hub{position:absolute;left:50%;top:50%;width:46px;height:46px;transform:translate(-50%,-50%);z-index:2;
+  background:#0f0d10;border:2px solid #23fff4;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.1rem;}
 
 /* ===== Demo control panel ===== */
 .fblm-panel{position:fixed;left:14px;bottom:14px;z-index:2147483640;width:300px;background:rgba(15,13,16,.97);
