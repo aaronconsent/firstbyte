@@ -114,11 +114,14 @@
           '<button type="button" data-double>Double</button><button type="button" data-split>Split</button>' +
         '</div>' +
         '<div class="fblm-bj-bet" data-betrow>' +
-          '<button type="button" data-betdown aria-label="Lower bet">&minus;</button>' +
-          '<span>Bet <span class="fblm-chip" data-betchip><b data-bet>25</b></span></span>' +
-          '<button type="button" data-betup aria-label="Raise bet">+</button>' +
-          '<button type="button" data-betmax>Max</button>' +
-          '<button type="button" class="fblm-cta" data-deal-bj>Deal</button>' +
+          '<div class="fblm-betslide">' +
+            '<span class="fblm-betslide-end">$25</span>' +
+            '<input type="range" class="fblm-betslider" data-betslider min="25" max="100" step="25" value="25" aria-label="Bet amount — drag right to bet more">' +
+            '<span class="fblm-betslide-end" data-slidemax>$100</span>' +
+          '</div>' +
+          '<button type="button" class="fblm-dealchip" data-deal-bj data-betchip>' +
+            '<span class="fblm-dealchip-lbl" data-deallbl>Tap to deal</span><b data-bet>$25</b>' +
+          '</button>' +
         '</div>' +
         '<button type="button" class="fblm-cta fblm-hidden" data-cashout style="margin-top:.6rem">💰 Cash out</button>' +
         '<div class="fblm-final fblm-hidden" data-final>' +
@@ -174,7 +177,8 @@
           burstEl = overlay.querySelector("[data-burst]"), muteBtn = overlay.querySelector("[data-mute]"),
           finalBox = overlay.querySelector("[data-final]"), finalQ = overlay.querySelector("[data-finalq]"),
           allInBtn = overlay.querySelector("[data-allin]"), claimNowBtn = overlay.querySelector("[data-claimnow]"),
-          dealBtn = overlay.querySelector("[data-deal-bj]");
+          slider = overlay.querySelector("[data-betslider]"), slideMax = overlay.querySelector("[data-slidemax]"),
+          dealLbl = overlay.querySelector("[data-deallbl]"), dealBtn = overlay.querySelector("[data-deal-bj]");
       muteBtn.textContent = MUTE ? "🔇" : "🔊";
       muteBtn.addEventListener("click", function () { MUTE = !MUTE; localStorage.setItem("fblm_mute", MUTE ? "1" : "0"); muteBtn.textContent = MUTE ? "🔇" : "🔊"; if (!MUTE) sfx.chip(); });
       function popBurst(txt, level) {
@@ -208,7 +212,14 @@
       // Favorable player card: never busts, tends to improve the hand.
       function playerCard(cards) { var t = total(cards); if (t <= 11) return pull(function () { return true; }); return pull(function (r) { return val(r) <= 21 - t; }); }
       function stagger() { Array.prototype.slice.call(overlay.querySelectorAll(".fblm-cardwrap:not(.fblm-in)")).forEach(function (w, i) { w.classList.add("fblm-in"); setTimeout(function () { w.classList.add("in"); sfx.deal(); }, 110 * i); }); }
-      function renderBank() { bankEl.textContent = "$" + bank; creditEl.textContent = "$" + Math.min(bank, CAP); betEl.textContent = "$" + bet; }
+      function paintSlider() {
+        var mx = Math.max(STEP, bank), pct = mx > STEP ? ((bet - STEP) / (mx - STEP)) * 100 : 100;
+        slider.style.background = "linear-gradient(90deg,#ffcb37 0%,#ffb300 " + pct + "%,rgba(0,0,0,.45) " + pct + "%,rgba(0,0,0,.45) 100%)";
+      }
+      function renderBank() {
+        bankEl.textContent = "$" + bank; creditEl.textContent = "$" + Math.min(bank, CAP); betEl.textContent = "$" + bet;
+        slider.max = Math.max(STEP, bank); slider.value = bet; slideMax.textContent = "$" + Math.max(STEP, bank); paintSlider();
+      }
       function renderDealer(reveal) {
         dRow.innerHTML = ""; dealer.forEach(function (c, i) { dRow.appendChild(cardEl(c, !reveal && i === 1)); });
         dTot.textContent = reveal ? ("Dealer: " + total(dealer) + (total(dealer) > 21 ? " — BUST" : "")) : "Dealer"; stagger();
@@ -291,15 +302,17 @@
         }
         bjMsg.innerHTML = parts.join(" · ") + (net > 0 ? " 🎉" : "") + (capped ? '<br><b>You maxed the $' + CAP + ' credit cap! 🏆</b>' : "");
         if (bet > bank) bet = Math.max(STEP, bank); betEl.textContent = "$" + bet;
-        if (!capped && !lastHand && bank >= STEP) { betRow.classList.remove("fblm-hidden"); dealBtn.textContent = "Deal next hand"; } else betRow.classList.add("fblm-hidden");
+        if (!capped && !lastHand && bank >= STEP) { betRow.classList.remove("fblm-hidden"); dealLbl.textContent = "Tap to deal"; slider.max = Math.max(STEP, bank); slider.value = bet; slideMax.textContent = "$" + Math.max(STEP, bank); paintSlider(); } else betRow.classList.add("fblm-hidden");
         cashBtn.classList.remove("fblm-hidden");
         cashBtn.textContent = (finalOffered ? "🎁 Claim my $" : "💰 Cash out my $") + Math.min(bank, CAP) + " credit →";
         track("bj_round", { net: net, bank: bank });
       }
-      function setBet(d) { bet = Math.max(STEP, Math.min(bank, d === "max" ? bank : bet + d)); renderBank(); sfx.bet(); var bc = overlay.querySelector("[data-betchip]"); bc.classList.remove("fblm-pulse"); void bc.offsetWidth; bc.classList.add("fblm-pulse"); }
-      overlay.querySelector("[data-betup]").addEventListener("click", function () { setBet(STEP); });
-      overlay.querySelector("[data-betdown]").addEventListener("click", function () { setBet(-STEP); });
-      overlay.querySelector("[data-betmax]").addEventListener("click", function () { setBet("max"); });
+      var betTick = 0;
+      slider.addEventListener("input", function () {
+        bet = Math.max(STEP, Math.min(bank, parseInt(slider.value, 10) || STEP));
+        betEl.textContent = "$" + bet; paintSlider();
+        var now = Date.now(); if (now - betTick > 55) { betTick = now; sfx.bet(); }
+      });
       dealBtn.addEventListener("click", startRound);
       overlay.querySelector("[data-hit]").addEventListener("click", function () { var h = hands[active]; h.cards.push(playerCard(h.cards)); renderPlayer(); if (total(h.cards) >= 21) { h.done = true; advance(); } else setActions(); });
       overlay.querySelector("[data-stand]").addEventListener("click", function () { hands[active].done = true; advance(); });
