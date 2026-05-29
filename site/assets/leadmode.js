@@ -14,7 +14,7 @@
   var LEADS = localStorage.getItem("fblm_leads") === "on"; // OFF by default
   if (!DEMO && !LEADS) return; // normal visitors: do nothing
 
-  var FEAT_DEFAULT = { hello: 1, fab: 1, mobile: 1, exit: 1, scroll: 1, social: 1, poker: 1 };
+  var FEAT_DEFAULT = { hello: 1, fab: 1, mobile: 1, exit: 1, scroll: 1, social: 1, blackjack: 1 };
   var FEAT = Object.assign({}, FEAT_DEFAULT, JSON.parse(localStorage.getItem("fblm_feat") || "{}"));
   var PHONE = "+1-713-578-0634", PHONE_D = "(713) 578-0634";
   // Owner: replace with your real Calendly (or other) booking link.
@@ -38,11 +38,22 @@
       '<h2>Get your <span class="a">free 2026 growth plan</span></h2>' +
       '<p class="fblm-sub">A no-obligation website + local-SEO audit for your business — what\'s working, what\'s leaking leads, and the 3 fastest wins. ($500 value.)</p>' +
       '<div class="fblm-count" data-count></div>' +
-      '<div class="fblm-pokerstage fblm-hidden fblm-poker">' +
-        '<div class="fblm-row" data-dealer></div><div class="fblm-rowlabel">Dealer</div>' +
-        '<div class="fblm-row" data-player></div><div class="fblm-rowlabel" data-holdhint>Your hand</div>' +
-        '<button type="button" class="fblm-cta" data-deal>🃏 Deal me in</button>' +
-        '<p class="fblm-spinresult fblm-hidden" style="margin:.9rem 0 0;font-size:1rem;line-height:1.5" data-pkresult></p>' +
+      '<div class="fblm-bjstage fblm-hidden fblm-bj">' +
+        '<div class="fblm-bj-bank">Chips: <b data-bank>$100</b> &nbsp;·&nbsp; Credit won: <b data-credit style="color:#01f6f2">$100</b></div>' +
+        '<div class="fblm-row" data-bjdealer></div><div class="fblm-rowlabel" data-dtotal>Dealer</div>' +
+        '<div class="fblm-bj-hands" data-bjplayer></div>' +
+        '<div class="fblm-bj-msg" data-bjmsg></div>' +
+        '<div class="fblm-bj-actions fblm-hidden" data-actions>' +
+          '<button type="button" data-hit>Hit</button><button type="button" data-stand>Stand</button>' +
+          '<button type="button" data-double>Double</button><button type="button" data-split>Split</button>' +
+        '</div>' +
+        '<div class="fblm-bj-bet" data-betrow>' +
+          '<button type="button" data-betdown aria-label="Lower bet">&minus;</button>' +
+          '<span>Bet <b data-bet>$10</b></span>' +
+          '<button type="button" data-betup aria-label="Raise bet">+</button>' +
+          '<button type="button" class="fblm-cta" data-deal-bj>Deal</button>' +
+        '</div>' +
+        '<button type="button" class="fblm-cta fblm-hidden" data-cashout style="margin-top:.6rem">💰 Cash out</button>' +
       '</div>' +
       '<div class="fblm-steps"><i class="on"></i><i></i><i></i></div>' +
       '<form class="fblm-form" novalidate>' +
@@ -77,98 +88,128 @@
     var steps = overlay.querySelectorAll(".fblm-step"), dots = overlay.querySelectorAll(".fblm-steps i");
     function goStep(n) { steps.forEach(function (s, i) { s.classList.toggle("on", i === n); }); dots.forEach(function (d, i) { d.classList.toggle("on", i <= n); }); }
     // Spin-to-win pre-stage (gamified). Everyone wins a genuinely offered prize.
-    if (FEAT.poker) {
-      var pkStage = overlay.querySelector(".fblm-pokerstage"),
+    if (FEAT.blackjack) {
+      var bjStage = overlay.querySelector(".fblm-bjstage"),
           stepsBar = overlay.querySelector(".fblm-steps"), h2 = overlay.querySelector(".fblm-modal h2"),
           sub = overlay.querySelector(".fblm-sub"),
-          dealerRow = overlay.querySelector("[data-dealer]"), playerRow = overlay.querySelector("[data-player]"),
-          holdHint = overlay.querySelector("[data-holdhint]"), dealBtn = overlay.querySelector("[data-deal]"),
-          pkResult = overlay.querySelector("[data-pkresult]");
-      h2.innerHTML = 'Beat the dealer, <span class="a">win a prize</span> 🃏';
-      sub.textContent = "Play one hand of 5-card draw. Every player wins a real prize — beat the dealer and it upgrades.";
-      pkStage.classList.remove("fblm-hidden"); stepsBar.classList.add("fblm-hidden"); form.classList.add("fblm-hidden");
+          dRow = overlay.querySelector("[data-bjdealer]"), dTot = overlay.querySelector("[data-dtotal]"),
+          pArea = overlay.querySelector("[data-bjplayer]"),
+          bankEl = overlay.querySelector("[data-bank]"), creditEl = overlay.querySelector("[data-credit]"), betEl = overlay.querySelector("[data-bet]"),
+          bjMsg = overlay.querySelector("[data-bjmsg]"), betRow = overlay.querySelector("[data-betrow]"),
+          actions = overlay.querySelector("[data-actions]"), cashBtn = overlay.querySelector("[data-cashout]"),
+          dealBtn = overlay.querySelector("[data-deal-bj]");
+      h2.innerHTML = 'Blackjack — <span class="a">win real credit</span> 🃏';
+      sub.textContent = "You've got $100 in chips ($10 a hand). Every chip you keep becomes 1st-month account credit — up to $2,500. The deck's stacked in your favor!";
+      bjStage.classList.remove("fblm-hidden"); stepsBar.classList.add("fblm-hidden"); form.classList.add("fblm-hidden");
 
       var SUITS = ["♠", "♥", "♦", "♣"], RANKS = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"];
-      // Real, deliverable prizes ordered low->high ($150–$500). Index by hand strength.
-      var PRIZES = [
-        { full: "Free 30-Minute Strategy Call", val: 150 },
-        { full: "Free Brand Mini-Review", val: 200 },
-        { full: "$250 off your first project", val: 250 },
-        { full: "Free Google Business Profile Tune-Up", val: 300 },
-        { full: "Free Competitor Analysis Report", val: 350 },
-        { full: "Free Website Audit", val: 500 }
-      ];
-      var CAT2PRIZE = [0, 1, 2, 3, 4, 4, 5, 5, 5];
-      var CATNAME = ["High Card", "a Pair", "Two Pair", "Three of a Kind", "a Straight", "a Flush", "a Full House", "Four of a Kind", "a Straight Flush"];
+      var CAP = 2500, bank = 100, bet = 10, deck = [], dealer = [], hands = [], active = 0, phase = "bet";
 
-      function newDeck() { var d = []; for (var s = 0; s < 4; s++) for (var r = 2; r <= 14; r++) d.push({ s: s, r: r }); for (var i = d.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = d[i]; d[i] = d[j]; d[j] = t; } return d; }
-      function cardEl(card, down) {
-        var red = card.s === 1 || card.s === 2;
+      function val(r) { return r >= 14 ? 11 : (r >= 11 ? 10 : r); }
+      function total(cards) { var t = 0, a = 0; cards.forEach(function (c) { t += val(c.r); if (c.r === 14) a++; }); while (t > 21 && a) { t -= 10; a--; } return t; }
+      function isBJ(cards) { return cards.length === 2 && total(cards) === 21; }
+      function freshDeck() { var d = []; for (var s = 0; s < 4; s++) for (var r = 2; r <= 14; r++) d.push({ s: s, r: r }); return d; }
+      function pull(pred) {
+        if (!deck.length) deck = freshDeck();
+        var idx = [], i; for (i = 0; i < deck.length; i++) if (pred(deck[i].r)) idx.push(i);
+        if (!idx.length) for (i = 0; i < deck.length; i++) idx.push(i);
+        return deck.splice(idx[Math.floor(Math.random() * idx.length)], 1)[0];
+      }
+      function cardEl(c, down) {
+        var red = c.s === 1 || c.s === 2;
         return el('<div class="fblm-cardwrap"><div class="fblm-card' + (down ? " down" : "") + '">' +
-          '<div class="face' + (red ? " red" : "") + '"><span>' + RANKS[card.r - 2] + '</span><span>' + SUITS[card.s] + '</span></div>' +
-          '<div class="back"></div></div></div>');
+          '<div class="face' + (red ? " red" : "") + '"><span>' + RANKS[c.r - 2] + '</span><span>' + SUITS[c.s] + '</span></div><div class="back"></div></div></div>');
       }
-      function evalHand(cards) {
-        var rs = cards.map(function (c) { return c.r; }).sort(function (a, b) { return b - a; });
-        var cnt = {}; rs.forEach(function (r) { cnt[r] = (cnt[r] || 0) + 1; });
-        var groups = Object.keys(cnt).map(function (r) { return { r: +r, c: cnt[r] }; }).sort(function (a, b) { return b.c - a.c || b.r - a.r; });
-        var flush = cards.every(function (c) { return c.s === cards[0].s; });
-        var uniq = rs.filter(function (v, i) { return rs.indexOf(v) === i; });
-        var sHigh = 0;
-        if (uniq.length === 5) { if (uniq[0] - uniq[4] === 4) sHigh = uniq[0]; else if (uniq[0] === 14 && uniq[1] === 5 && uniq[4] === 2) sHigh = 5; }
-        var pat = groups.map(function (g) { return g.c; }).join(""), cat, score, gr = groups.map(function (g) { return g.r; });
-        if (sHigh && flush) { cat = 8; score = [sHigh]; }
-        else if (pat === "41") { cat = 7; score = gr; }
-        else if (pat === "32") { cat = 6; score = gr; }
-        else if (flush) { cat = 5; score = rs; }
-        else if (sHigh) { cat = 4; score = [sHigh]; }
-        else if (pat === "311") { cat = 3; score = gr; }
-        else if (pat === "221") { cat = 2; score = gr; }
-        else if (pat === "2111") { cat = 1; score = gr; }
-        else { cat = 0; score = rs; }
-        return { cat: cat, score: score };
+      // Favorable player card: never busts, tends to improve the hand.
+      function playerCard(cards) { var t = total(cards); if (t <= 11) return pull(function () { return true; }); return pull(function (r) { return val(r) <= 21 - t; }); }
+      function stagger() { Array.prototype.slice.call(overlay.querySelectorAll(".fblm-cardwrap:not(.fblm-in)")).forEach(function (w, i) { w.classList.add("fblm-in"); setTimeout(function () { w.classList.add("in"); }, 50 * i); }); }
+      function renderBank() { bankEl.textContent = "$" + bank; creditEl.textContent = "$" + Math.min(bank, CAP); betEl.textContent = "$" + bet; }
+      function renderDealer(reveal) {
+        dRow.innerHTML = ""; dealer.forEach(function (c, i) { dRow.appendChild(cardEl(c, !reveal && i === 1)); });
+        dTot.textContent = reveal ? ("Dealer: " + total(dealer) + (total(dealer) > 21 ? " — BUST" : "")) : "Dealer"; stagger();
       }
-      function cmp(a, b) { if (a.cat !== b.cat) return a.cat - b.cat; for (var i = 0; i < 5; i++) { var x = a.score[i] || 0, y = b.score[i] || 0; if (x !== y) return x - y; } return 0; }
-
-      var deck, player, dealer, held, phase = "predeal", wonPrize = null;
-      function render(revealDealer) {
-        dealerRow.innerHTML = ""; dealer.forEach(function (c) { dealerRow.appendChild(cardEl(c, !revealDealer)); });
-        playerRow.innerHTML = "";
-        player.forEach(function (c, idx) {
-          var w = cardEl(c, false), card = w.querySelector(".fblm-card");
-          if (held[idx]) card.classList.add("held");
-          if (phase === "draw") { w.style.cursor = "pointer"; w.title = "Tap to hold"; w.addEventListener("click", function () { held[idx] = !held[idx]; card.classList.toggle("held"); }); }
-          playerRow.appendChild(w);
+      function renderPlayer() {
+        pArea.innerHTML = "";
+        hands.forEach(function (h, i) {
+          var grp = el('<div class="fblm-bj-hand' + (i === active && phase === "play" ? " active" : "") + '"></div>');
+          var row = el('<div class="fblm-row"></div>'); h.cards.forEach(function (c) { row.appendChild(cardEl(c, false)); }); grp.appendChild(row);
+          var t = total(h.cards);
+          grp.appendChild(el('<div class="fblm-rowlabel">' + (hands.length > 1 ? "Hand " + (i + 1) + ": " : "") + t +
+            (t > 21 ? " BUST" : (isBJ(h.cards) && hands.length === 1 ? " — BLACKJACK!" : "")) + (h.doubled ? " ×2" : "") + '</div>'));
+          pArea.appendChild(grp);
         });
-        Array.prototype.slice.call(overlay.querySelectorAll(".fblm-cardwrap")).forEach(function (w, i) { setTimeout(function () { w.classList.add("in"); }, 55 * i); });
+        stagger();
       }
-      dealBtn.addEventListener("click", function () {
-        if (phase === "predeal") {
-          deck = newDeck(); player = []; dealer = [];
-          for (var i = 0; i < 5; i++) { player.push(deck.pop()); dealer.push(deck.pop()); }
-          held = [false, false, false, false, false]; phase = "draw"; render(false);
-          holdHint.textContent = "Tap cards to HOLD, then draw"; dealBtn.textContent = "🔄 Draw & reveal dealer"; track("poker_deal");
-        } else if (phase === "draw") {
-          phase = "reveal";
-          for (var k = 0; k < 5; k++) { if (!held[k]) player[k] = deck.pop(); }
-          render(true); holdHint.textContent = "";
-          var pe = evalHand(player), de = evalHand(dealer), c = cmp(pe, de), idx = CAT2PRIZE[pe.cat], won = c > 0;
-          if (won) idx = Math.min(idx + 1, PRIZES.length - 1);
-          wonPrize = PRIZES[idx];
-          var verdict = c > 0 ? "You beat the dealer! 🎉" : (c < 0 ? "Dealer edged you — but you still win! 🎁" : "A tie — you still win! 🎁");
-          track("poker_result", { player: pe.cat, dealer: de.cat, win: won, prize: wonPrize.full, value: wonPrize.val });
-          pkResult.classList.remove("fblm-hidden");
-          pkResult.innerHTML = 'You: <b>' + CATNAME[pe.cat] + '</b> &nbsp;·&nbsp; Dealer: <b>' + CATNAME[de.cat] + '</b><br>' + verdict +
-            '<br>You won <b style="color:#01f6f2">' + wonPrize.full + '</b> ($' + wonPrize.val + ' value)' + (won ? ' <b>— upgraded!</b>' : '');
-          // Wait for the player to claim — no auto-advance.
-          dealBtn.textContent = "🎁 Claim my prize →"; phase = "claim";
-        } else if (phase === "claim") {
-          track("poker_claim", { prize: wonPrize.full, value: wonPrize.val });
-          pkStage.classList.add("fblm-hidden"); stepsBar.classList.remove("fblm-hidden"); form.classList.remove("fblm-hidden");
-          h2.innerHTML = 'Claim your <span class="a">' + wonPrize.full + '</span> 🎁';
-          sub.textContent = "Worth $" + wonPrize.val + " — where should we send it?"; goStep(1);
-        }
+      function setActions() {
+        var h = hands[active], two = h.cards.length === 2;
+        actions.classList.toggle("fblm-hidden", phase !== "play");
+        actions.querySelector("[data-double]").classList.toggle("fblm-hidden", !(two && bank >= h.bet));
+        actions.querySelector("[data-split]").classList.toggle("fblm-hidden", !(hands.length === 1 && two && val(h.cards[0].r) === val(h.cards[1].r) && bank >= h.bet));
+      }
+      function rigStart(cards) {
+        var roll = Math.random();
+        if (roll < 0.25) { cards.push(pull(function (r) { return r === 14; })); cards.push(pull(function (r) { return val(r) === 10; })); }          // blackjack
+        else if (roll < 0.45) { var rk = [8, 14, 10][Math.floor(Math.random() * 3)]; cards.push(pull(function (r) { return r === rk; })); cards.push(pull(function (r) { return r === rk; })); } // pair (split fun)
+        else if (roll < 0.65) { var v1 = 2 + Math.floor(Math.random() * 8); cards.push(pull(function (r) { return r !== 14 && val(r) === v1; })); cards.push(pull(function (r) { return r !== 14 && val(r) === (11 - v1); })); } // total 11 (double fun)
+        else { var T = [18, 19, 20][Math.floor(Math.random() * 3)], f = pull(function (r) { return r !== 14 && val(r) >= 8; }); cards.push(f); var need = Math.max(2, Math.min(10, T - val(f))); cards.push(pull(function (r) { return r !== 14 && val(r) === need; })); } // strong total
+      }
+      function startRound() {
+        if (bank < bet) { bjMsg.textContent = "Not enough chips — cash out your credit!"; return; }
+        deck = freshDeck(); dealer = []; hands = [{ cards: [], bet: bet, done: false, doubled: false }]; active = 0; phase = "play";
+        rigStart(hands[0].cards);
+        dealer.push(pull(function (r) { return r >= 4 && r <= 6; })); dealer.push(pull(function () { return true; }));
+        bjMsg.textContent = ""; betRow.classList.add("fblm-hidden"); cashBtn.classList.add("fblm-hidden");
+        renderDealer(false); renderPlayer(); track("bj_deal", { bet: bet });
+        if (isBJ(hands[0].cards)) { hands[0].done = true; dealerTurn(); } else setActions();
+      }
+      function advance() { for (var i = 0; i < hands.length; i++) if (!hands[i].done) { active = i; renderPlayer(); setActions(); return; } dealerTurn(); }
+      function dealerTurn() {
+        phase = "dealer"; actions.classList.add("fblm-hidden"); renderDealer(true);
+        var t = total(dealer), g = 0;
+        while (t < 17 && g++ < 10) { var c = (t >= 12 && t <= 16) ? pull(function (r) { return val(r) > 21 - t; }) : pull(function () { return true; }); dealer.push(c); t = total(dealer); if (t > 21) break; }
+        renderDealer(true); resolve();
+      }
+      function resolve() {
+        var dt = total(dealer), dBust = dt > 21, dBJ = isBJ(dealer), net = 0, parts = [];
+        hands.forEach(function (h, i) {
+          var pt = total(h.cards), lbl = hands.length > 1 ? "Hand " + (i + 1) + ": " : "", r;
+          if (pt > 21) { net -= h.bet; r = "bust −$" + h.bet; }
+          else if (isBJ(h.cards) && hands.length === 1 && !dBJ) { var w = Math.round(h.bet * 1.5); net += w; r = "Blackjack +$" + w; }
+          else if (dBust) { net += h.bet; r = "dealer busts +$" + h.bet; }
+          else if (pt > dt) { net += h.bet; r = "win +$" + h.bet; }
+          else if (pt === dt) { r = "push"; }
+          else { net -= h.bet; r = "lose −$" + h.bet; }
+          parts.push(lbl + r);
+        });
+        bank = Math.min(CAP, Math.max(0, bank + net)); renderBank(); phase = "bet";
+        var capped = bank >= CAP;
+        bjMsg.innerHTML = parts.join(" · ") + (net > 0 ? " 🎉" : "") + (capped ? '<br><b>You maxed the $' + CAP + ' credit cap! 🏆</b>' : "");
+        if (bet > bank) bet = Math.max(10, bank);
+        if (!capped && bank >= 10) { betRow.classList.remove("fblm-hidden"); dealBtn.textContent = "Deal next hand"; } else betRow.classList.add("fblm-hidden");
+        cashBtn.classList.remove("fblm-hidden"); cashBtn.textContent = "💰 Cash out my $" + Math.min(bank, CAP) + " credit →";
+        track("bj_round", { net: net, bank: bank });
+      }
+      function setBet(d) { bet = Math.max(10, Math.min(bank, bet + d)); renderBank(); }
+      overlay.querySelector("[data-betup]").addEventListener("click", function () { setBet(10); });
+      overlay.querySelector("[data-betdown]").addEventListener("click", function () { setBet(-10); });
+      dealBtn.addEventListener("click", startRound);
+      overlay.querySelector("[data-hit]").addEventListener("click", function () { var h = hands[active]; h.cards.push(playerCard(h.cards)); renderPlayer(); if (total(h.cards) >= 21) { h.done = true; advance(); } else setActions(); });
+      overlay.querySelector("[data-stand]").addEventListener("click", function () { hands[active].done = true; advance(); });
+      overlay.querySelector("[data-double]").addEventListener("click", function () { var h = hands[active]; if (h.cards.length !== 2 || bank < h.bet) return; h.doubled = true; h.bet *= 2; h.cards.push(playerCard(h.cards)); h.done = true; renderPlayer(); advance(); });
+      overlay.querySelector("[data-split]").addEventListener("click", function () {
+        var h = hands[active]; if (hands.length !== 1 || h.cards.length !== 2 || val(h.cards[0].r) !== val(h.cards[1].r) || bank < h.bet) return;
+        hands = [{ cards: [h.cards[0]], bet: bet, done: false, doubled: false }, { cards: [h.cards[1]], bet: bet, done: false, doubled: false }];
+        hands[0].cards.push(playerCard(hands[0].cards)); hands[1].cards.push(playerCard(hands[1].cards));
+        active = 0; renderPlayer(); setActions(); track("bj_split");
       });
+      cashBtn.addEventListener("click", function () {
+        var credit = Math.min(bank, CAP); track("bj_cashout", { credit: credit });
+        form._goal.value = "Blackjack credit: $" + credit + " first-month account credit";
+        bjStage.classList.add("fblm-hidden"); stepsBar.classList.remove("fblm-hidden"); form.classList.remove("fblm-hidden");
+        h2.innerHTML = 'Claim your <span class="a">$' + credit + ' account credit</span> 🎉';
+        sub.textContent = "Your first-month credit — where should we send it?"; goStep(1);
+      });
+      renderBank();
     }
     overlay.querySelectorAll("[data-goal]").forEach(function (b) {
       b.addEventListener("click", function () { form._goal.value = b.dataset.goal; track("step", { step: 1, goal: b.dataset.goal }); goStep(1); });
@@ -309,7 +350,7 @@
       '<button class="fblm-cta" id="fblm-preview" style="margin-top:.7rem;padding:.6rem;font-size:.9rem">Preview the popup ▶</button>' +
       '<p class="fblm-note">Real submissions are emailed to the owner via Resend. Social-proof toasts use sample data in this demo.</p>' +
       '</div></div>');
-    var feats = [["hello", "Hello bar (top offer)"], ["fab", "Floating CTA button"], ["mobile", "Sticky mobile call bar"], ["exit", "Exit-intent popup"], ["scroll", "Scroll-triggered offer"], ["poker", "Poker challenge (in popup)"], ["social", "Social-proof toasts"]];
+    var feats = [["hello", "Hello bar (top offer)"], ["fab", "Floating CTA button"], ["mobile", "Sticky mobile call bar"], ["exit", "Exit-intent popup"], ["scroll", "Scroll-triggered offer"], ["blackjack", "Blackjack challenge (in popup)"], ["social", "Social-proof toasts"]];
     var fc = p.querySelector(".fblm-feats");
     feats.forEach(function (f) {
       var row = el('<label class="fblm-feat"><input type="checkbox" data-f="' + f[0] + '"' + (FEAT[f[0]] ? " checked" : "") + '> ' + f[1] + '</label>');

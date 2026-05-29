@@ -107,6 +107,26 @@
 .fblm-card .back{transform:rotateY(180deg);background:#01323a;border:2px solid #23fff4;
   background-image:repeating-linear-gradient(45deg,rgba(35,255,244,.18) 0 6px,transparent 6px 12px);}
 .fblm-card.held .face{outline:3px solid #23fff4;box-shadow:0 0 14px rgba(35,255,244,.55);}
+/* blackjack */
+.fblm-bj{text-align:center;}
+.fblm-bj-bank{font-size:.9rem;color:hsla(0,0%,100%,.78);margin:0 0 .8rem;}
+.fblm-bj-bank b{color:#fff;}
+.fblm-bj-hands{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;}
+.fblm-bj-hand{padding:.35rem;border-radius:.7rem;transition:box-shadow .2s;}
+.fblm-bj-hand.active{box-shadow:0 0 0 2px rgba(35,255,244,.6);}
+.fblm-bj-msg{min-height:1.2rem;margin:.8rem 0;color:#fff;font-weight:600;font-size:.92rem;line-height:1.45;}
+.fblm-bj-actions{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin-bottom:.6rem;}
+.fblm-bj-actions button{cursor:pointer;border:1px solid var(--fblm-line);background:#0c0a0d;color:#fff;font-weight:700;
+  border-radius:.6rem;padding:.55rem .95rem;font-size:.9rem;font-family:inherit;transition:.15s;}
+.fblm-bj-actions button:hover{border-color:#01f6f2;color:#01f6f2;}
+.fblm-bj-actions [data-double]{border-color:rgba(35,255,244,.45);}
+.fblm-bj-bet{display:flex;align-items:center;gap:.6rem;justify-content:center;}
+.fblm-bj-bet>button:not(.fblm-cta){cursor:pointer;width:34px;height:34px;border-radius:50%;border:1px solid var(--fblm-line);
+  background:#0c0a0d;color:#fff;font-size:1.15rem;font-weight:800;line-height:1;}
+.fblm-bj-bet>button:not(.fblm-cta):hover{border-color:#01f6f2;color:#01f6f2;}
+.fblm-bj-bet span{color:hsla(0,0%,100%,.8);font-size:.92rem;}
+.fblm-bj-bet b{color:#fff;}
+.fblm-bj-bet .fblm-cta{width:auto;padding:.6rem 1.3rem;margin:0;}
 
 /* ===== Demo control panel ===== */
 .fblm-panel{position:fixed;left:14px;bottom:14px;z-index:2147483640;width:300px;background:rgba(15,13,16,.97);
