@@ -126,6 +126,7 @@
 .fblm-bj-bet>button:not(.fblm-cta):hover{border-color:#01f6f2;color:#01f6f2;}
 .fblm-bj-bet span{color:hsla(0,0%,100%,.8);font-size:.92rem;}
 .fblm-bj-bet b{color:#fff;}
+.fblm-bj-bet [data-betmax]{width:auto !important;height:34px;border-radius:.55rem;padding:0 .75rem;font-size:.78rem;font-weight:800;border-color:rgba(35,255,244,.45);}
 .fblm-bj-bet .fblm-cta{width:auto;padding:.6rem 1.3rem;margin:0;}
 
 /* ===== Demo control panel ===== */

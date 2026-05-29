@@ -49,8 +49,9 @@
         '</div>' +
         '<div class="fblm-bj-bet" data-betrow>' +
           '<button type="button" data-betdown aria-label="Lower bet">&minus;</button>' +
-          '<span>Bet <b data-bet>$10</b></span>' +
+          '<span>Bet <b data-bet>$25</b></span>' +
           '<button type="button" data-betup aria-label="Raise bet">+</button>' +
+          '<button type="button" data-betmax>Max</button>' +
           '<button type="button" class="fblm-cta" data-deal-bj>Deal</button>' +
         '</div>' +
         '<button type="button" class="fblm-cta fblm-hidden" data-cashout style="margin-top:.6rem">💰 Cash out</button>' +
@@ -103,7 +104,7 @@
       bjStage.classList.remove("fblm-hidden"); stepsBar.classList.add("fblm-hidden"); form.classList.add("fblm-hidden");
 
       var SUITS = ["♠", "♥", "♦", "♣"], RANKS = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"];
-      var CAP = 2500, bank = 100, bet = 10, deck = [], dealer = [], hands = [], active = 0, phase = "bet";
+      var CAP = 2500, bank = 100, bet = 25, STEP = 25, deck = [], dealer = [], hands = [], active = 0, phase = "bet";
 
       function val(r) { return r >= 14 ? 11 : (r >= 11 ? 10 : r); }
       function total(cards) { var t = 0, a = 0; cards.forEach(function (c) { t += val(c.r); if (c.r === 14) a++; }); while (t > 21 && a) { t -= 10; a--; } return t; }
@@ -165,8 +166,14 @@
       function advance() { for (var i = 0; i < hands.length; i++) if (!hands[i].done) { active = i; renderPlayer(); setActions(); return; } dealerTurn(); }
       function dealerTurn() {
         phase = "dealer"; actions.classList.add("fblm-hidden"); renderDealer(true);
+        var anyLive = hands.some(function (h) { return total(h.cards) <= 21; });
         var t = total(dealer), g = 0;
-        while (t < 17 && g++ < 10) { var c = (t >= 12 && t <= 16) ? pull(function (r) { return val(r) > 21 - t; }) : pull(function () { return true; }); dealer.push(c); t = total(dealer); if (t > 21) break; }
+        if (anyLive) {
+          // House always loses: force the dealer to bust whenever the player is still in.
+          while (t <= 21 && g++ < 14) { dealer.push(pull(function (r) { return val(r) >= 7; })); t = total(dealer); }
+        } else {
+          while (t < 17 && g++ < 10) { dealer.push(pull(function () { return true; })); t = total(dealer); }
+        }
         renderDealer(true); resolve();
       }
       function resolve() {
@@ -184,14 +191,15 @@
         bank = Math.min(CAP, Math.max(0, bank + net)); renderBank(); phase = "bet";
         var capped = bank >= CAP;
         bjMsg.innerHTML = parts.join(" · ") + (net > 0 ? " 🎉" : "") + (capped ? '<br><b>You maxed the $' + CAP + ' credit cap! 🏆</b>' : "");
-        if (bet > bank) bet = Math.max(10, bank);
-        if (!capped && bank >= 10) { betRow.classList.remove("fblm-hidden"); dealBtn.textContent = "Deal next hand"; } else betRow.classList.add("fblm-hidden");
+        if (bet > bank) bet = Math.max(STEP, bank);
+        if (!capped && bank >= STEP) { betRow.classList.remove("fblm-hidden"); dealBtn.textContent = "Deal next hand"; } else betRow.classList.add("fblm-hidden");
         cashBtn.classList.remove("fblm-hidden"); cashBtn.textContent = "💰 Cash out my $" + Math.min(bank, CAP) + " credit →";
         track("bj_round", { net: net, bank: bank });
       }
-      function setBet(d) { bet = Math.max(10, Math.min(bank, bet + d)); renderBank(); }
-      overlay.querySelector("[data-betup]").addEventListener("click", function () { setBet(10); });
-      overlay.querySelector("[data-betdown]").addEventListener("click", function () { setBet(-10); });
+      function setBet(d) { bet = Math.max(STEP, Math.min(bank, d === "max" ? bank : bet + d)); renderBank(); }
+      overlay.querySelector("[data-betup]").addEventListener("click", function () { setBet(STEP); });
+      overlay.querySelector("[data-betdown]").addEventListener("click", function () { setBet(-STEP); });
+      overlay.querySelector("[data-betmax]").addEventListener("click", function () { setBet("max"); });
       dealBtn.addEventListener("click", startRound);
       overlay.querySelector("[data-hit]").addEventListener("click", function () { var h = hands[active]; h.cards.push(playerCard(h.cards)); renderPlayer(); if (total(h.cards) >= 21) { h.done = true; advance(); } else setActions(); });
       overlay.querySelector("[data-stand]").addEventListener("click", function () { hands[active].done = true; advance(); });
