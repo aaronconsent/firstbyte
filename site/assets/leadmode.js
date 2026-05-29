@@ -90,7 +90,6 @@
 
   /* ---------------- Modal (shared offer + multi-step form) ---------------- */
   var overlay;
-  function monthEnd() { var n = new Date(); return new Date(n.getFullYear(), n.getMonth() + 1, 0, 23, 59, 59); }
   function buildModal() {
     if (overlay) return overlay;
     overlay = el('<div class="fblm-overlay" role="dialog" aria-modal="true"></div>');
@@ -100,7 +99,6 @@
       '<span class="fblm-badge">Free • Limited this month</span>' +
       '<h2>Get your <span class="a">free 2026 growth plan</span></h2>' +
       '<p class="fblm-sub">A no-obligation website + local-SEO audit for your business — what\'s working, what\'s leaking leads, and the 3 fastest wins. ($500 value.)</p>' +
-      '<div class="fblm-count" data-count></div>' +
       '<div class="fblm-bjstage fblm-hidden fblm-bj">' +
         '<button type="button" class="fblm-mute" data-mute aria-label="Toggle sound">🔊</button>' +
         '<div class="fblm-bj-burst fblm-hidden" data-burst></div>' +
@@ -123,33 +121,39 @@
           '<button type="button" class="fblm-cta" data-deal-bj>Deal</button>' +
         '</div>' +
         '<button type="button" class="fblm-cta fblm-hidden" data-cashout style="margin-top:.6rem">💰 Cash out</button>' +
+        '<div class="fblm-final fblm-hidden" data-final>' +
+          '<div class="fblm-final-q" data-finalq></div>' +
+          '<button type="button" class="fblm-cta fblm-allin" data-allin></button>' +
+          '<button type="button" class="fblm-final-skip" data-claimnow></button>' +
+        '</div>' +
       '</div>' +
       '<div class="fblm-steps"><i class="on"></i><i></i><i></i></div>' +
       '<form class="fblm-form" novalidate>' +
         '<input class="fblm-hp" type="text" name="company" tabindex="-1" autocomplete="off" aria-hidden="true">' +
         '<input type="hidden" name="_goal" value="">' +
+        '<input type="hidden" name="_credit" value="">' +
         '<div class="fblm-step on" data-step="0">' +
-          '<div class="fblm-field"><label>What do you most want to fix?</label></div>' +
+          '<div class="fblm-field"><label data-spendlabel>How would you like to put your credit to work?</label></div>' +
           '<div class="fblm-choices">' +
-            '<button type="button" data-goal="Get more leads / calls">📈 Get more leads &amp; calls</button>' +
-            '<button type="button" data-goal="New or rebuilt website">🎨 A new / better website</button>' +
-            '<button type="button" data-goal="Rank higher on Google">🔍 Rank higher on Google</button>' +
-            '<button type="button" data-goal="Not sure — need a plan">🤝 Not sure, I want a plan</button>' +
+            '<button type="button" data-goal="More leads &amp; calls">📈 Get more leads &amp; calls</button>' +
+            '<button type="button" data-goal="A new / refreshed website">🎨 A new or refreshed website</button>' +
+            '<button type="button" data-goal="Rank higher on Google (SEO)">🔍 Rank higher on Google</button>' +
+            '<button type="button" data-goal="Launch paid ad campaigns">📣 Launch paid ad campaigns</button>' +
+            '<button type="button" data-goal="Not sure — recommend a plan">🤝 Not sure — recommend a plan</button>' +
           '</div>' +
         '</div>' +
         '<div class="fblm-step" data-step="1">' +
           '<div class="fblm-field"><label>Your name</label><input name="name" autocomplete="name" placeholder="Jane Smith"></div>' +
-          '<div class="fblm-field"><label>Email</label><input name="email" type="email" autocomplete="email" placeholder="you@business.com"></div>' +
+          '<div class="fblm-field"><label>Email (where we send your credit details)</label><input name="email" type="email" autocomplete="email" placeholder="you@business.com"></div>' +
           '<button type="button" class="fblm-cta" data-next>Continue &rarr;</button>' +
         '</div>' +
         '<div class="fblm-step" data-step="2">' +
-          '<div class="fblm-field"><label>Best phone (for your free audit call)</label><input name="phone" type="tel" autocomplete="tel" placeholder="(713) 555-0123"></div>' +
-          '<div class="fblm-field"><label>Anything we should know? (optional)</label><textarea name="message" rows="2" placeholder="Tell us about your business"></textarea></div>' +
-          '<button type="submit" class="fblm-cta">🚀 Send me my free plan</button>' +
+          '<div class="fblm-field"><label>Best phone (so we can set up your credit)</label><input name="phone" type="tel" autocomplete="tel" placeholder="(713) 555-0123"></div>' +
+          '<div class="fblm-field"><label>Anything we should know about your business? (optional)</label><textarea name="message" rows="2" placeholder="Tell us a bit about your business"></textarea></div>' +
+          '<button type="submit" class="fblm-cta" data-claimbtn>🎁 Claim my credit</button>' +
         '</div>' +
         '<div class="fblm-msg" role="status" aria-live="polite"></div>' +
       '</form>' +
-      '<p class="fblm-fine">No spam, ever. Or call <a href="tel:' + PHONE + '">' + PHONE_D + '</a> now.</p>' +
       '</div>';
     document.body.appendChild(overlay);
 
@@ -168,6 +172,8 @@
           bjMsg = overlay.querySelector("[data-bjmsg]"), betRow = overlay.querySelector("[data-betrow]"),
           actions = overlay.querySelector("[data-actions]"), cashBtn = overlay.querySelector("[data-cashout]"),
           burstEl = overlay.querySelector("[data-burst]"), muteBtn = overlay.querySelector("[data-mute]"),
+          finalBox = overlay.querySelector("[data-final]"), finalQ = overlay.querySelector("[data-finalq]"),
+          allInBtn = overlay.querySelector("[data-allin]"), claimNowBtn = overlay.querySelector("[data-claimnow]"),
           dealBtn = overlay.querySelector("[data-deal-bj]");
       muteBtn.textContent = MUTE ? "🔇" : "🔊";
       muteBtn.addEventListener("click", function () { MUTE = !MUTE; localStorage.setItem("fblm_mute", MUTE ? "1" : "0"); muteBtn.textContent = MUTE ? "🔇" : "🔊"; if (!MUTE) sfx.chip(); });
@@ -182,6 +188,7 @@
 
       var SUITS = ["♠", "♥", "♦", "♣"], RANKS = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"];
       var CAP = 2500, bank = 100, bet = 25, STEP = 25, deck = [], dealer = [], hands = [], active = 0, phase = "bet";
+      var finalOffered = false, lastHand = false;
 
       function val(r) { return r >= 14 ? 11 : (r >= 11 ? 10 : r); }
       function total(cards) { var t = 0, a = 0; cards.forEach(function (c) { t += val(c.r); if (c.r === 14) a++; }); while (t > 21 && a) { t -= 10; a--; } return t; }
@@ -221,8 +228,8 @@
       function setActions() {
         var h = hands[active], two = h.cards.length === 2;
         actions.classList.toggle("fblm-hidden", phase !== "play");
-        actions.querySelector("[data-double]").classList.toggle("fblm-hidden", !(two && bank >= h.bet));
-        actions.querySelector("[data-split]").classList.toggle("fblm-hidden", !(hands.length === 1 && two && val(h.cards[0].r) === val(h.cards[1].r) && bank >= h.bet));
+        actions.querySelector("[data-double]").classList.toggle("fblm-hidden", !(two && !lastHand && bank > h.bet));
+        actions.querySelector("[data-split]").classList.toggle("fblm-hidden", !(hands.length === 1 && two && !lastHand && val(h.cards[0].r) === val(h.cards[1].r) && bank > h.bet));
       }
       function rigStart(cards) {
         var roll = Math.random();
@@ -284,8 +291,9 @@
         }
         bjMsg.innerHTML = parts.join(" · ") + (net > 0 ? " 🎉" : "") + (capped ? '<br><b>You maxed the $' + CAP + ' credit cap! 🏆</b>' : "");
         if (bet > bank) bet = Math.max(STEP, bank); betEl.textContent = "$" + bet;
-        if (!capped && bank >= STEP) { betRow.classList.remove("fblm-hidden"); dealBtn.textContent = "Deal next hand"; } else betRow.classList.add("fblm-hidden");
-        cashBtn.classList.remove("fblm-hidden"); cashBtn.textContent = "💰 Cash out my $" + Math.min(bank, CAP) + " credit →";
+        if (!capped && !lastHand && bank >= STEP) { betRow.classList.remove("fblm-hidden"); dealBtn.textContent = "Deal next hand"; } else betRow.classList.add("fblm-hidden");
+        cashBtn.classList.remove("fblm-hidden");
+        cashBtn.textContent = (finalOffered ? "🎁 Claim my $" : "💰 Cash out my $") + Math.min(bank, CAP) + " credit →";
         track("bj_round", { net: net, bank: bank });
       }
       function setBet(d) { bet = Math.max(STEP, Math.min(bank, d === "max" ? bank : bet + d)); renderBank(); sfx.bet(); var bc = overlay.querySelector("[data-betchip]"); bc.classList.remove("fblm-pulse"); void bc.offsetWidth; bc.classList.add("fblm-pulse"); }
@@ -302,14 +310,36 @@
         hands[0].cards.push(playerCard(hands[0].cards)); hands[1].cards.push(playerCard(hands[1].cards));
         active = 0; renderPlayer(); setActions(); track("bj_split");
       });
-      cashBtn.addEventListener("click", function () {
+      function goToForm() {
         var credit = Math.min(bank, CAP); track("bj_cashout", { credit: credit });
         sfx.jackpot(); celebrate("jackpot");
-        form._goal.value = "Blackjack credit: $" + credit + " first-month account credit";
+        form._goal.value = "Blackjack prize claim";
+        form._credit.value = "$" + credit;
         bjStage.classList.add("fblm-hidden"); stepsBar.classList.remove("fblm-hidden"); form.classList.remove("fblm-hidden");
         h2.innerHTML = 'Claim your <span class="a">$' + credit + ' account credit</span> 🎉';
-        sub.textContent = "Your first-month credit — where should we send it?"; goStep(1);
+        sub.textContent = "You won $" + credit + " in first-month account credit! Let's put it to work — just answer a couple quick questions and it's yours.";
+        var sl = overlay.querySelector("[data-spendlabel]"); if (sl) sl.textContent = "How would you like to put your $" + credit + " credit to work?";
+        var cb = overlay.querySelector("[data-claimbtn]"); if (cb) cb.innerHTML = "🎁 Claim my $" + credit + " credit";
+        goStep(0);
+      }
+      function showFinalOffer() {
+        var credit = Math.min(bank, CAP), pot = Math.min(CAP, credit * 2);
+        // Already at the cap, or no upside left — go straight to the claim form.
+        if (credit >= CAP || pot <= credit) { goToForm(); return; }
+        finalQ.innerHTML = "One last shot! Go <b>all-in</b> with your $" + credit + " and you could walk away with <b>$" + pot + "</b> in credit.";
+        allInBtn.innerHTML = "🎲 ALL-IN — bet all $" + credit + " on one final hand";
+        claimNowBtn.textContent = "No thanks — claim my $" + credit + " now →";
+        actions.classList.add("fblm-hidden"); betRow.classList.add("fblm-hidden"); cashBtn.classList.add("fblm-hidden");
+        bjMsg.textContent = ""; finalBox.classList.remove("fblm-hidden");
+        track("bj_final_offer", { credit: credit });
+      }
+      allInBtn.addEventListener("click", function () {
+        finalOffered = true; lastHand = true; bet = bank;
+        finalBox.classList.add("fblm-hidden"); track("bj_allin", { bet: bet });
+        startRound();
       });
+      claimNowBtn.addEventListener("click", function () { finalBox.classList.add("fblm-hidden"); goToForm(); });
+      cashBtn.addEventListener("click", function () { if (finalOffered) goToForm(); else showFinalOffer(); });
       renderBank();
     }
     overlay.querySelectorAll("[data-goal]").forEach(function (b) {
@@ -324,10 +354,11 @@
     form.addEventListener("submit", function (e) {
       e.preventDefault();
       var btn = form.querySelector('button[type=submit]'); btn.disabled = true; msg.className = "fblm-msg"; msg.textContent = "Sending…";
+      var creditStr = form._credit.value || "";
       var fd = new FormData();
       fd.append("name", form.name.value); fd.append("email", form.email.value); fd.append("phone", form.phone.value); fd.append("company", form.company.value);
-      fd.append("message", "[Lead Engine • " + (form._goal.value || "popup") + "] " + (form.message.value || ""));
-      track("submit", { goal: form._goal.value });
+      fd.append("message", "[Lead Engine • Blackjack prize claim" + (creditStr ? " " + creditStr + " credit" : "") + " • wants to spend on: " + (form._goal.value || "?") + "] " + (form.message.value || ""));
+      track("submit", { goal: form._goal.value, credit: creditStr });
       fetch("/api/contact", { method: "POST", headers: { Accept: "application/json" }, body: fd })
         .then(function (r) { return r.json().catch(function () { return { ok: r.ok }; }); })
         .then(function (d) {
@@ -336,8 +367,8 @@
               '<button class="fblm-close" aria-label="Close">&times;</button>' +
               '<div style="text-align:center;padding:.5rem 0">' +
               '<div style="font-size:3rem">🎉</div>' +
-              '<h2>You\'re in!</h2>' +
-              '<p class="fblm-sub">Your free plan is reserved. <b style="color:#fff">Skip the wait</b> — grab a time on the calendar right now and we\'ll walk through it live.</p>' +
+              '<h2>Your credit is reserved!</h2>' +
+              '<p class="fblm-sub">Your <b style="color:#fff">' + (creditStr || "account") + ' credit</b> is locked in. <b style="color:#fff">Skip the wait</b> — grab a time on the calendar now and we\'ll map out exactly how to put it to work.</p>' +
               '<a class="fblm-cta" style="display:inline-block;text-decoration:none;max-width:300px" href="' + CALENDLY + '" target="_blank" rel="noopener" data-book>📅 Book your free call now</a>' +
               '<p class="fblm-fine">Prefer the phone? Call <a href="tel:' + PHONE + '">' + PHONE_D + '</a>.</p>' +
               '</div>';
@@ -349,20 +380,10 @@
         })
         .catch(function () { msg.className = "fblm-msg err"; msg.textContent = "Network error — please call " + PHONE_D + "."; btn.disabled = false; });
     });
-    startCountdown(overlay.querySelector("[data-count]"));
     return overlay;
   }
   function openModal(src) { buildModal(); requestAnimationFrame(function () { overlay.classList.add("fblm-show"); }); track("open", { source: src || "?" }); }
   function closeModal() { if (overlay) overlay.classList.remove("fblm-show"); }
-
-  function startCountdown(node) {
-    function tick() {
-      var ms = monthEnd() - new Date(); if (ms < 0) ms = 0;
-      var d = Math.floor(ms / 864e5), h = Math.floor(ms / 36e5) % 24, m = Math.floor(ms / 6e4) % 60, s = Math.floor(ms / 1e3) % 60;
-      node.innerHTML = [["Days", d], ["Hrs", h], ["Min", m], ["Sec", s]].map(function (x) { return '<div><b>' + String(x[1]).padStart(2, "0") + '</b><span>' + x[0] + '</span></div>'; }).join("");
-    }
-    tick(); setInterval(tick, 1000);
-  }
 
   /* ---------------- Individual mechanisms ---------------- */
   function helloBar() {
