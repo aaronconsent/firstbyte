@@ -22,6 +22,25 @@
   display:flex;align-items:center;gap:.5rem;animation:fblm-pulse 2.4s infinite;}
 @keyframes fblm-pulse{0%{box-shadow:0 0 0 0 rgba(1,246,242,.5);}70%{box-shadow:0 0 0 16px rgba(1,246,242,0);}100%{box-shadow:0 0 0 0 rgba(1,246,242,0);}}
 
+/* ===== Blackjack side tab (right edge, vertically centered) ===== */
+.fblm-bjtab{position:fixed;right:0;top:50%;transform:translateY(-50%);z-index:2147483600;cursor:pointer;border:0;
+  display:flex;align-items:center;gap:.6rem;padding:.7rem .95rem;border-radius:.9rem 0 0 .9rem;
+  background:linear-gradient(135deg,#01f6f2,#00d4ff);color:#04201f;text-align:left;
+  box-shadow:-8px 10px 30px rgba(1,246,242,.35);animation:fblm-bjglow 2.6s infinite;
+  transition:padding-right .25s ease,transform .25s ease;}
+.fblm-bjtab:hover{padding-right:1.3rem;}
+.fblm-bjtab .fblm-bjtab-ico{font-size:1.5rem;line-height:1;}
+.fblm-bjtab .fblm-bjtab-txt{display:flex;flex-direction:column;line-height:1.15;}
+.fblm-bjtab .fblm-bjtab-txt b{font-weight:800;font-size:.95rem;white-space:nowrap;}
+.fblm-bjtab .fblm-bjtab-txt span{font-size:.78rem;font-weight:700;opacity:.85;white-space:nowrap;}
+@keyframes fblm-bjglow{0%{box-shadow:-8px 10px 30px rgba(1,246,242,.25);}50%{box-shadow:-8px 10px 38px rgba(1,246,242,.55);}100%{box-shadow:-8px 10px 30px rgba(1,246,242,.25);}}
+@media(max-width:768px){
+  .fblm-bjtab{top:auto;bottom:64px;right:10px;transform:none;border-radius:.9rem;padding:.55rem .8rem;}
+  .fblm-bjtab .fblm-bjtab-ico{font-size:1.25rem;}
+  .fblm-bjtab .fblm-bjtab-txt b{font-size:.82rem;}
+  .fblm-bjtab .fblm-bjtab-txt span{font-size:.7rem;}
+}
+
 /* ===== Sticky mobile action bar ===== */
 .fblm-mobilebar{position:fixed;left:0;right:0;bottom:0;z-index:2147483599;display:none;
   grid-template-columns:1fr 1fr;gap:1px;background:var(--fblm-line);box-shadow:0 -6px 20px rgba(0,0,0,.4);}

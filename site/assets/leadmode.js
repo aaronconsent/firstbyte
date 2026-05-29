@@ -11,10 +11,12 @@
   if (qs.has("leads")) { localStorage.setItem("fblm_leads", qs.get("leads") === "off" ? "off" : "on"); }
 
   var DEMO = localStorage.getItem("fblm_demo") === "1";
-  var LEADS = localStorage.getItem("fblm_leads") === "on"; // OFF by default
-  if (!DEMO && !LEADS) return; // normal visitors: do nothing
+  var stored = localStorage.getItem("fblm_leads");
+  var LEADS = stored === null ? true : stored === "on"; // ON by default (deployed live)
+  if (!DEMO && !LEADS) return; // only off if explicitly disabled
 
-  var FEAT_DEFAULT = { hello: 1, fab: 1, mobile: 1, exit: 1, scroll: 1, social: 1, blackjack: 1 };
+  // Deployed default: only Blackjack, Social proof, and the Sticky mobile bar.
+  var FEAT_DEFAULT = { hello: 0, fab: 0, mobile: 1, exit: 0, scroll: 0, social: 1, blackjack: 1 };
   var FEAT = Object.assign({}, FEAT_DEFAULT, JSON.parse(localStorage.getItem("fblm_feat") || "{}"));
   var PHONE = "+1-713-578-0634", PHONE_D = "(713) 578-0634";
   // Owner: replace with your real Calendly (or other) booking link.
@@ -316,36 +318,54 @@
   }
   function socialProof() {
     if (!FEAT.social) return;
-    /* Sample fallback — clearly labeled. Fabricated social proof is deceptive
-       (and unlawful in some places), so on a live site the toasts pull REAL
-       recent leads from /api/recent-leads (backed by Cloudflare KV). The
-       sample data only shows when no real data is available (e.g. local demo). */
+    /* Honest social proof. Fabricated social proof is deceptive (and unlawful
+       in some places), so for REAL visitors the toasts ONLY show genuine recent
+       leads pulled from /api/recent-leads (backed by Cloudflare KV) — if there
+       are none yet, nothing is shown. Clearly-labeled SAMPLE data is shown only
+       in the owner demo (/?demo=1) so the owner can preview the look. */
     var SAMPLES = [
       { name: "Mike R.", text: "in Conroe requested a free audit", real: false },
       { name: "Sarah L.", text: "in Spring booked a strategy call", real: false },
       { name: "Carlos M.", text: "in Katy claimed the monthly offer", real: false },
       { name: "Jen P.", text: "in Tomball requested a quote", real: false }
     ];
-    var data = SAMPLES, node = el('<div class="fblm-toast"></div>');
-    document.body.appendChild(node);
-    fetch("/api/recent-leads").then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
-      if (j && j.length) data = j.map(function (x) { return { name: x.n, text: x.a, ts: x.t, real: true }; });
-    }).catch(function () {});
-    var i = 0;
-    function show() {
-      var s = data[i % data.length]; i++;
-      var when = s.real ? relTime(s.ts) + " • verified lead" : "recently • sample";
-      node.dataset.kind = s.real ? "live" : "sample";
-      node.innerHTML = '<div><span class="fblm-t-name">' + s.name + '</span> ' + s.text + '.</div><div class="fblm-t-time">' + when + '</div>';
-      node.classList.add("fblm-show");
-      setTimeout(function () { node.classList.remove("fblm-show"); }, 5200);
+    var node = null;
+    function ensureNode() { if (!node) { node = el('<div class="fblm-toast"></div>'); document.body.appendChild(node); } return node; }
+    function run(data) {
+      if (!data.length) return;
+      ensureNode();
+      var i = 0;
+      function show() {
+        var s = data[i % data.length]; i++;
+        var when = s.real ? relTime(s.ts) + " • verified lead" : "recently • sample";
+        node.dataset.kind = s.real ? "live" : "sample";
+        node.innerHTML = '<div><span class="fblm-t-name">' + s.name + '</span> ' + s.text + '.</div><div class="fblm-t-time">' + when + '</div>';
+        node.classList.add("fblm-show");
+        setTimeout(function () { node.classList.remove("fblm-show"); }, 5200);
+      }
+      setTimeout(function () { show(); setInterval(show, 12000); }, 4000);
     }
-    setTimeout(function () { show(); setInterval(show, 12000); }, 4000);
+    fetch("/api/recent-leads").then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+      var real = (j && j.length) ? j.map(function (x) { return { name: x.n, text: x.a, ts: x.t, real: true }; }) : [];
+      if (real.length) run(real);            // real visitors: only genuine leads
+      else if (DEMO) run(SAMPLES);           // owner demo only: labeled samples
+    }).catch(function () { if (DEMO) run(SAMPLES); });
+  }
+
+  /* Right-edge, vertically-centered widget that opens the Blackjack challenge. */
+  function blackjackTab() {
+    if (!FEAT.blackjack) return;
+    var t = el('<button class="fblm-bjtab" aria-label="Play Blackjack — win up to $2,500 in account credit">' +
+      '<span class="fblm-bjtab-ico">🃏</span>' +
+      '<span class="fblm-bjtab-txt"><b>Win up to $2,500</b><span>Play Blackjack →</span></span>' +
+      '</button>');
+    t.addEventListener("click", function () { openModal("bj-tab"); });
+    document.body.appendChild(t);
   }
 
   function activate() {
     track("activate", { features: FEAT });
-    helloBar(); fab(); mobileBar(); exitIntent(); scrollOffer(); socialProof();
+    helloBar(); fab(); mobileBar(); exitIntent(); scrollOffer(); socialProof(); blackjackTab();
   }
 
   /* ---------------- Demo control panel ---------------- */
