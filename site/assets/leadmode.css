@@ -126,27 +126,66 @@
 .fblm-card .back{transform:rotateY(180deg);background:#01323a;border:2px solid #23fff4;
   background-image:repeating-linear-gradient(45deg,rgba(35,255,244,.18) 0 6px,transparent 6px 12px);}
 .fblm-card.held .face{outline:3px solid #23fff4;box-shadow:0 0 14px rgba(35,255,244,.55);}
-/* blackjack */
-.fblm-bj{text-align:center;}
-.fblm-bj-bank{font-size:.9rem;color:hsla(0,0%,100%,.78);margin:0 0 .8rem;}
-.fblm-bj-bank b{color:#fff;}
-.fblm-bj-hands{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;}
+/* ===== Blackjack — green felt casino table ===== */
+.fblm-bj{text-align:center;position:relative;overflow:hidden;
+  background:radial-gradient(120% 95% at 50% 8%,#1b8a55 0%,#0e6b3e 45%,#084c2b 100%);
+  background-color:#0e6b3e;border:1px solid rgba(255,215,0,.3);border-radius:1.1rem;
+  padding:2.4rem .85rem 1.15rem;margin:0 0 .2rem;
+  box-shadow:inset 0 0 70px rgba(0,0,0,.45),0 0 0 6px rgba(0,0,0,.25),0 0 0 7px rgba(255,215,0,.18);}
+.fblm-bj::before{content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;
+  background:repeating-linear-gradient(45deg,rgba(255,255,255,.025) 0 3px,transparent 3px 6px);}
+.fblm-bj.fblm-win{box-shadow:inset 0 0 70px rgba(0,0,0,.35),0 0 0 6px rgba(0,0,0,.25),0 0 28px 2px rgba(255,215,0,.65);animation:fblm-tablewin .6s ease;}
+.fblm-bj.fblm-lose{box-shadow:inset 0 0 70px rgba(0,0,0,.55),0 0 0 6px rgba(0,0,0,.3);animation:fblm-tableshake .35s ease;}
+@keyframes fblm-tablewin{0%{box-shadow:inset 0 0 70px rgba(0,0,0,.35),0 0 0 6px rgba(0,0,0,.25),0 0 10px 0 rgba(255,215,0,.3);}50%{box-shadow:inset 0 0 70px rgba(0,0,0,.35),0 0 0 6px rgba(0,0,0,.25),0 0 40px 6px rgba(255,215,0,.85);}}
+@keyframes fblm-tableshake{0%,100%{transform:translateX(0);}25%{transform:translateX(-5px);}75%{transform:translateX(5px);}}
+.fblm-mute{position:absolute;top:.5rem;right:.55rem;z-index:3;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.25);
+  color:#fff;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:.95rem;line-height:1;padding:0;}
+.fblm-mute:hover{border-color:#ffd700;}
+.fblm-bj-bank{display:flex;gap:1.2rem;justify-content:center;align-items:center;flex-wrap:wrap;font-size:.74rem;
+  letter-spacing:.06em;text-transform:uppercase;color:hsla(0,0%,100%,.7);margin:0 0 1rem;position:relative;z-index:2;}
+.fblm-stat{display:flex;align-items:center;gap:.45rem;}
+/* Gold poker chips */
+.fblm-chip{display:inline-flex;align-items:center;justify-content:center;min-width:2.4rem;padding:.34rem .7rem;border-radius:2rem;
+  font-size:.9rem;letter-spacing:0;text-transform:none;
+  background:radial-gradient(circle at 50% 32%,#fff0b8,#ffcb37 58%,#dd9a00);
+  border:2px dashed #fff7d6;box-shadow:0 2px 7px rgba(0,0,0,.45),inset 0 0 0 2px rgba(255,255,255,.35),inset 0 -3px 6px rgba(140,90,0,.4);}
+.fblm-chip b{color:#5a3d00;font-weight:800;}
+.fblm-chip-teal{background:radial-gradient(circle at 50% 32%,#c6fffb,#23fff4 58%,#01b8b3);border-color:#e0fffd;box-shadow:0 2px 7px rgba(0,0,0,.45),inset 0 0 0 2px rgba(255,255,255,.35),inset 0 -3px 6px rgba(0,90,88,.4);}
+.fblm-chip-teal b{color:#024c4a;}
+.fblm-pulse{animation:fblm-chippop .55s cubic-bezier(.2,1.4,.4,1);}
+@keyframes fblm-chippop{0%{transform:scale(1);}40%{transform:scale(1.4);filter:brightness(1.3);}100%{transform:scale(1);}}
+.fblm-bj-hands{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;position:relative;z-index:2;}
 .fblm-bj-hand{padding:.35rem;border-radius:.7rem;transition:box-shadow .2s;}
-.fblm-bj-hand.active{box-shadow:0 0 0 2px rgba(35,255,244,.6);}
-.fblm-bj-msg{min-height:1.2rem;margin:.8rem 0;color:#fff;font-weight:600;font-size:.92rem;line-height:1.45;}
-.fblm-bj-actions{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin-bottom:.6rem;}
-.fblm-bj-actions button{cursor:pointer;border:1px solid var(--fblm-line);background:#0c0a0d;color:#fff;font-weight:700;
+.fblm-bj-hand.active{box-shadow:0 0 0 2px rgba(255,215,0,.7);}
+.fblm-bj-msg{min-height:1.2rem;margin:.8rem 0;color:#fff;font-weight:600;font-size:.92rem;line-height:1.45;position:relative;z-index:2;text-shadow:0 1px 2px rgba(0,0,0,.5);}
+.fblm-bj-actions{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin-bottom:.6rem;position:relative;z-index:2;}
+.fblm-bj-actions button{cursor:pointer;border:1px solid rgba(255,255,255,.2);background:rgba(8,40,24,.85);color:#fff;font-weight:700;
   border-radius:.6rem;padding:.55rem .95rem;font-size:.9rem;font-family:inherit;transition:.15s;}
-.fblm-bj-actions button:hover{border-color:#01f6f2;color:#01f6f2;}
-.fblm-bj-actions [data-double]{border-color:rgba(35,255,244,.45);}
-.fblm-bj-bet{display:flex;align-items:center;gap:.6rem;justify-content:center;}
-.fblm-bj-bet>button:not(.fblm-cta){cursor:pointer;width:34px;height:34px;border-radius:50%;border:1px solid var(--fblm-line);
-  background:#0c0a0d;color:#fff;font-size:1.15rem;font-weight:800;line-height:1;}
-.fblm-bj-bet>button:not(.fblm-cta):hover{border-color:#01f6f2;color:#01f6f2;}
-.fblm-bj-bet span{color:hsla(0,0%,100%,.8);font-size:.92rem;}
-.fblm-bj-bet b{color:#fff;}
-.fblm-bj-bet [data-betmax]{width:auto !important;height:34px;border-radius:.55rem;padding:0 .75rem;font-size:.78rem;font-weight:800;border-color:rgba(35,255,244,.45);}
-.fblm-bj-bet .fblm-cta{width:auto;padding:.6rem 1.3rem;margin:0;}
+.fblm-bj-actions button:hover{border-color:#ffd700;color:#ffe88a;}
+.fblm-bj-actions [data-double]{border-color:rgba(255,215,0,.5);}
+.fblm-bj-bet{display:flex;align-items:center;gap:.6rem;justify-content:center;position:relative;z-index:2;}
+.fblm-bj-bet>button:not(.fblm-cta){cursor:pointer;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.25);
+  background:rgba(8,40,24,.85);color:#fff;font-size:1.15rem;font-weight:800;line-height:1;}
+.fblm-bj-bet>button:not(.fblm-cta):hover{border-color:#ffd700;color:#ffe88a;}
+.fblm-bj-bet span{color:hsla(0,0%,100%,.85);font-size:.92rem;display:inline-flex;align-items:center;gap:.4rem;}
+.fblm-bj-bet [data-betmax]{width:auto !important;height:34px;border-radius:.55rem;padding:0 .75rem;font-size:.78rem;font-weight:800;border-color:rgba(255,215,0,.5);}
+.fblm-bj-bet .fblm-cta{width:auto;padding:.6rem 1.3rem;margin:0;background:linear-gradient(90deg,#ffd24a,#ffb300);color:#3d2a00;}
+/* Win burst banner */
+.fblm-bj-burst{position:absolute;top:42%;left:50%;transform:translate(-50%,-50%) scale(.5);z-index:6;pointer-events:none;
+  font-family:"Funnel Display","Figtree",sans-serif;font-weight:800;white-space:nowrap;opacity:0;}
+.fblm-burst-win{font-size:1.5rem;color:#fff;text-shadow:0 0 12px rgba(255,215,0,.9),0 2px 4px rgba(0,0,0,.6);}
+.fblm-burst-big{font-size:1.7rem;color:#ffe87a;text-shadow:0 0 16px rgba(255,200,0,1),0 2px 4px rgba(0,0,0,.7);}
+.fblm-burst-jackpot{font-size:1.9rem;color:#fff;text-shadow:0 0 20px rgba(255,215,0,1),0 0 40px rgba(255,160,0,.8);}
+.fblm-bj-burst.fblm-go{animation:fblm-burst 1.9s cubic-bezier(.2,1.3,.4,1) forwards;}
+@keyframes fblm-burst{0%{opacity:0;transform:translate(-50%,-50%) scale(.4) rotate(-6deg);}15%{opacity:1;transform:translate(-50%,-50%) scale(1.15) rotate(2deg);}30%{transform:translate(-50%,-50%) scale(1) rotate(0);}80%{opacity:1;transform:translate(-50%,-50%) scale(1);}100%{opacity:0;transform:translate(-50%,-90%) scale(1);}}
+/* Full-screen confetti + flash (appended to overlay) */
+.fblm-confetti{position:fixed;top:-22px;width:10px;height:15px;border-radius:2px;z-index:2147483611;pointer-events:none;
+  animation:fblm-fall 1.4s ease-in forwards;will-change:transform,opacity;}
+@keyframes fblm-fall{0%{transform:translateY(0) translateX(0) rotate(0);opacity:1;}100%{transform:translateY(102vh) translateX(var(--dx,0)) rotate(var(--rot,360deg));opacity:.9;}}
+.fblm-flash{position:fixed;inset:0;z-index:2147483611;pointer-events:none;
+  background:radial-gradient(circle at 50% 45%,rgba(255,215,0,.55),rgba(255,215,0,0) 60%);animation:fblm-flash .65s ease-out forwards;}
+@keyframes fblm-flash{0%{opacity:0;}25%{opacity:1;}100%{opacity:0;}}
+@media(prefers-reduced-motion:reduce){.fblm-confetti,.fblm-flash,.fblm-bj-burst.fblm-go,.fblm-pulse,.fblm-bj.fblm-win,.fblm-bj.fblm-lose{animation:none;}}
 
 /* ===== Demo control panel ===== */
 .fblm-panel{position:fixed;left:14px;bottom:14px;z-index:2147483640;width:300px;background:rgba(15,13,16,.97);

@@ -27,6 +27,67 @@
   function el(html) { var d = document.createElement("div"); d.innerHTML = html.trim(); return d.firstChild; }
   function once(k) { if (fired[k]) return false; fired[k] = 1; return true; }
 
+  /* ---------------- Sound engine (WebAudio, no asset files) ---------------- */
+  var AC = null, MUTE = localStorage.getItem("fblm_mute") === "1";
+  function actx() {
+    try { if (!AC) AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; }
+    if (AC && AC.state === "suspended") { try { AC.resume(); } catch (e) {} }
+    return AC;
+  }
+  function tone(freq, dur, type, vol, when) {
+    var ac = actx(); if (!ac || MUTE) return;
+    var t0 = ac.currentTime + (when || 0);
+    var o = ac.createOscillator(), g = ac.createGain();
+    o.type = type || "sine"; o.frequency.setValueAtTime(freq, t0);
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(Math.max(0.001, vol || 0.18), t0 + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    o.connect(g); g.connect(ac.destination); o.start(t0); o.stop(t0 + dur + 0.02);
+  }
+  var sfx = {
+    deal: function () { tone(300, 0.07, "triangle", 0.12); tone(180, 0.05, "sine", 0.08, 0.01); },
+    chip: function () { tone(1200, 0.05, "square", 0.06); tone(1750, 0.05, "square", 0.04, 0.03); },
+    bet: function () { tone(700, 0.05, "square", 0.07); },
+    flip: function () { tone(520, 0.06, "triangle", 0.1); },
+    win: function () {[523, 659, 784, 1047].forEach(function (f, i) { tone(f, 0.2, "triangle", 0.17, i * 0.085); }); },
+    lose: function () { tone(220, 0.28, "sine", 0.13); tone(165, 0.4, "sine", 0.11, 0.09); },
+    blackjack: function () {[523, 659, 784, 1047, 1319].forEach(function (f, i) { tone(f, 0.22, "triangle", 0.18, i * 0.075); }); tone(1047, 0.55, "sine", 0.1, 0.42); },
+    jackpot: function () { for (var i = 0; i < 9; i++) tone(440 * Math.pow(1.1225, i), 0.15, "triangle", 0.15, i * 0.065); for (var j = 0; j < 4; j++) tone(1600 + j * 200, 0.4, "sine", 0.08, 0.6 + j * 0.05); }
+  };
+
+  /* ---------------- Celebration: confetti + flash ---------------- */
+  function celebrate(level) {
+    if (!overlay) return;
+    var colors = ["#ffd700", "#ffec80", "#ffb300", "#01f6f2", "#ffffff", "#ffcf3f"];
+    var n = level === "jackpot" ? 160 : (level === "big" ? 110 : 60);
+    var flash = el('<div class="fblm-flash"></div>'); overlay.appendChild(flash);
+    setTimeout(function () { flash.remove(); }, 700);
+    for (var i = 0; i < n; i++) {
+      var c = document.createElement("i");
+      c.className = "fblm-confetti";
+      var shape = Math.random();
+      if (shape > 0.6) c.style.borderRadius = "50%";
+      c.style.left = (Math.random() * 100) + "vw";
+      c.style.background = colors[i % colors.length];
+      c.style.animationDelay = (Math.random() * 0.35) + "s";
+      c.style.animationDuration = (1 + Math.random() * 1.1) + "s";
+      c.style.setProperty("--dx", (Math.random() * 280 - 140) + "px");
+      c.style.setProperty("--rot", (Math.random() * 900 - 450) + "deg");
+      overlay.appendChild(c);
+      (function (node) { setTimeout(function () { node.remove(); }, 2400); })(c);
+    }
+  }
+  function countUp(node, from, to, fmt) {
+    var start = null, dur = 650;
+    function step(ts) {
+      if (start === null) start = ts;
+      var p = Math.min(1, (ts - start) / dur), e = 1 - Math.pow(1 - p, 3);
+      node.textContent = fmt(Math.round(from + (to - from) * e));
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
   /* ---------------- Modal (shared offer + multi-step form) ---------------- */
   var overlay;
   function monthEnd() { var n = new Date(); return new Date(n.getFullYear(), n.getMonth() + 1, 0, 23, 59, 59); }
@@ -41,7 +102,12 @@
       '<p class="fblm-sub">A no-obligation website + local-SEO audit for your business — what\'s working, what\'s leaking leads, and the 3 fastest wins. ($500 value.)</p>' +
       '<div class="fblm-count" data-count></div>' +
       '<div class="fblm-bjstage fblm-hidden fblm-bj">' +
-        '<div class="fblm-bj-bank">Chips: <b data-bank>$100</b> &nbsp;·&nbsp; Credit won: <b data-credit style="color:#01f6f2">$100</b></div>' +
+        '<button type="button" class="fblm-mute" data-mute aria-label="Toggle sound">🔊</button>' +
+        '<div class="fblm-bj-burst fblm-hidden" data-burst></div>' +
+        '<div class="fblm-bj-bank">' +
+          '<span class="fblm-stat">Chips <span class="fblm-chip" data-bankchip><b data-bank>100</b></span></span>' +
+          '<span class="fblm-stat">Credit won <span class="fblm-chip fblm-chip-teal" data-creditchip><b data-credit>100</b></span></span>' +
+        '</div>' +
         '<div class="fblm-row" data-bjdealer></div><div class="fblm-rowlabel" data-dtotal>Dealer</div>' +
         '<div class="fblm-bj-hands" data-bjplayer></div>' +
         '<div class="fblm-bj-msg" data-bjmsg></div>' +
@@ -51,7 +117,7 @@
         '</div>' +
         '<div class="fblm-bj-bet" data-betrow>' +
           '<button type="button" data-betdown aria-label="Lower bet">&minus;</button>' +
-          '<span>Bet <b data-bet>$25</b></span>' +
+          '<span>Bet <span class="fblm-chip" data-betchip><b data-bet>25</b></span></span>' +
           '<button type="button" data-betup aria-label="Raise bet">+</button>' +
           '<button type="button" data-betmax>Max</button>' +
           '<button type="button" class="fblm-cta" data-deal-bj>Deal</button>' +
@@ -98,9 +164,18 @@
           dRow = overlay.querySelector("[data-bjdealer]"), dTot = overlay.querySelector("[data-dtotal]"),
           pArea = overlay.querySelector("[data-bjplayer]"),
           bankEl = overlay.querySelector("[data-bank]"), creditEl = overlay.querySelector("[data-credit]"), betEl = overlay.querySelector("[data-bet]"),
+          bankChip = overlay.querySelector("[data-bankchip]"), creditChip = overlay.querySelector("[data-creditchip]"),
           bjMsg = overlay.querySelector("[data-bjmsg]"), betRow = overlay.querySelector("[data-betrow]"),
           actions = overlay.querySelector("[data-actions]"), cashBtn = overlay.querySelector("[data-cashout]"),
+          burstEl = overlay.querySelector("[data-burst]"), muteBtn = overlay.querySelector("[data-mute]"),
           dealBtn = overlay.querySelector("[data-deal-bj]");
+      muteBtn.textContent = MUTE ? "🔇" : "🔊";
+      muteBtn.addEventListener("click", function () { MUTE = !MUTE; localStorage.setItem("fblm_mute", MUTE ? "1" : "0"); muteBtn.textContent = MUTE ? "🔇" : "🔊"; if (!MUTE) sfx.chip(); });
+      function popBurst(txt, level) {
+        burstEl.textContent = txt; burstEl.className = "fblm-bj-burst fblm-burst-" + (level || "win");
+        burstEl.classList.remove("fblm-hidden"); void burstEl.offsetWidth; burstEl.classList.add("fblm-go");
+        setTimeout(function () { burstEl.classList.add("fblm-hidden"); burstEl.classList.remove("fblm-go"); }, 1900);
+      }
       h2.innerHTML = 'Blackjack — <span class="a">win real credit</span> 🃏';
       sub.textContent = "You've got $100 in chips ($10 a hand). Every chip you keep becomes 1st-month account credit — up to $2,500. The deck's stacked in your favor!";
       bjStage.classList.remove("fblm-hidden"); stepsBar.classList.add("fblm-hidden"); form.classList.add("fblm-hidden");
@@ -125,7 +200,7 @@
       }
       // Favorable player card: never busts, tends to improve the hand.
       function playerCard(cards) { var t = total(cards); if (t <= 11) return pull(function () { return true; }); return pull(function (r) { return val(r) <= 21 - t; }); }
-      function stagger() { Array.prototype.slice.call(overlay.querySelectorAll(".fblm-cardwrap:not(.fblm-in)")).forEach(function (w, i) { w.classList.add("fblm-in"); setTimeout(function () { w.classList.add("in"); }, 50 * i); }); }
+      function stagger() { Array.prototype.slice.call(overlay.querySelectorAll(".fblm-cardwrap:not(.fblm-in)")).forEach(function (w, i) { w.classList.add("fblm-in"); setTimeout(function () { w.classList.add("in"); sfx.deal(); }, 110 * i); }); }
       function renderBank() { bankEl.textContent = "$" + bank; creditEl.textContent = "$" + Math.min(bank, CAP); betEl.textContent = "$" + bet; }
       function renderDealer(reveal) {
         dRow.innerHTML = ""; dealer.forEach(function (c, i) { dRow.appendChild(cardEl(c, !reveal && i === 1)); });
@@ -162,6 +237,7 @@
         rigStart(hands[0].cards);
         dealer.push(pull(function (r) { return r >= 4 && r <= 6; })); dealer.push(pull(function () { return true; }));
         bjMsg.textContent = ""; betRow.classList.add("fblm-hidden"); cashBtn.classList.add("fblm-hidden");
+        bjStage.classList.remove("fblm-win", "fblm-lose"); sfx.chip();
         renderDealer(false); renderPlayer(); track("bj_deal", { bet: bet });
         if (isBJ(hands[0].cards)) { hands[0].done = true; dealerTurn(); } else setActions();
       }
@@ -179,26 +255,40 @@
         renderDealer(true); resolve();
       }
       function resolve() {
-        var dt = total(dealer), dBust = dt > 21, dBJ = isBJ(dealer), net = 0, parts = [];
+        var dt = total(dealer), dBust = dt > 21, dBJ = isBJ(dealer), net = 0, parts = [], wasBJ = false;
         hands.forEach(function (h, i) {
           var pt = total(h.cards), lbl = hands.length > 1 ? "Hand " + (i + 1) + ": " : "", r;
           if (pt > 21) { net -= h.bet; r = "bust −$" + h.bet; }
-          else if (isBJ(h.cards) && hands.length === 1 && !dBJ) { var w = Math.round(h.bet * 1.5); net += w; r = "Blackjack +$" + w; }
+          else if (isBJ(h.cards) && hands.length === 1 && !dBJ) { var w = Math.round(h.bet * 1.5); net += w; r = "Blackjack +$" + w; wasBJ = true; }
           else if (dBust) { net += h.bet; r = "dealer busts +$" + h.bet; }
           else if (pt > dt) { net += h.bet; r = "win +$" + h.bet; }
           else if (pt === dt) { r = "push"; }
           else { net -= h.bet; r = "lose −$" + h.bet; }
           parts.push(lbl + r);
         });
-        bank = Math.min(CAP, Math.max(0, bank + net)); renderBank(); phase = "bet";
-        var capped = bank >= CAP;
+        var oldCredit = Math.min(bank, CAP);
+        bank = Math.min(CAP, Math.max(0, bank + net)); betEl.textContent = "$" + bet;
+        bankEl.textContent = "$" + bank; phase = "bet";
+        var newCredit = Math.min(bank, CAP), capped = bank >= CAP;
+        if (net > 0) {
+          countUp(creditEl, oldCredit, newCredit, function (v) { return "$" + v; });
+          creditChip.classList.remove("fblm-pulse"); void creditChip.offsetWidth; creditChip.classList.add("fblm-pulse");
+          bankChip.classList.remove("fblm-pulse"); void bankChip.offsetWidth; bankChip.classList.add("fblm-pulse");
+          bjStage.classList.add("fblm-win");
+          if (capped) { sfx.jackpot(); celebrate("jackpot"); popBurst("🏆 MAX $" + CAP + "! 🏆", "jackpot"); }
+          else if (wasBJ) { sfx.blackjack(); celebrate("big"); popBurst("BLACKJACK! +$" + net, "big"); }
+          else { sfx.win(); celebrate(net >= 100 ? "big" : "win"); popBurst("WIN +$" + net + " 🎉", "win"); }
+        } else {
+          creditEl.textContent = "$" + newCredit;
+          if (net < 0) { sfx.lose(); bjStage.classList.add("fblm-lose"); }
+        }
         bjMsg.innerHTML = parts.join(" · ") + (net > 0 ? " 🎉" : "") + (capped ? '<br><b>You maxed the $' + CAP + ' credit cap! 🏆</b>' : "");
-        if (bet > bank) bet = Math.max(STEP, bank);
+        if (bet > bank) bet = Math.max(STEP, bank); betEl.textContent = "$" + bet;
         if (!capped && bank >= STEP) { betRow.classList.remove("fblm-hidden"); dealBtn.textContent = "Deal next hand"; } else betRow.classList.add("fblm-hidden");
         cashBtn.classList.remove("fblm-hidden"); cashBtn.textContent = "💰 Cash out my $" + Math.min(bank, CAP) + " credit →";
         track("bj_round", { net: net, bank: bank });
       }
-      function setBet(d) { bet = Math.max(STEP, Math.min(bank, d === "max" ? bank : bet + d)); renderBank(); }
+      function setBet(d) { bet = Math.max(STEP, Math.min(bank, d === "max" ? bank : bet + d)); renderBank(); sfx.bet(); var bc = overlay.querySelector("[data-betchip]"); bc.classList.remove("fblm-pulse"); void bc.offsetWidth; bc.classList.add("fblm-pulse"); }
       overlay.querySelector("[data-betup]").addEventListener("click", function () { setBet(STEP); });
       overlay.querySelector("[data-betdown]").addEventListener("click", function () { setBet(-STEP); });
       overlay.querySelector("[data-betmax]").addEventListener("click", function () { setBet("max"); });
@@ -214,6 +304,7 @@
       });
       cashBtn.addEventListener("click", function () {
         var credit = Math.min(bank, CAP); track("bj_cashout", { credit: credit });
+        sfx.jackpot(); celebrate("jackpot");
         form._goal.value = "Blackjack credit: $" + credit + " first-month account credit";
         bjStage.classList.add("fblm-hidden"); stepsBar.classList.remove("fblm-hidden"); form.classList.remove("fblm-hidden");
         h2.innerHTML = 'Claim your <span class="a">$' + credit + ' account credit</span> 🎉';
