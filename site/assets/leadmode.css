@@ -163,7 +163,16 @@
   border-radius:.6rem;padding:.55rem .95rem;font-size:.9rem;font-family:inherit;transition:.15s;}
 .fblm-bj-actions button:hover{border-color:#ffd700;color:#ffe88a;}
 .fblm-bj-actions [data-double]{border-color:rgba(255,215,0,.5);}
-.fblm-bj-bet{display:flex;flex-direction:column;align-items:center;gap:.75rem;justify-content:center;position:relative;z-index:2;}
+.fblm-bj-bet{display:flex;flex-direction:column;align-items:center;gap:.7rem;justify-content:center;position:relative;z-index:2;}
+/* Preset quick-bet chips */
+.fblm-presets{display:flex;gap:.5rem;justify-content:center;}
+.fblm-preset{cursor:pointer;font-family:inherit;font-weight:800;font-size:.82rem;color:#5a3d00;
+  padding:.4rem .9rem;border-radius:2rem;border:2px dashed #fff7d6;line-height:1;
+  background:radial-gradient(circle at 50% 30%,#fff0b8,#ffcb37 60%,#dd9a00);
+  box-shadow:0 2px 6px rgba(0,0,0,.4),inset 0 0 0 2px rgba(255,255,255,.3);transition:transform .1s,filter .15s;}
+.fblm-preset:hover{filter:brightness(1.07);}
+.fblm-preset:active{transform:scale(.94);}
+.fblm-preset-max{color:#04201f;background:radial-gradient(circle at 50% 30%,#c6fffb,#23fff4 60%,#01b8b3);border-color:#e0fffd;}
 /* Bet slider — drag right to bet more */
 .fblm-betslide{display:flex;align-items:center;gap:.6rem;width:100%;max-width:300px;}
 .fblm-betslide-end{font-size:.72rem;font-weight:700;color:hsla(0,0%,100%,.75);white-space:nowrap;}

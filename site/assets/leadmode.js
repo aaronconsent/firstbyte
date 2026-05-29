@@ -114,6 +114,11 @@
           '<button type="button" data-double>Double</button><button type="button" data-split>Split</button>' +
         '</div>' +
         '<div class="fblm-bj-bet" data-betrow>' +
+          '<div class="fblm-presets" data-presets>' +
+            '<button type="button" class="fblm-preset" data-preset="25">$25</button>' +
+            '<button type="button" class="fblm-preset" data-preset="100">$100</button>' +
+            '<button type="button" class="fblm-preset fblm-preset-max" data-preset="max">Max</button>' +
+          '</div>' +
           '<div class="fblm-betslide">' +
             '<span class="fblm-betslide-end">$25</span>' +
             '<input type="range" class="fblm-betslider" data-betslider min="25" max="100" step="25" value="25" aria-label="Bet amount — drag right to bet more">' +
@@ -308,10 +313,14 @@
         track("bj_round", { net: net, bank: bank });
       }
       var betTick = 0;
+      function setBet(v) { bet = Math.max(STEP, Math.min(bank, v)); betEl.textContent = "$" + bet; slider.value = bet; paintSlider(); sfx.chip(); }
       slider.addEventListener("input", function () {
         bet = Math.max(STEP, Math.min(bank, parseInt(slider.value, 10) || STEP));
         betEl.textContent = "$" + bet; paintSlider();
         var now = Date.now(); if (now - betTick > 55) { betTick = now; sfx.bet(); }
+      });
+      overlay.querySelectorAll("[data-preset]").forEach(function (b) {
+        b.addEventListener("click", function () { setBet(b.dataset.preset === "max" ? bank : parseInt(b.dataset.preset, 10)); });
       });
       dealBtn.addEventListener("click", startRound);
       overlay.querySelector("[data-hit]").addEventListener("click", function () { var h = hands[active]; h.cards.push(playerCard(h.cards)); renderPlayer(); if (total(h.cards) >= 21) { h.done = true; advance(); } else setActions(); });
