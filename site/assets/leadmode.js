@@ -368,35 +368,8 @@
     helloBar(); fab(); mobileBar(); exitIntent(); scrollOffer(); socialProof(); blackjackTab();
   }
 
-  /* ---------------- Demo control panel ---------------- */
-  function panel() {
-    var p = el('<div class="fblm-panel"><button class="fblm-collapse" title="Minimize">_</button>' +
-      '<h4>⚡ Lead Engine — Demo</h4><p class="fblm-p-sub">Owner preview. Off by default for real visitors.</p>' +
-      '<div class="fblm-body">' +
-      '<div class="fblm-master"><span>Lead Capture</span><label class="fblm-switch"><input type="checkbox" id="fblm-master"><span class="fblm-slider"></span></label></div>' +
-      '<div class="fblm-feats"></div>' +
-      '<button class="fblm-cta" id="fblm-preview" style="margin-top:.7rem;padding:.6rem;font-size:.9rem">Preview the popup ▶</button>' +
-      '<p class="fblm-note">Real submissions are emailed to the owner via Resend. Social-proof toasts use sample data in this demo.</p>' +
-      '</div></div>');
-    var feats = [["hello", "Hello bar (top offer)"], ["fab", "Floating CTA button"], ["mobile", "Sticky mobile call bar"], ["exit", "Exit-intent popup"], ["scroll", "Scroll-triggered offer"], ["blackjack", "Blackjack challenge (in popup)"], ["social", "Social-proof toasts"]];
-    var fc = p.querySelector(".fblm-feats");
-    feats.forEach(function (f) {
-      var row = el('<label class="fblm-feat"><input type="checkbox" data-f="' + f[0] + '"' + (FEAT[f[0]] ? " checked" : "") + '> ' + f[1] + '</label>');
-      fc.appendChild(row);
-    });
-    document.body.appendChild(p);
-    var master = p.querySelector("#fblm-master"); master.checked = LEADS;
-    master.addEventListener("change", function () { localStorage.setItem("fblm_leads", master.checked ? "on" : "off"); location.reload(); });
-    fc.querySelectorAll("input").forEach(function (cb) {
-      cb.addEventListener("change", function () { FEAT[cb.dataset.f] = cb.checked ? 1 : 0; localStorage.setItem("fblm_feat", JSON.stringify(FEAT)); if (LEADS) location.reload(); });
-    });
-    p.querySelector("#fblm-preview").addEventListener("click", function () { openModal("preview"); });
-    p.querySelector(".fblm-collapse").addEventListener("click", function () { p.classList.toggle("fblm-min"); });
-  }
-
   function init() {
     if (LEADS) activate();
-    if (DEMO) panel();
   }
   if (document.readyState !== "loading") init(); else document.addEventListener("DOMContentLoaded", init);
 })();
