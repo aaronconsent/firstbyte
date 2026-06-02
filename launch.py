@@ -45,6 +45,117 @@ SPEND_IDEAS = [
     ("👥", "Hiring help", "Free up your time so you can run the business, not the website."),
 ]
 
+# Pricing tiers — Launch is featured. Higher tiers expose what AI-assisted dev
+# unlocks (ads management, AI chatbots, custom integrations, e-commerce, etc.).
+TIERS = [
+    {
+        "name": "Launch",
+        "tag": "Most Popular",
+        "subtitle": "Custom site + the marketing engine to grow it.",
+        "price": 250,
+        "savings": "Save $5,000 up-front",
+        "featured": True,
+        "features": [
+            "Custom-designed website — no up-front cost",
+            "Premium Cloudflare hosting + SSL + daily backups",
+            "Monthly local SEO (Google Business Profile, citations, on-page)",
+            "Up to 2 content updates per month",
+            "AI-assisted copywriting baked into the build",
+            "Monthly performance report (plain-English)",
+            "Direct access to your local team",
+            "Launch in 2–3 weeks",
+        ],
+    },
+    {
+        "name": "Grow",
+        "tag": "",
+        "subtitle": "Launch + active demand generation + an AI chatbot.",
+        "price": 500,
+        "savings": "Still $0 up-front",
+        "featured": False,
+        "features": [
+            "Everything in Launch",
+            "Google Ads OR Meta Ads management",
+            "4 content updates per month + 1 blog post",
+            "Custom AI chatbot trained on your business",
+            "Connect your CRM, calendar, or booking tool",
+            "Email marketing automation",
+            "Bi-weekly strategy check-ins",
+        ],
+    },
+    {
+        "name": "Scale",
+        "tag": "Aggressive growth",
+        "subtitle": "Full marketing team + custom AI built for you.",
+        "price": 1000,
+        "savings": "Still $0 up-front",
+        "featured": False,
+        "features": [
+            "Everything in Grow",
+            "Multi-location / multi-language SEO",
+            "E-commerce / online store setup",
+            "Custom AI tools and dashboards built for your business",
+            "Advanced server-side conversion tracking",
+            "8 content updates per month + 2 blog posts",
+            "Weekly strategy calls",
+            "Priority development queue",
+        ],
+    },
+]
+
+# AI / Claude-Code-powered features we can ship in days, not months.
+AI_FEATURES = [
+    ("🤖", "Custom AI chatbot",
+     "Trained on your hours, services, pricing, and FAQs — answers customer questions 24/7 and routes hot leads straight to you."),
+    ("✍️", "AI-powered SEO content",
+     "Fresh local pages and blog posts built around the real keywords your customers search — generated and edited by humans."),
+    ("📅", "Smart booking & scheduling",
+     "Customers self-book directly from your site; AI handles confirmations, reminders, and reschedules."),
+    ("🎯", "Lead scoring & routing",
+     "Every form scored by intent. Hot leads text or email you instantly so a job never slips through."),
+    ("🔌", "Custom integrations",
+     "QuickBooks, ServiceTitan, Jobber, HubSpot, Stripe, Google Calendar — whatever you use. Built in days, not months."),
+    ("📊", "Custom dashboards",
+     "A real-time dashboard built for *your* business — leads, calls, conversion rates, ad ROI, all in one place."),
+    ("🔁", "Auto-drafted review replies",
+     "AI drafts personalized review responses for you to approve in one tap — keeps your Google ranking strong."),
+    ("🖼️", "On-brand AI imagery",
+     "Need a hero, social post, or hero image? We generate on-brand AI imagery so you never pay a stock photographer."),
+]
+
+# Speed advantage — what AI-assisted dev unlocks.
+SPEED_STATS = [
+    ("🚀", "2–3 weeks", "From signup to live site"),
+    ("⚡", "Days, not months", "New features and changes"),
+    ("🧠", "Claude Code + AI", "Behind every build"),
+    ("🔧", "Custom included", "Integrations & widgets"),
+]
+
+# 4-way comparison: standard hosting / DIY builders / traditional agency / us.
+COMPARE = {
+    "headers": [
+        "",
+        "Standard hosting<br><span class='sm'>GoDaddy, Bluehost</span>",
+        "DIY builder<br><span class='sm'>Wix, Squarespace</span>",
+        "Traditional agency",
+        "First Byte Launch",
+    ],
+    "rows": [
+        ("Up-front website cost", "Free template", "Free template", "$5,000+", "$0"),
+        ("Monthly cost", "$10–40", "$25–60", "$0 hosting only", "$250 all-in"),
+        ("Custom-designed site", "No — template", "No — template", "Yes (slow)", "Yes (fast)"),
+        ("Typical launch time", "Hours (DIY)", "Hours (DIY)", "8–12 weeks", "2–3 weeks"),
+        ("Local SEO", "DIY", "DIY", "Extra $800+/mo", "Included"),
+        ("Hosting + SSL + backups", "Basic", "Basic", "Sometimes", "Premium (Cloudflare)"),
+        ("Monthly content updates", "DIY", "DIY", "Billed hourly", "Included (up to 2/mo)"),
+        ("AI features (chatbot, etc.)", "Plugins you DIY", "Limited apps", "Quoted per project", "Built-in"),
+        ("Custom integrations", "Buy a plugin", "App marketplace", "$$$ per project", "Included"),
+        ("New features", "Buy a plugin", "Wait for an app", "Quote + months", "Days"),
+        ("Real reporting", "Basic analytics", "Basic analytics", "Rare", "Monthly"),
+        ("Who answers when you call", "Overseas chat", "Help center", "Sales then queue", "Your local team"),
+    ],
+}
+
 FAQS = [
     ("Is the website really free up-front?",
      "Yes. We design, build, and launch your website with zero upfront cost. You commit to the $250/month plan for 12 months. After that, you can keep going month-to-month or take the site with you — your choice."),
@@ -55,7 +166,11 @@ FAQS = [
     ("Do I own the website?",
      "Yes — after 12 months you own the design and content outright and can take the site to any host. We just ask for the first 12 months to recoup the build cost."),
     ("How long does it take to launch?",
-     "Most launches go live in 2–3 weeks from signup. Faster if you have logos, photos, and copy ready; a bit longer if we need to gather everything from scratch."),
+     "Most launches go live in 2–3 weeks from signup. Faster if you have logos, photos, and copy ready; a bit longer if we need to gather everything from scratch. We build with Claude Code and modern AI tooling, which compresses the timeline traditional agencies need."),
+    ("What does 'AI-powered' actually mean?",
+     "Two things. First, we build faster using AI-assisted development (Claude Code), so custom features that would cost $10,000+ at a traditional agency can ship in days. Second, on Grow and Scale plans we install real AI tools on your site — a chatbot trained on your business, lead scoring, auto-drafted review responses, AI-generated content, and custom integrations with whatever software you already use."),
+    ("Can I move up or down between plans?",
+     "Yes. After the initial 12-month launch term, you can switch between Launch, Grow, and Scale any month. Most clients start on Launch and move to Grow once their site is bringing in leads."),
     ("What if I already have a website?",
      "Even better — we can redesign and migrate it, often improving speed and SEO in the process. The $250/month plan still applies."),
     ("Can I cancel?",
@@ -132,15 +247,67 @@ STYLE = """<style>
 .lp-stack-total b{color:#fff;font-weight:800;}
 .lp-stack-total .you{color:#01f6f2;font-weight:800;}
 
-/* Compare table */
-.lp-compare{max-width:780px;margin:0 auto;background:#141215;border:1px solid rgba(255,255,255,.08);border-radius:1.1rem;overflow:hidden;}
-.lp-comparerow{display:grid;grid-template-columns:1.4fr 1fr 1fr;border-top:1px solid rgba(255,255,255,.07);}
+/* Pricing tiers (hosting-style grid) */
+.lp-tiers{display:grid;gap:1.3rem;grid-template-columns:repeat(auto-fit,minmax(17.5rem,1fr));align-items:stretch;max-width:1100px;margin:0 auto;}
+.lp-tier{position:relative;display:flex;flex-direction:column;background:#171518;border:1px solid rgba(255,255,255,.10);
+  border-radius:1.1rem;padding:2rem 1.7rem 1.7rem;transition:transform .2s,border-color .2s,box-shadow .2s;}
+.lp-tier:hover{transform:translateY(-4px);border-color:rgba(35,255,244,.35);box-shadow:0 18px 50px rgba(0,0,0,.45);}
+.lp-tier.featured{border:2px solid #01f6f2;background:linear-gradient(180deg,#1c1a21,#15131a);box-shadow:0 28px 70px rgba(1,246,242,.22);}
+@media(min-width:920px){.lp-tier.featured{transform:scale(1.05);}.lp-tier.featured:hover{transform:scale(1.05) translateY(-4px);}}
+.lp-tier-tag{position:absolute;top:-.85rem;left:50%;transform:translateX(-50%);background:linear-gradient(90deg,#01f6f2,#00d4ff);
+  color:#03282a;font-size:.66rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase;
+  padding:.4rem .9rem;border-radius:2rem;box-shadow:0 6px 20px rgba(1,246,242,.5);white-space:nowrap;}
+.lp-tier h3{font-family:"Funnel Display",sans-serif;color:#fff;font-size:1.6rem;margin:0 0 .35rem;}
+.lp-tier .sub{color:hsla(0,0%,100%,.65);font-size:.92rem;line-height:1.45;margin:0 0 1.3rem;min-height:2.7rem;}
+.lp-tier-price{display:flex;align-items:baseline;gap:.35rem;margin-bottom:.3rem;}
+.lp-tier-price .amt{font-family:"Funnel Display",sans-serif;color:#fff;font-size:2.7rem;line-height:1;}
+.lp-tier-price .per{color:hsla(0,0%,100%,.6);font-size:.92rem;}
+.lp-tier-save{color:#01f6f2;font-size:.84rem;font-weight:700;margin-bottom:1.4rem;display:block;}
+.lp-tier ul{list-style:none;padding:0;margin:0 0 1.5rem;display:grid;gap:.6rem;}
+.lp-tier li{position:relative;padding-left:1.7rem;color:hsla(0,0%,100%,.85);font-size:.92rem;line-height:1.5;}
+.lp-tier li::before{content:"";position:absolute;left:0;top:.1rem;width:1.15rem;height:1.15rem;border-radius:50%;background:rgba(1,246,242,.16);}
+.lp-tier li::after{content:"";position:absolute;left:.42rem;top:.3rem;width:.28rem;height:.58rem;border:solid #01f6f2;border-width:0 2px 2px 0;transform:rotate(45deg);}
+.lp-tier-cta{margin-top:auto;display:block;text-align:center;text-decoration:none;font-weight:800;font-size:1rem;
+  padding:.95rem;border-radius:.7rem;background:rgba(255,255,255,.05);color:#fff;border:1.5px solid rgba(255,255,255,.20);transition:.15s;cursor:pointer;}
+.lp-tier-cta:hover{border-color:#01f6f2;color:#01f6f2;}
+.lp-tier.featured .lp-tier-cta{background:linear-gradient(90deg,#01f6f2,#00d4ff);color:#03282a;border:0;box-shadow:0 12px 30px rgba(1,246,242,.35);}
+.lp-tier.featured .lp-tier-cta:hover{filter:brightness(1.06);color:#03282a;}
+.lp-tier-foot{text-align:center;color:hsla(0,0%,100%,.55);font-size:.86rem;margin-top:1.6rem;}
+.lp-tier-foot b{color:#fff;}
+
+/* AI / Claude-Code-powered features grid */
+.lp-aibadge{display:inline-flex;align-items:center;gap:.4rem;font-size:.66rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase;
+  color:#ffd24a;background:rgba(255,210,74,.10);border:1px solid rgba(255,210,74,.45);border-radius:2rem;padding:.35rem .85rem;margin-bottom:1rem;}
+.lp-ai{display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(18rem,1fr));}
+.lp-aicard{background:linear-gradient(180deg,#1a181d,#141215);border:1px solid rgba(255,255,255,.08);
+  border-radius:1rem;padding:1.6rem 1.4rem;position:relative;overflow:hidden;transition:.2s;}
+.lp-aicard:hover{border-color:rgba(35,255,244,.4);box-shadow:0 14px 36px rgba(1,246,242,.06);}
+.lp-aicard::before{content:"";position:absolute;top:0;right:0;width:9rem;height:9rem;
+  background:radial-gradient(closest-side,rgba(1,246,242,.13),transparent);transform:translate(2rem,-3rem);pointer-events:none;}
+.lp-aicard>*{position:relative;}
+.lp-aicard .ic{font-size:1.85rem;margin-bottom:.7rem;display:block;}
+.lp-aicard h3{font-family:"Funnel Display",sans-serif;color:#fff;font-size:1.15rem;margin:0 0 .5rem;}
+.lp-aicard p{color:hsla(0,0%,100%,.72);font-size:.92rem;line-height:1.55;margin:0;}
+
+/* Speed advantage stat row */
+.lp-speed{display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(12rem,1fr));margin-top:.5rem;max-width:1000px;margin-left:auto;margin-right:auto;}
+.lp-stat{text-align:center;padding:1.5rem 1.1rem 1.4rem;background:#171518;border:1px solid rgba(255,255,255,.08);border-radius:1rem;transition:.2s;}
+.lp-stat:hover{border-color:rgba(35,255,244,.35);}
+.lp-stat .ic{font-size:1.9rem;margin-bottom:.55rem;}
+.lp-stat .num{font-family:"Funnel Display",sans-serif;color:#01f6f2;font-size:1.55rem;line-height:1.1;margin-bottom:.3rem;}
+.lp-stat .lbl{color:hsla(0,0%,100%,.65);font-size:.86rem;line-height:1.4;}
+
+/* Compare table — 5 columns now (label + 4 contenders) */
+.lp-compare{max-width:1080px;margin:0 auto;background:#141215;border:1px solid rgba(255,255,255,.08);border-radius:1.1rem;overflow:hidden;}
+.lp-comparewrap{overflow-x:auto;}
+.lp-comparerow{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr 1fr;border-top:1px solid rgba(255,255,255,.07);min-width:780px;}
 .lp-comparerow:first-child{border-top:0;background:rgba(255,255,255,.03);}
-.lp-comparerow>div{padding:.9rem 1rem;color:hsla(0,0%,100%,.85);font-size:.92rem;line-height:1.4;}
+.lp-comparerow>div{padding:.85rem .95rem;color:hsla(0,0%,100%,.85);font-size:.9rem;line-height:1.4;}
 .lp-comparerow .label{color:hsla(0,0%,100%,.65);font-weight:600;}
-.lp-comparerow .vs{color:#ff8e8e;}
-.lp-comparerow .us{color:#01f6f2;font-weight:700;border-left:1px solid rgba(35,255,244,.25);}
-.lp-comparerow.head>div{font-family:"Funnel Display",sans-serif;font-weight:700;color:#fff;font-size:.95rem;}
+.lp-comparerow .vs{color:#ff9e9e;}
+.lp-comparerow .us{color:#01f6f2;font-weight:700;border-left:1px solid rgba(35,255,244,.30);background:rgba(1,246,242,.04);}
+.lp-comparerow.head>div{font-family:"Funnel Display",sans-serif;font-weight:700;color:#fff;font-size:.9rem;line-height:1.25;}
+.lp-comparerow.head .sm{display:block;color:hsla(0,0%,100%,.45);font-weight:500;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;margin-top:.2rem;}
 
 /* Where to spend */
 .lp-ideas{display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(15.5rem,1fr));}
@@ -248,26 +415,89 @@ def section_value_stack():
 
 
 def section_compare():
-    rows = [
-        ("Up-front website cost", "$5,000+", "$0"),
-        ("Monthly cost", "$0–250 (just hosting)", "$250 all-in"),
-        ("Local SEO included", "No — extra $800+/mo", "Yes"),
-        ("Hosting + SSL + backups", "Sometimes", "Yes"),
-        ("Monthly content updates", "Billed hourly", "Included (up to 2/mo)"),
-        ("Real reporting", "Rare", "Monthly"),
-        ("Who answers when you call?", "Sales rep, then a queue", "Your local team"),
-    ]
-    headcells = '<div class="lp-comparerow head"><div></div><div>Typical agency</div><div>First Byte Launch</div></div>'
-    body = "".join(
-        f'<div class="lp-comparerow"><div class="label">{tu.esc(l)}</div>'
-        f'<div class="vs">{tu.esc(a)}</div><div class="us">{tu.esc(b)}</div></div>'
-        for (l, a, b) in rows
+    head = '<div class="lp-comparerow head">' + "".join(
+        f'<div>{h}</div>' for h in COMPARE["headers"]
+    ) + "</div>"
+    body = ""
+    for row in COMPARE["rows"]:
+        label = row[0]
+        cells = row[1:]
+        cell_html = "".join(
+            f'<div class="us">{tu.esc(c)}</div>' if i == len(cells) - 1
+            else f'<div class="vs">{tu.esc(c)}</div>'
+            for i, c in enumerate(cells)
+        )
+        body += f'<div class="lp-comparerow"><div class="label">{tu.esc(label)}</div>{cell_html}</div>'
+    return (
+        '<section class="lp-section"><div class="fb-wrap">'
+        '<div class="lp-head"><h2>How we compare — <span class="accent">across the board</span></h2>'
+        "<p>Standard hosting is cheap but you build it. DIY builders lock you in. Traditional agencies bill $5,000 up front. We do all of it — for $250/month.</p></div>"
+        f'<div class="lp-compare"><div class="lp-comparewrap">{head}{body}</div></div>'
+        '</div></section>'
+    )
+
+
+def section_tiers():
+    cards = ""
+    for t in TIERS:
+        feats = "".join(f"<li>{tu.esc(f)}</li>" for f in t["features"])
+        tag = f'<span class="lp-tier-tag">{tu.esc(t["tag"])}</span>' if t["tag"] else ""
+        feat = " featured" if t["featured"] else ""
+        cards += (
+            f'<div class="lp-tier{feat}">{tag}'
+            f'<h3>{tu.esc(t["name"])}</h3>'
+            f'<p class="sub">{tu.esc(t["subtitle"])}</p>'
+            f'<div class="lp-tier-price"><span class="amt">${t["price"]}</span><span class="per">/mo</span></div>'
+            f'<span class="lp-tier-save">{tu.esc(t["savings"])}</span>'
+            f"<ul>{feats}</ul>"
+            f'<a class="lp-tier-cta" href="#claim">Start sign-up →</a>'
+            "</div>"
+        )
+    return (
+        '<section class="lp-section" id="pricing"><div class="fb-wrap">'
+        '<div class="lp-head">'
+        '<h2>One flat monthly price — <span class="accent">pick your level of growth</span></h2>'
+        '<p>Every plan includes a custom website, premium hosting, monthly SEO, and a real local team. No up-front website cost on any plan.</p>'
+        '</div>'
+        f'<div class="lp-tiers">{cards}</div>'
+        '<p class="lp-tier-foot">All plans are <b>$0 up-front</b> — you only pay once your site is approved and live. '
+        'Move up or down anytime after the initial 12-month launch term.</p>'
+        '</div></section>'
+    )
+
+
+def section_ai():
+    cards = "".join(
+        f'<div class="lp-aicard"><span class="ic">{ico}</span>'
+        f'<h3>{tu.esc(name)}</h3><p>{tu.esc(desc)}</p></div>'
+        for (ico, name, desc) in AI_FEATURES
     )
     return (
         '<section class="lp-section"><div class="fb-wrap">'
-        '<div class="lp-head"><h2>How this compares</h2>'
-        '<p>Same launch. Same quality. Without the $5,000 up-front bite.</p></div>'
-        f'<div class="lp-compare">{headcells}{body}</div>'
+        '<div class="lp-head">'
+        '<span class="lp-aibadge">🤖 AI-Powered · Built with Claude Code</span>'
+        '<h2>Custom features other agencies <span class="accent">don\'t even quote</span></h2>'
+        "<p>Because we build with Claude Code and modern AI tooling, we can ship custom features in days that traditional agencies take months on — and charge $10,000+ for. Many of these are included in Grow and Scale.</p>"
+        '</div>'
+        f'<div class="lp-ai">{cards}</div>'
+        '</div></section>'
+    )
+
+
+def section_speed():
+    stats = "".join(
+        f'<div class="lp-stat"><div class="ic">{ico}</div>'
+        f'<div class="num">{tu.esc(num)}</div>'
+        f'<div class="lbl">{tu.esc(lbl)}</div></div>'
+        for (ico, num, lbl) in SPEED_STATS
+    )
+    return (
+        '<section class="lp-section"><div class="fb-wrap">'
+        '<div class="lp-head">'
+        '<h2>Built in <span class="accent">days, not months</span></h2>'
+        '<p>Traditional agencies spend 2–3 months on a custom site. We use AI-assisted development to compress that to weeks — and ship new features whenever you ask.</p>'
+        '</div>'
+        f'<div class="lp-speed">{stats}</div>'
         '</div></section>'
     )
 
@@ -313,7 +543,7 @@ def section_faqs():
 def section_hero():
     return (
         '<section class="lp-hero"><div class="fb-wrap">'
-        '<span class="lp-eyebrow">First Byte Launch · The Woodlands, TX</span>'
+        '<span class="lp-eyebrow">🤖 AI-Powered · First Byte Launch · The Woodlands, TX</span>'
         '<h1>A custom website <span class="gold">for $0 up-front</span><br>'
         '+ monthly marketing — <span class="accent">$250/month flat.</span></h1>'
         '<p class="lp-lead">Save the <b style="color:#fff">$5,000</b> you\'d normally pay an agency to build your site. We design it, host it, '
@@ -321,7 +551,7 @@ def section_hero():
         '<div class="lp-pricepill"><span class="amt">$250</span><span class="per">per month · all-in</span></div>'
         '<div class="lp-ctas">'
         '<a class="lp-ctaprimary" href="#claim">🚀 Claim my $5,000 savings →</a>'
-        '<a class="lp-ctaghost" href="#whats-included">See what\'s included</a>'
+        '<a class="lp-ctaghost" href="#pricing">See pricing</a>'
         '</div>'
         '<p class="lp-microtrust">Limited launches each month · <b>The Woodlands</b> &amp; Greater Houston</p>'
         '</div></section>'
@@ -619,7 +849,10 @@ def build():
     inner = STYLE + '<div class="lp-pad-mobile">' + (
         section_hero()
         + section_savings()
+        + section_tiers()
         + section_value_stack()
+        + section_ai()
+        + section_speed()
         + section_compare()
         + section_spend()
         + section_faqs()
