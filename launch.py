@@ -16,24 +16,30 @@ BASE = tu.BASE
 URL = BASE + "/launch/"
 
 VALUE_STACK = [
-    ("🎨", "Custom-designed website",
-     "Built from scratch for your business — not a template. Mobile-first, fast, conversion-focused.",
-     "$5,000 value"),
-    ("⚡", "Hosting, SSL & daily backups",
-     "Lightning-fast Cloudflare hosting, free SSL, automated backups, 99.9% uptime monitoring.",
-     "$540/yr value"),
-    ("🔍", "Monthly local SEO",
-     "Google Business Profile optimization, citations, on-page SEO, and local ranking work — every month.",
-     "$800/mo value"),
-    ("✍️", "Content updates",
-     "Up to 2 page edits or content updates per month — fresh photos, new offers, holiday hours, you name it.",
-     "$300/mo value"),
-    ("📊", "Monthly performance report",
-     "Plain-English report on rankings, traffic, leads, and what we did to move the needle.",
-     "$200/mo value"),
-    ("📞", "Real humans on call",
-     "Text, call, or email your local team in The Woodlands when you need a change — same-day response.",
-     "Priceless"),
+    ("☁️", "Hosted on Cloudflare",
+     "Enjoy lightning-fast loading worldwide, built-in protection from attacks, and uptime that rarely ever blinks."),
+    ("📦", "Never run out of room",
+     "Your storage grows as your site grows. There are no hard drives filling up and hitting your limit."),
+    ("⚡", "Fast, even when it's busy",
+     "When a crowd shows up, your site speeds up to handle them. No slowdowns, no \"upgrade your plan\" surprise."),
+    ("📈", "Go viral, no penalty",
+     "As many visitors as you can get, with no caps and no overage bills. Other hosts say \"unlimited,\" then throttle you."),
+    ("🌍", "Fast everywhere on earth",
+     "Your site is copied to 300+ cities, so every visitor loads it from the one nearest them. Local feel, worldwide."),
+    ("🔒", "The padlock is always on",
+     "That little lock in the address bar? It's free, automatic, and it never expires. Visitors trust you on day one."),
+    ("↩️", "An undo button for your whole site",
+     "Every change is saved automatically. Something break? Roll back to how it looked yesterday in one click."),
+    ("🛡️", "Built to keep the bad guys out",
+     "Attacks and junk bots get blocked before they ever reach your site — protection that's built in, not an add-on."),
+    ("🚚", "We move you over for free",
+     "Already have a site? We rebuild it cleaner and faster, then hand it back ready to go. You don't lift a finger."),
+    ("🆙", "Ditch WordPress and old CMSs fast",
+     "Tired of slow, clunky WordPress and endless plugin headaches? We move you onto a faster, modern setup — quickly, with none of the old baggage."),
+    ("✉️", "Real email at your own name",
+     "Get you@yourbusiness.com running on a top-tier email service — the same one the pros use, not a cheap add-on."),
+    ("🧱", "A site that won't fall apart",
+     "Built as solid, modern code — not a stack of plugins that break, slow you down, or get hacked."),
 ]
 
 SPEND_IDEAS = [
@@ -390,19 +396,16 @@ STYLE = """<style>
 def section_value_stack():
     items = "".join(
         f'<div class="lp-item"><span class="ic">{ico}</span>'
-        f'<h3>{tu.esc(name)}</h3><p>{tu.esc(desc)}</p>'
-        f'<span class="val">{tu.esc(val)}</span></div>'
-        for (ico, name, desc, val) in VALUE_STACK
+        f'<h3>{tu.esc(name)}</h3><p>{tu.esc(desc)}</p></div>'
+        for (ico, name, desc) in VALUE_STACK
     )
     return (
         '<section class="lp-section" id="whats-included"><div class="fb-wrap">'
         '<div class="lp-head">'
-        '<h2>Everything you need to launch + grow — <span class="accent">for $250/month</span></h2>'
-        '<p>Most agencies charge $5,000 up front and then go silent. We build, host, and actively market your site every month, for one flat price.</p>'
+        '<h2>Hosting and infrastructure — <span class="accent">built to scale with you</span></h2>'
+        '<p>The same foundational tech the biggest sites in the world use, baked into every Launch plan. Most agencies bolt these on as separate paid add-ons; we just include them.</p>'
         '</div>'
         f'<div class="lp-stack">{items}</div>'
-        '<p class="lp-stack-total">Total monthly value: <b>$1,800+</b> &nbsp;·&nbsp; '
-        'You pay: <span class="you">$250/month</span></p>'
         '</div></section>'
     )
 
