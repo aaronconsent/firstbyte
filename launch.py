@@ -165,21 +165,46 @@ STYLE = """<style>
 .lp-step h4{font-family:"Funnel Display",sans-serif;color:#fff;font-size:1.1rem;margin:0 0 1.1rem;}
 .lp-field{margin-bottom:1rem;}
 .lp-field label{display:block;color:hsla(0,0%,100%,.82);font-size:.85rem;margin-bottom:.4rem;font-weight:600;}
-.lp-field input,.lp-field select,.lp-field textarea{width:100%;box-sizing:border-box;background:#0f0d10;
-  border:1px solid rgba(255,255,255,.14);border-radius:.6rem;padding:.78rem .95rem;color:#fff;font-family:inherit;font-size:.98rem;}
-.lp-field input:focus,.lp-field select:focus,.lp-field textarea:focus{outline:none;border-color:#01f6f2;}
-.lp-field textarea{min-height:90px;resize:vertical;}
+.lp-field input,.lp-field select,.lp-field textarea{width:100%;box-sizing:border-box;background:rgba(255,255,255,.07);
+  border:1.5px solid rgba(255,255,255,.25);border-radius:.6rem;padding:.85rem 1rem;color:#fff;font-family:inherit;font-size:1rem;
+  transition:border-color .15s,background .15s,box-shadow .15s;line-height:1.3;}
+.lp-field input::placeholder,.lp-field textarea::placeholder{color:hsla(0,0%,100%,.55);}
+.lp-field input:hover,.lp-field select:hover,.lp-field textarea:hover{border-color:rgba(35,255,244,.45);background:rgba(255,255,255,.09);}
+.lp-field input:focus,.lp-field select:focus,.lp-field textarea:focus{outline:none;border-color:#01f6f2;background:rgba(1,246,242,.07);box-shadow:0 0 0 3px rgba(1,246,242,.20);}
+.lp-field select{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1 1l5 5 5-5' stroke='%2301f6f2' stroke-width='2' fill='none'/></svg>");background-repeat:no-repeat;background-position:right 1rem center;padding-right:2.5rem;}
+.lp-field select option{background:#171518;color:#fff;}
+.lp-field textarea{min-height:92px;resize:vertical;}
+.lp-field .hint{display:block;color:hsla(0,0%,100%,.55);font-size:.78rem;font-weight:400;margin-top:.4rem;font-style:italic;}
 .lp-row2{display:grid;gap:1rem;grid-template-columns:1fr 1fr;}
 @media(max-width:520px){.lp-row2{grid-template-columns:1fr;}}
 .lp-radios{display:grid;gap:.55rem;}
-.lp-radios label{display:flex;align-items:center;gap:.7rem;cursor:pointer;background:#0f0d10;border:1px solid rgba(255,255,255,.12);
-  border-radius:.6rem;padding:.75rem .9rem;color:#fff;font-size:.95rem;transition:.15s;}
-.lp-radios label:hover{border-color:rgba(35,255,244,.4);}
-.lp-radios input{appearance:none;-webkit-appearance:none;width:18px;height:18px;border-radius:50%;border:2px solid rgba(255,255,255,.4);
-  flex:0 0 auto;margin:0;background:#0f0d10;cursor:pointer;position:relative;}
+.lp-radios label{display:flex;align-items:center;gap:.7rem;cursor:pointer;background:rgba(255,255,255,.05);
+  border:1.5px solid rgba(255,255,255,.20);border-radius:.6rem;padding:.85rem 1rem;color:#fff;font-size:.98rem;transition:.15s;}
+.lp-radios label:hover{border-color:rgba(35,255,244,.5);background:rgba(255,255,255,.08);}
+.lp-radios input{appearance:none;-webkit-appearance:none;width:20px;height:20px;border-radius:50%;border:2px solid rgba(255,255,255,.5);
+  flex:0 0 auto;margin:0;background:rgba(255,255,255,.06);cursor:pointer;position:relative;}
 .lp-radios input:checked{border-color:#01f6f2;}
 .lp-radios input:checked::after{content:"";position:absolute;inset:3px;border-radius:50%;background:#01f6f2;}
-.lp-radios label:has(input:checked){border-color:#01f6f2;background:rgba(1,246,242,.06);}
+.lp-radios label:has(input:checked){border-color:#01f6f2;background:rgba(1,246,242,.10);}
+/* Multi-select chips (pages / features) */
+.lp-chips{display:flex;flex-wrap:wrap;gap:.55rem;}
+.lp-chip{cursor:pointer;display:inline-flex;align-items:center;gap:.5rem;background:rgba(255,255,255,.06);
+  border:1.5px solid rgba(255,255,255,.22);border-radius:2rem;padding:.55rem 1rem;color:#fff;font-size:.9rem;font-family:inherit;
+  transition:.15s;line-height:1;}
+.lp-chip:hover{border-color:rgba(35,255,244,.5);background:rgba(255,255,255,.09);}
+.lp-chip .ck{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;
+  border:1.5px solid hsla(0,0%,100%,.55);background:transparent;font-size:.7rem;line-height:1;color:transparent;flex:0 0 auto;}
+.lp-chip.on{border-color:#01f6f2;background:rgba(1,246,242,.15);color:#01f6f2;font-weight:700;}
+.lp-chip.on .ck{background:#01f6f2;border-color:#01f6f2;color:#03282a;}
+.lp-chip.on .ck::after{content:"✓";font-weight:900;font-size:.72rem;}
+/* No-CC trust strip + section note */
+.lp-trust{display:flex;flex-wrap:wrap;gap:.55rem;justify-content:center;margin-bottom:1.5rem;}
+.lp-trust>div{display:inline-flex;align-items:center;gap:.4rem;background:rgba(1,246,242,.10);
+  border:1px solid rgba(1,246,242,.35);border-radius:2rem;padding:.42rem .85rem;color:#fff;font-size:.78rem;font-weight:600;}
+.lp-trust>div span{font-size:.95rem;line-height:1;}
+.lp-secnote{color:hsla(0,0%,100%,.72);font-size:.86rem;text-align:center;margin:.2rem 0 1rem;line-height:1.45;
+  background:rgba(1,246,242,.06);border:1px solid rgba(1,246,242,.22);border-radius:.6rem;padding:.7rem .9rem;}
+.lp-secnote b{color:#01f6f2;}
 .lp-hp{position:absolute!important;left:-9999px!important;width:1px;height:1px;overflow:hidden;}
 .lp-nav{display:flex;justify-content:space-between;gap:.7rem;margin-top:1.2rem;}
 .lp-nav button{cursor:pointer;font-family:inherit;font-weight:700;font-size:.98rem;padding:.85rem 1.3rem;border-radius:.7rem;border:0;}
@@ -304,25 +329,32 @@ def section_hero():
 
 
 def section_form():
-    # Multi-step form posts to /api/contact (Resend) and packages all answers into the message body.
+    # Comprehensive 4-step sign-up. POSTs to /api/contact (Resend) with a full
+    # project brief packed into the message body so Sean can quote/start fast.
     return r"""
 <section class="lp-section" id="claim"><div class="fb-wrap">
-<div class="lp-head"><h2>Start your <span class="accent">$0-down</span> launch</h2>
-<p>Three quick steps — about 60 seconds. We'll review and reach out the same business day.</p></div>
+<div class="lp-head"><h2>Start your <span class="accent">$0-down</span> sign-up</h2>
+<p>Tell us about your business and what you want — we'll reach out the same business day to confirm the plan.</p></div>
 
 <div class="lp-formwrap">
-  <div class="lp-formhead"><h3>Claim your launch spot</h3>
-  <p>No payment now. We confirm the plan with you on a quick call.</p></div>
+  <div class="lp-formhead"><h3>Website sign-up</h3>
+  <p>4 quick steps · about 2 minutes</p></div>
 
-  <div class="lp-progress" aria-hidden="true"><i class="on" data-dot="0"></i><i data-dot="1"></i><i data-dot="2"></i></div>
+  <div class="lp-trust">
+    <div><span>🪙</span> No credit card required</div>
+    <div><span>✅</span> Pay only after you approve the site</div>
+    <div><span>🚀</span> We launch on your green light</div>
+  </div>
+
+  <div class="lp-progress" aria-hidden="true"><i class="on"></i><i></i><i></i><i></i></div>
 
   <form class="lp-form" id="lp-form" novalidate>
     <input class="lp-hp" type="text" name="company" tabindex="-1" autocomplete="off" aria-hidden="true">
-    <input type="hidden" name="_source" value="Launch page ($250/mo)">
+    <input type="hidden" name="_source" value="Launch sign-up ($250/mo)">
 
-    <!-- Step 1: Business basics -->
+    <!-- Step 1: Your business -->
     <div class="lp-step on" data-step="0">
-      <h4>1. Tell us about your business</h4>
+      <h4>1. Your business</h4>
       <div class="lp-field"><label for="lp-biz">Business name <span style="color:#ff8e8e">*</span></label>
         <input id="lp-biz" name="business" type="text" autocomplete="organization" placeholder="Acme Plumbing"></div>
       <div class="lp-row2">
@@ -336,47 +368,110 @@ def section_form():
             <option>Health &amp; wellness</option>
             <option>Real estate</option>
             <option>Automotive</option>
-            <option>Live entertainment / events</option>
+            <option>Beauty / Salon / Spa</option>
+            <option>Construction / Contracting</option>
+            <option>Live entertainment / Events</option>
+            <option>Nonprofit</option>
             <option>Other</option>
           </select></div>
-        <div class="lp-field"><label for="lp-city">City you serve</label>
-          <input id="lp-city" name="city" type="text" placeholder="The Woodlands, TX"></div>
+        <div class="lp-field"><label for="lp-years">Years in business</label>
+          <select id="lp-years" name="years">
+            <option value="">Pick one…</option>
+            <option>Brand new / pre-launch</option>
+            <option>Less than 1 year</option>
+            <option>1–3 years</option>
+            <option>4–10 years</option>
+            <option>10+ years</option>
+          </select></div>
       </div>
-      <div class="lp-field"><label for="lp-existing">Existing website (if any)</label>
-        <input id="lp-existing" name="existing" type="url" inputmode="url" placeholder="https:// — or leave blank if none"></div>
+      <div class="lp-row2">
+        <div class="lp-field"><label for="lp-city">City / service area</label>
+          <input id="lp-city" name="city" type="text" placeholder="The Woodlands, TX"></div>
+        <div class="lp-field"><label for="lp-existing">Existing website</label>
+          <input id="lp-existing" name="existing" type="url" inputmode="url" placeholder="https:// — or leave blank"></div>
+      </div>
+      <div class="lp-field"><label for="lp-desc">In one line, what do you do? <span style="color:#ff8e8e">*</span></label>
+        <input id="lp-desc" name="description" type="text" placeholder="e.g. 24/7 emergency HVAC repair in Spring &amp; The Woodlands">
+        <span class="hint">This becomes your headline — we can polish it later.</span></div>
       <div class="lp-nav">
         <button type="button" class="next" data-next>Continue →</button>
       </div>
     </div>
 
-    <!-- Step 2: Goals -->
+    <!-- Step 2: Your website -->
     <div class="lp-step" data-step="1">
-      <h4>2. What's the main goal for your new site?</h4>
-      <div class="lp-radios">
-        <label><input type="radio" name="goal" value="Get more leads & calls"> 📈 Get more leads &amp; calls</label>
-        <label><input type="radio" name="goal" value="Modernize / rebrand"> 🎨 Modernize / rebrand</label>
-        <label><input type="radio" name="goal" value="Launch a brand-new business"> 🆕 Launch a brand-new business</label>
-        <label><input type="radio" name="goal" value="Rank higher on Google"> 🔍 Rank higher on Google</label>
-        <label><input type="radio" name="goal" value="Not sure — recommend a plan"> 🤝 Not sure — recommend a plan</label>
-      </div>
-      <div class="lp-field" style="margin-top:1rem"><label for="lp-pages">Rough idea on pages? (optional)</label>
-        <select id="lp-pages" name="pages">
-          <option value="">Pick one…</option>
-          <option>1–3 (simple)</option>
-          <option>4–7 (standard)</option>
-          <option>8–15 (multi-service)</option>
-          <option>15+ (large)</option>
-          <option>Not sure — you tell me</option>
-        </select></div>
+      <h4>2. What you want from the site</h4>
+      <div class="lp-field"><label>Main goal</label>
+        <div class="lp-radios">
+          <label><input type="radio" name="goal" value="Get more leads & calls"> 📈 Get more leads &amp; calls</label>
+          <label><input type="radio" name="goal" value="Modernize / rebrand"> 🎨 Modernize / rebrand</label>
+          <label><input type="radio" name="goal" value="Launch a brand-new business"> 🆕 Launch a brand-new business</label>
+          <label><input type="radio" name="goal" value="Rank higher on Google"> 🔍 Rank higher on Google</label>
+          <label><input type="radio" name="goal" value="Sell online"> 🛒 Sell online</label>
+          <label><input type="radio" name="goal" value="Not sure — recommend a plan"> 🤝 Not sure — recommend a plan</label>
+        </div></div>
+      <div class="lp-field"><label>Pages you'd like <span class="hint" style="display:inline">(tap any that apply)</span></label>
+        <div class="lp-chips" data-chipgroup="pages">
+          <button type="button" class="lp-chip" data-val="Home"><span class="ck"></span>Home</button>
+          <button type="button" class="lp-chip" data-val="About"><span class="ck"></span>About</button>
+          <button type="button" class="lp-chip" data-val="Services"><span class="ck"></span>Services</button>
+          <button type="button" class="lp-chip" data-val="Pricing"><span class="ck"></span>Pricing</button>
+          <button type="button" class="lp-chip" data-val="Contact"><span class="ck"></span>Contact</button>
+          <button type="button" class="lp-chip" data-val="Blog"><span class="ck"></span>Blog</button>
+          <button type="button" class="lp-chip" data-val="Portfolio"><span class="ck"></span>Portfolio</button>
+          <button type="button" class="lp-chip" data-val="Testimonials"><span class="ck"></span>Testimonials</button>
+          <button type="button" class="lp-chip" data-val="FAQ"><span class="ck"></span>FAQ</button>
+          <button type="button" class="lp-chip" data-val="Team"><span class="ck"></span>Team</button>
+          <button type="button" class="lp-chip" data-val="Gallery"><span class="ck"></span>Gallery</button>
+        </div></div>
+      <div class="lp-field"><label>Features you'd like</label>
+        <div class="lp-chips" data-chipgroup="features">
+          <button type="button" class="lp-chip" data-val="Online booking"><span class="ck"></span>Online booking</button>
+          <button type="button" class="lp-chip" data-val="Contact form"><span class="ck"></span>Contact form</button>
+          <button type="button" class="lp-chip" data-val="Photo gallery"><span class="ck"></span>Photo gallery</button>
+          <button type="button" class="lp-chip" data-val="Blog / news"><span class="ck"></span>Blog / news</button>
+          <button type="button" class="lp-chip" data-val="E-commerce / store"><span class="ck"></span>E-commerce / store</button>
+          <button type="button" class="lp-chip" data-val="Customer login"><span class="ck"></span>Customer login</button>
+          <button type="button" class="lp-chip" data-val="Maps & directions"><span class="ck"></span>Maps &amp; directions</button>
+          <button type="button" class="lp-chip" data-val="Newsletter signup"><span class="ck"></span>Newsletter signup</button>
+          <button type="button" class="lp-chip" data-val="Reviews widget"><span class="ck"></span>Reviews widget</button>
+          <button type="button" class="lp-chip" data-val="Live chat"><span class="ck"></span>Live chat</button>
+        </div></div>
+      <div class="lp-field"><label for="lp-insp">Websites you like (inspiration)</label>
+        <textarea id="lp-insp" name="inspiration" rows="2" placeholder="Paste a URL or two — or describe the vibe you want"></textarea></div>
       <div class="lp-nav">
         <button type="button" class="back" data-back>← Back</button>
         <button type="button" class="next" data-next>Continue →</button>
       </div>
     </div>
 
-    <!-- Step 3: Contact -->
+    <!-- Step 3: Your brand -->
     <div class="lp-step" data-step="2">
-      <h4>3. Where should we reach you?</h4>
+      <h4>3. Your brand</h4>
+      <div class="lp-field"><label>Do you have a logo?</label>
+        <div class="lp-radios">
+          <label><input type="radio" name="logo" value="Yes — I'll send it"> ✅ Yes — I'll send it</label>
+          <label><input type="radio" name="logo" value="No — please design one for me"> 🎨 No — please design one for me</label>
+          <label><input type="radio" name="logo" value="Have one but want it refreshed"> ♻️ Have one but want it refreshed</label>
+        </div></div>
+      <div class="lp-row2">
+        <div class="lp-field"><label for="lp-colors">Brand colors</label>
+          <input id="lp-colors" name="colors" type="text" placeholder="e.g. navy + gold, or 'open to ideas'"></div>
+        <div class="lp-field"><label for="lp-tag">Tagline (optional)</label>
+          <input id="lp-tag" name="tagline" type="text" placeholder="Your one-liner / slogan"></div>
+      </div>
+      <div class="lp-field"><label for="lp-diff">What makes you different from competitors? (optional)</label>
+        <textarea id="lp-diff" name="differentiator" rows="2" placeholder="Faster, family-owned, certified, 24/7, lifetime warranty…"></textarea></div>
+      <div class="lp-nav">
+        <button type="button" class="back" data-back>← Back</button>
+        <button type="button" class="next" data-next>Continue →</button>
+      </div>
+    </div>
+
+    <!-- Step 4: Contact + timeline -->
+    <div class="lp-step" data-step="3">
+      <h4>4. Where should we reach you?</h4>
+      <p class="lp-secnote"><b>No payment now — no credit card required.</b> We only collect a card once you've approved your finished website and we're ready to launch it.</p>
       <div class="lp-row2">
         <div class="lp-field"><label for="lp-name">Your name <span style="color:#ff8e8e">*</span></label>
           <input id="lp-name" name="name" type="text" autocomplete="name" placeholder="Jane Smith"></div>
@@ -391,17 +486,25 @@ def section_form():
             <option value="">Any time</option><option>Morning</option><option>Midday</option><option>Afternoon</option><option>Evening</option>
           </select></div>
       </div>
+      <div class="lp-field"><label>Desired launch timeline</label>
+        <div class="lp-radios">
+          <label><input type="radio" name="timeline" value="ASAP"> 🚀 ASAP</label>
+          <label><input type="radio" name="timeline" value="2–3 weeks"> ⚡ 2–3 weeks</label>
+          <label><input type="radio" name="timeline" value="1 month"> 📅 1 month</label>
+          <label><input type="radio" name="timeline" value="2+ months"> 🕒 2+ months</label>
+          <label><input type="radio" name="timeline" value="Flexible — your recommendation"> 🤷 Flexible — your recommendation</label>
+        </div></div>
       <div class="lp-field"><label for="lp-notes">Anything else? (optional)</label>
-        <textarea id="lp-notes" name="notes" rows="3" placeholder="Logo, branding, deadlines, ideas…"></textarea></div>
+        <textarea id="lp-notes" name="notes" rows="3" placeholder="Hours of operation, special offers, photos you have ready, deadlines, etc."></textarea></div>
       <div class="lp-nav">
         <button type="button" class="back" data-back>← Back</button>
-        <button type="submit" class="submit">🎁 Claim my $5,000 savings</button>
+        <button type="submit" class="submit">🚀 Send my sign-up</button>
       </div>
     </div>
 
     <div class="lp-formmsg" role="status" aria-live="polite"></div>
   </form>
-  <p class="lp-formfine">By submitting you agree to be contacted about your project. No spam. Cancel anytime after 12 months.</p>
+  <p class="lp-formfine">No spam, no surprises. By submitting you agree to be contacted about your project. Cancel anytime after the initial 12-month launch term.</p>
 </div>
 </div></section>
 
@@ -415,34 +518,60 @@ def section_form():
     steps.forEach(function (s, i) { s.classList.toggle("on", i === n); });
     dots.forEach(function (d, i) { d.classList.toggle("on", i <= n); });
     msg.textContent = ""; msg.className = "lp-formmsg";
-    var f = steps[n].querySelector("input,select,textarea"); if (f) try { f.focus({preventScroll:true}); } catch (e) {}
+    var f = steps[n].querySelector("input:not([type=radio]):not(.lp-hp),select,textarea"); if (f) try { f.focus({preventScroll:true}); } catch (e) {}
     try { document.getElementById("claim").scrollIntoView({behavior:"smooth", block:"start"}); } catch (e) {}
   }
   function valid(n) {
     if (n === 0) {
       if (!form.business.value.trim()) { msg.className="lp-formmsg err"; msg.textContent="Please add your business name."; return false; }
-    } else if (n === 2) {
+      if (!form.description.value.trim()) { msg.className="lp-formmsg err"; msg.textContent="A one-line description helps us get started."; return false; }
+    } else if (n === 3) {
       if (!form.name.value.trim()) { msg.className="lp-formmsg err"; msg.textContent="Please add your name."; return false; }
       if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email.value)) { msg.className="lp-formmsg err"; msg.textContent="Please add a valid email."; return false; }
     }
     return true;
   }
+  // Chip multi-select (pages + features)
+  form.querySelectorAll(".lp-chips").forEach(function (group) {
+    group.addEventListener("click", function (e) {
+      var b = e.target.closest(".lp-chip"); if (!b || !group.contains(b)) return;
+      b.classList.toggle("on"); b.setAttribute("aria-pressed", b.classList.contains("on") ? "true" : "false");
+    });
+  });
+  function chipsOf(name) {
+    return Array.from(form.querySelectorAll('[data-chipgroup="' + name + '"] .lp-chip.on')).map(function (b) { return b.dataset.val; }).join(", ") || "—";
+  }
   form.querySelectorAll("[data-next]").forEach(function (b) { b.addEventListener("click", function () { if (valid(cur)) setStep(cur + 1); }); });
   form.querySelectorAll("[data-back]").forEach(function (b) { b.addEventListener("click", function () { setStep(cur - 1); }); });
   form.addEventListener("submit", function (e) {
-    e.preventDefault(); if (!valid(2)) return;
+    e.preventDefault(); if (!valid(3)) return;
     var btn = form.querySelector(".submit"); btn.disabled = true;
     msg.className = "lp-formmsg"; msg.textContent = "Sending…";
-    var goal = (form.querySelector('input[name="goal"]:checked') || {}).value || "Not specified";
+    var goal = (form.querySelector('input[name="goal"]:checked') || {}).value || "—";
+    var logo = (form.querySelector('input[name="logo"]:checked') || {}).value || "—";
+    var timeline = (form.querySelector('input[name="timeline"]:checked') || {}).value || "—";
     var summary =
-      "[Launch lead — $250/mo plan]\n" +
-      "Business: " + form.business.value + "\n" +
+      "[Launch sign-up — $250/mo plan]\n\n" +
+      "— BUSINESS —\n" +
+      "Name: " + form.business.value + "\n" +
       "Industry: " + (form.industry.value || "—") + "\n" +
-      "City: " + (form.city.value || "—") + "\n" +
+      "Years in business: " + (form.years.value || "—") + "\n" +
+      "City / service area: " + (form.city.value || "—") + "\n" +
       "Existing site: " + (form.existing.value || "(none)") + "\n" +
+      "What they do: " + form.description.value + "\n\n" +
+      "— WEBSITE —\n" +
       "Primary goal: " + goal + "\n" +
-      "Pages: " + (form.pages.value || "—") + "\n" +
+      "Pages wanted: " + chipsOf("pages") + "\n" +
+      "Features wanted: " + chipsOf("features") + "\n" +
+      "Inspiration: " + (form.inspiration.value || "—") + "\n\n" +
+      "— BRAND —\n" +
+      "Logo: " + logo + "\n" +
+      "Colors: " + (form.colors.value || "—") + "\n" +
+      "Tagline: " + (form.tagline.value || "—") + "\n" +
+      "Differentiator: " + (form.differentiator.value || "—") + "\n\n" +
+      "— CONTACT —\n" +
       "Best time: " + (form.besttime.value || "Any") + "\n" +
+      "Launch timeline: " + timeline + "\n" +
       "Notes: " + (form.notes.value || "—");
     var fd = new FormData();
     fd.append("name", form.name.value);
@@ -457,15 +586,16 @@ def section_form():
           form.parentElement.innerHTML =
             '<div style="text-align:center;padding:1rem 0">' +
               '<div style="font-size:3rem">🎉</div>' +
-              '<h3 style="font-family:\'Funnel Display\',sans-serif;color:#fff;font-size:1.7rem;margin:.4rem 0">You\'re on the list!</h3>' +
-              '<p style="color:hsla(0,0%,100%,.75);margin:0 0 1.2rem;line-height:1.6">' +
-                'We\'ll review your info and reach out the same business day. Want to skip the wait? ' +
-                'Grab a time on the calendar now.' +
+              '<h3 style="font-family:\'Funnel Display\',sans-serif;color:#fff;font-size:1.7rem;margin:.4rem 0">You\'re signed up!</h3>' +
+              '<p style="color:hsla(0,0%,100%,.78);margin:0 0 .6rem;line-height:1.6">' +
+                'We\'ll review your sign-up and reach out the same business day to confirm your launch plan. ' +
+                '<b style="color:#fff">You don\'t pay a thing until your site is approved and ready to go live.</b>' +
               '</p>' +
+              '<p style="color:hsla(0,0%,100%,.55);margin:.4rem 0 1.2rem;font-size:.85rem">Want to skip the wait? Grab a time on the calendar now.</p>' +
               '<a class="lp-ctaprimary" style="text-decoration:none;display:inline-block" ' +
                 'href="https://calendly.com/firstbyte-agency/free-audit" target="_blank" rel="noopener">📅 Book your launch call</a>' +
             '</div>';
-          try { window.dataLayer = window.dataLayer || []; window.dataLayer.push({event:"launch_lead_success"}); } catch (e) {}
+          try { window.dataLayer = window.dataLayer || []; window.dataLayer.push({event:"launch_signup_success"}); } catch (e) {}
         } else {
           msg.className = "lp-formmsg err";
           msg.textContent = (d && d.error) ? d.error : "Something went wrong — please try again or call (713) 578-0634.";
@@ -481,7 +611,7 @@ def section_form():
 })();
 </script>
 
-<div class="lp-stickym"><a href="#claim">🚀 Claim my $5,000 savings</a></div>
+<div class="lp-stickym"><a href="#claim">🚀 Start my sign-up</a></div>
 """
 
 
