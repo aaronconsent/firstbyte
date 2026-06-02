@@ -66,24 +66,36 @@ LAUNCH_PLAN = {
     ],
 }
 
-# AI / Claude-Code-powered features we can ship in days, not months.
+# AI / Claude-Code-powered features — web-native, conversion-focused.
+# Tuple: (icon, title, category, description, previously-required line)
 AI_FEATURES = [
-    ("🤖", "Custom AI chatbot",
-     "Trained on your hours, services, pricing, and FAQs — answers customer questions 24/7 and routes hot leads straight to you."),
-    ("✍️", "AI-powered SEO content",
-     "Fresh local pages and blog posts built around the real keywords your customers search — generated and edited by humans."),
-    ("📅", "Smart booking & scheduling",
-     "Customers self-book directly from your site; AI handles confirmations, reminders, and reschedules."),
-    ("🎯", "Lead scoring & routing",
-     "Every form scored by intent. Hot leads text or email you instantly so a job never slips through."),
-    ("🔌", "Custom integrations",
-     "QuickBooks, ServiceTitan, Jobber, HubSpot, Stripe, Google Calendar — whatever you use. Built in days, not months."),
-    ("📊", "Custom dashboards",
-     "A real-time dashboard built for *your* business — leads, calls, conversion rates, ad ROI, all in one place."),
-    ("🔁", "Auto-drafted review replies",
-     "AI drafts personalized review responses for you to approve in one tap — keeps your Google ranking strong."),
-    ("🖼️", "On-brand AI imagery",
-     "Need a hero, social post, or hero image? We generate on-brand AI imagery so you never pay a stock photographer."),
+    ("🗺️", "Hyper-local landing pages", "Local SEO",
+     "Unique, on-brand pages per neighborhood, zip, or service combo — original content, not spun, seasonally refreshed so they keep ranking.",
+     "Previously: hand-write 30–100 pages, or risk Google's scaled-content penalty."),
+    ("✍️", "Auto-blogging on autopilot", "Auto-blogging",
+     "Weekly AI-drafted posts targeted at the keywords your customers actually search. Old posts auto-refreshed with new stats and fresh dates.",
+     "Previously: $200–500 per post from a freelance writer — so most small businesses stop after three."),
+    ("💬", "AEO-optimized FAQ blocks", "AEO",
+     "Question-and-answer blocks formatted the exact way ChatGPT, Perplexity, Gemini, and Claude search quote sources — with the structured data to back it up.",
+     "Previously: nobody was doing this. You were invisible to AI search."),
+    ("📡", "AI-readable site structure", "AEO",
+     "Proper llms.txt, conversational H2s, clean schema, and short citation-ready paragraphs so AI engines reliably surface and quote your business.",
+     "Previously: required a developer who'd even heard of llms.txt — almost nobody had."),
+    ("📋", "Smart conversational quote forms", "Quote forms",
+     "Multi-step forms where each question depends on the previous answer (residential vs commercial → totally different paths), with a ballpark range shown before submit.",
+     "Previously: a developer + form-builder + custom logic, or a 1-page form nobody finishes."),
+    ("🧩", "Adaptive site widgets", "Widgets",
+     "Quote CTAs, click-to-call bars, exit-intent offers, social-proof toasts, live Google-reviews carousel — all context-aware by page, device, and source.",
+     "Previously: 4–5 paid plugins that never talked to each other."),
+    ("📣", "AI-ready OG images + RSS-ready pages", "Distribution",
+     "Auto-generated on-brand social-share previews for every page (perfect in LinkedIn, Facebook, iMessage, Slack) plus proper RSS feeds so AI agents, aggregators, and readers can pull your content.",
+     "Previously: a designer per OG image (or the generic browser fallback) and RSS just didn't exist."),
+    ("🧪", "Always-on A/B testing", "Split tests",
+     "Headlines, buttons, and offers automatically rotate against each other; the statistically-significant winner gets promoted — no manual setup.",
+     "Previously: $200–500/mo for Optimizely-style tools, plus someone to run the tests."),
+    ("🎯", "Personalized hero variants by source", "Conversions",
+     "Headline, image, and CTA swap based on where the visitor came from — Google ad → emergency-focused hero, Facebook → seasonal offer hero — no extra landing pages.",
+     "Previously: build a separate landing page per campaign and manage 20+."),
 ]
 
 # Speed advantage — what AI-assisted dev unlocks.
@@ -261,9 +273,14 @@ STYLE = """<style>
 .lp-aicard::before{content:"";position:absolute;top:0;right:0;width:9rem;height:9rem;
   background:radial-gradient(closest-side,rgba(1,246,242,.13),transparent);transform:translate(2rem,-3rem);pointer-events:none;}
 .lp-aicard>*{position:relative;}
-.lp-aicard .ic{font-size:1.85rem;margin-bottom:.7rem;display:block;}
+.lp-aicard{display:flex;flex-direction:column;}
+.lp-aicard .ic{font-size:1.85rem;margin-bottom:.55rem;display:block;}
+.lp-aicard .cat{display:inline-block;align-self:flex-start;font-size:.6rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase;
+  color:#23fff4;background:rgba(35,255,244,.10);border:1px solid rgba(35,255,244,.35);border-radius:2rem;padding:.25rem .65rem;margin-bottom:.65rem;line-height:1;}
 .lp-aicard h3{font-family:"Funnel Display",sans-serif;color:#fff;font-size:1.15rem;margin:0 0 .5rem;}
-.lp-aicard p{color:hsla(0,0%,100%,.72);font-size:.92rem;line-height:1.55;margin:0;}
+.lp-aicard p{color:hsla(0,0%,100%,.78);font-size:.92rem;line-height:1.55;margin:0;}
+.lp-aicard .was{display:block;color:hsla(0,0%,100%,.5);font-size:.78rem;line-height:1.5;margin-top:auto;padding-top:.95rem;border-top:1px dashed rgba(255,255,255,.12);font-style:italic;}
+.lp-aicard .was::before{content:"⏮ ";color:hsla(0,0%,100%,.4);font-style:normal;}
 
 /* Speed advantage stat row */
 .lp-speed{display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(12rem,1fr));margin-top:.5rem;max-width:1000px;margin-left:auto;margin-right:auto;}
@@ -474,15 +491,17 @@ def section_tiers():
 def section_ai():
     cards = "".join(
         f'<div class="lp-aicard"><span class="ic">{ico}</span>'
-        f'<h3>{tu.esc(name)}</h3><p>{tu.esc(desc)}</p></div>'
-        for (ico, name, desc) in AI_FEATURES
+        f'<span class="cat">{tu.esc(cat)}</span>'
+        f'<h3>{tu.esc(name)}</h3><p>{tu.esc(desc)}</p>'
+        f'<span class="was">{tu.esc(was)}</span></div>'
+        for (ico, name, cat, desc, was) in AI_FEATURES
     )
     return (
         '<section class="lp-section"><div class="fb-wrap">'
         '<div class="lp-head">'
         '<span class="lp-aibadge">🤖 AI-Powered · Built with Claude Code</span>'
-        '<h2>Custom features other agencies <span class="accent">don\'t even quote</span></h2>'
-        "<p>Because we build with Claude Code and modern AI tooling, we can ship custom features in days that traditional agencies take months on — and charge $10,000+ for. Add any of these to your Launch plan; the development is included.</p>"
+        '<h2>9 things we can now do that <span class="accent">used to be impossible</span></h2>'
+        "<p>Built with Claude Code and modern AI tooling, the Launch plan ships features that would've cost thousands to build by hand — and weren't even on the menu at most small-business sites a year ago.</p>"
         '</div>'
         f'<div class="lp-ai">{cards}</div>'
         '</div></section>'
