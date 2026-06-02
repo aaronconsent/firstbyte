@@ -68,7 +68,7 @@ LAUNCH_PLAN = {
         "Custom integrations available (CRM, calendar, booking, etc.)",
         "Monthly performance report (plain-English)",
         "Direct access to your local team",
-        "Launch in 2–3 weeks",
+        "Launch in 2–3 days",
     ],
 }
 
@@ -106,7 +106,7 @@ AI_FEATURES = [
 
 # Speed advantage — what AI-assisted dev unlocks.
 SPEED_STATS = [
-    ("🚀", "2–3 weeks", "From signup to live site"),
+    ("🚀", "2–3 days", "From signup to live site"),
     ("⚡", "Days, not months", "New features and changes"),
     ("🧠", "Claude Code + AI", "Behind every build"),
     ("🔧", "Custom included", "Integrations & widgets"),
@@ -125,7 +125,7 @@ COMPARE = {
         ("Up-front website cost", "Free template", "Free template", "$5,000+", "$0"),
         ("Monthly cost", "$10–40", "$25–60", "$0 hosting only", "$250 all-in"),
         ("Custom-designed site", "No — template", "No — template", "Yes (slow)", "Yes (fast)"),
-        ("Typical launch time", "Hours (DIY)", "Hours (DIY)", "8–12 weeks", "2–3 weeks"),
+        ("Typical launch time", "Hours (DIY)", "Hours (DIY)", "8–12 weeks", "2–3 days"),
         ("Local SEO", "DIY", "DIY", "Extra $800+/mo", "Included"),
         ("Hosting + SSL + backups", "Basic", "Basic", "Sometimes", "Premium (Cloudflare)"),
         ("Monthly content updates", "DIY", "DIY", "Billed hourly", "Included (up to 2/mo)"),
@@ -147,7 +147,7 @@ FAQS = [
     ("Do I own the website?",
      "Yes — after 12 months you own the design and content outright and can take the site to any host. We just ask for the first 12 months to recoup the build cost."),
     ("How long does it take to launch?",
-     "Most launches go live in 2–3 weeks from signup. Faster if you have logos, photos, and copy ready; a bit longer if we need to gather everything from scratch. We build with Claude Code and modern AI tooling, which compresses the timeline traditional agencies need."),
+     "Most launches go live in 2–3 days from signup. Faster if you have logos, photos, and copy ready; a bit longer if we need to gather everything from scratch. We build with Claude Code and modern AI tooling, which compresses what traditional agencies need weeks for down to days."),
     ("What does 'AI-powered' actually mean?",
      "Two things. First, we build faster using AI-assisted development (Claude Code), so custom features that would cost $10,000+ at a traditional agency can ship in days. Second, we install real AI tools on your site as needed — a chatbot trained on your business, lead scoring, auto-drafted review responses, AI-generated content, and custom integrations with whatever software you already use."),
     ("Monthly or annual — which should I pick?",
