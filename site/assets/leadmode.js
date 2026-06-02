@@ -489,6 +489,8 @@
   /* Right-edge, vertically-centered widget that opens the Blackjack challenge. */
   function blackjackTab() {
     if (!FEAT.blackjack) return;
+    // Pages with their own dedicated lead form shouldn't compete with the game widget.
+    if (/^\/launch\/?($|\?|#)/.test(location.pathname)) return;
     var t = el('<button class="fblm-bjtab" aria-label="Play Blackjack — win up to $2,500 in account credit">' +
       '<span class="fblm-bjtab-ico">🃏</span>' +
       '<span class="fblm-bjtab-txt"><b>Win up to $2,500</b><span>Play Blackjack →</span></span>' +
