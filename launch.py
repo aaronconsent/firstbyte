@@ -73,35 +73,35 @@ LAUNCH_PLAN = {
 }
 
 # AI / Claude-Code-powered features — web-native, conversion-focused.
-# Tuple: (icon, title, category, description, previously-required line)
+# Tuple: (icon, title, category, description, value-range badge)
 AI_FEATURES = [
     ("🗺️", "Hyper-local landing pages", "Local SEO",
      "Unique, on-brand pages per neighborhood, zip, or service combo — original content, not spun, seasonally refreshed so they keep ranking.",
-     "Previously: hand-write 30–100 pages, or risk Google's scaled-content penalty."),
+     "$5K–$20K elsewhere"),
     ("✍️", "Auto-blogging on autopilot", "Auto-blogging",
      "Weekly AI-drafted posts targeted at the keywords your customers actually search. Old posts auto-refreshed with new stats and fresh dates.",
-     "Previously: $200–500 per post from a freelance writer — so most small businesses stop after three."),
+     "$10K–$25K/yr elsewhere"),
     ("💬", "AEO-optimized FAQ blocks", "AEO",
      "Question-and-answer blocks formatted the exact way ChatGPT, Perplexity, Gemini, and Claude search quote sources — with the structured data to back it up.",
-     "Previously: nobody was doing this. You were invisible to AI search."),
+     "$3K–$10K elsewhere"),
     ("📡", "AI-readable site structure", "AEO",
      "Proper llms.txt, conversational H2s, clean schema, and short citation-ready paragraphs so AI engines reliably surface and quote your business.",
-     "Previously: required a developer who'd even heard of llms.txt — almost nobody had."),
+     "$2K–$8K elsewhere"),
     ("📋", "Smart conversational quote forms", "Quote forms",
      "Multi-step forms where each question depends on the previous answer (residential vs commercial → totally different paths), with a ballpark range shown before submit.",
-     "Previously: a developer + form-builder + custom logic, or a 1-page form nobody finishes."),
+     "$3K–$10K elsewhere"),
     ("🧩", "Adaptive site widgets", "Widgets",
      "Quote CTAs, click-to-call bars, exit-intent offers, social-proof toasts, live Google-reviews carousel — all context-aware by page, device, and source.",
-     "Previously: 4–5 paid plugins that never talked to each other."),
+     "$2K–$6K/yr elsewhere"),
     ("📣", "AI-ready OG images + RSS-ready pages", "Distribution",
      "Auto-generated on-brand social-share previews for every page (perfect in LinkedIn, Facebook, iMessage, Slack) plus proper RSS feeds so AI agents, aggregators, and readers can pull your content.",
-     "Previously: a designer per OG image (or the generic browser fallback) and RSS just didn't exist."),
+     "$2K–$5K elsewhere"),
     ("🧪", "Always-on A/B testing", "Split tests",
      "Headlines, buttons, and offers automatically rotate against each other; the statistically-significant winner gets promoted — no manual setup.",
-     "Previously: $200–500/mo for Optimizely-style tools, plus someone to run the tests."),
+     "$3K–$10K/yr elsewhere"),
     ("🎯", "Personalized hero variants by source", "Conversions",
      "Headline, image, and CTA swap based on where the visitor came from — Google ad → emergency-focused hero, Facebook → seasonal offer hero — no extra landing pages.",
-     "Previously: build a separate landing page per campaign and manage 20+."),
+     "$10K–$30K elsewhere"),
 ]
 
 # Speed advantage — what AI-assisted dev unlocks.
@@ -285,8 +285,11 @@ STYLE = """<style>
   color:#23fff4;background:rgba(35,255,244,.10);border:1px solid rgba(35,255,244,.35);border-radius:2rem;padding:.25rem .65rem;margin-bottom:.65rem;line-height:1;}
 .lp-aicard h3{font-family:"Funnel Display",sans-serif;color:#fff;font-size:1.15rem;margin:0 0 .5rem;}
 .lp-aicard p{color:hsla(0,0%,100%,.78);font-size:.92rem;line-height:1.55;margin:0;}
-.lp-aicard .was{display:block;color:hsla(0,0%,100%,.5);font-size:.78rem;line-height:1.5;margin-top:auto;padding-top:.95rem;border-top:1px dashed rgba(255,255,255,.12);font-style:italic;}
-.lp-aicard .was::before{content:"⏮ ";color:hsla(0,0%,100%,.4);font-style:normal;}
+.lp-aicard p{margin-bottom:1.1rem;}
+.lp-aicard .aival{display:inline-flex;align-self:flex-start;align-items:center;gap:.35rem;
+  margin-top:auto;padding:.45rem .85rem;border-radius:2rem;line-height:1;
+  font-size:.72rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
+  color:#ffd24a;background:rgba(255,210,74,.10);border:1.5px solid rgba(255,210,74,.45);}
 
 /* Speed advantage stat row */
 .lp-speed{display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(12rem,1fr));margin-top:.5rem;max-width:1000px;margin-left:auto;margin-right:auto;}
@@ -496,8 +499,8 @@ def section_ai():
         f'<div class="lp-aicard"><span class="ic">{ico}</span>'
         f'<span class="cat">{tu.esc(cat)}</span>'
         f'<h3>{tu.esc(name)}</h3><p>{tu.esc(desc)}</p>'
-        f'<span class="was">{tu.esc(was)}</span></div>'
-        for (ico, name, cat, desc, was) in AI_FEATURES
+        f'<span class="aival">💰 {tu.esc(val)}</span></div>'
+        for (ico, name, cat, desc, val) in AI_FEATURES
     )
     return (
         '<section class="lp-section"><div class="fb-wrap">'
