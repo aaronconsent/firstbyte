@@ -45,63 +45,26 @@ SPEND_IDEAS = [
     ("👥", "Hiring help", "Free up your time so you can run the business, not the website."),
 ]
 
-# Pricing tiers — Launch is featured. Higher tiers expose what AI-assisted dev
-# unlocks (ads management, AI chatbots, custom integrations, e-commerce, etc.).
-TIERS = [
-    {
-        "name": "Launch",
-        "tag": "Most Popular",
-        "subtitle": "Custom site + the marketing engine to grow it.",
-        "price": 250,
-        "savings": "Save $5,000 up-front",
-        "featured": True,
-        "features": [
-            "Custom-designed website — no up-front cost",
-            "Premium Cloudflare hosting + SSL + daily backups",
-            "Monthly local SEO (Google Business Profile, citations, on-page)",
-            "Up to 2 content updates per month",
-            "AI-assisted copywriting baked into the build",
-            "Monthly performance report (plain-English)",
-            "Direct access to your local team",
-            "Launch in 2–3 weeks",
-        ],
-    },
-    {
-        "name": "Grow",
-        "tag": "",
-        "subtitle": "Launch + active demand generation + an AI chatbot.",
-        "price": 500,
-        "savings": "Still $0 up-front",
-        "featured": False,
-        "features": [
-            "Everything in Launch",
-            "Google Ads OR Meta Ads management",
-            "4 content updates per month + 1 blog post",
-            "Custom AI chatbot trained on your business",
-            "Connect your CRM, calendar, or booking tool",
-            "Email marketing automation",
-            "Bi-weekly strategy check-ins",
-        ],
-    },
-    {
-        "name": "Scale",
-        "tag": "Aggressive growth",
-        "subtitle": "Full marketing team + custom AI built for you.",
-        "price": 1000,
-        "savings": "Still $0 up-front",
-        "featured": False,
-        "features": [
-            "Everything in Grow",
-            "Multi-location / multi-language SEO",
-            "E-commerce / online store setup",
-            "Custom AI tools and dashboards built for your business",
-            "Advanced server-side conversion tracking",
-            "8 content updates per month + 2 blog posts",
-            "Weekly strategy calls",
-            "Priority development queue",
-        ],
-    },
-]
+# Launch plan — one plan, billed monthly ($250/mo) or annually ($2,500/yr, 2 months free).
+LAUNCH_PLAN = {
+    "name": "Launch",
+    "tag": "The Launch Plan",
+    "subtitle": "Custom website + monthly local SEO + AI-powered features — one flat price.",
+    "monthly_price": 250,
+    "annual_price": 2500,
+    "annual_save_note": "2 months free vs monthly",
+    "features": [
+        "Custom-designed website — no up-front cost",
+        "Premium Cloudflare hosting + SSL + daily backups",
+        "Monthly local SEO (Google Business Profile, citations, on-page)",
+        "Up to 2 content updates per month",
+        "AI-assisted copywriting baked into the build",
+        "Custom integrations available (CRM, calendar, booking, etc.)",
+        "Monthly performance report (plain-English)",
+        "Direct access to your local team",
+        "Launch in 2–3 weeks",
+    ],
+}
 
 # AI / Claude-Code-powered features we can ship in days, not months.
 AI_FEATURES = [
@@ -168,9 +131,9 @@ FAQS = [
     ("How long does it take to launch?",
      "Most launches go live in 2–3 weeks from signup. Faster if you have logos, photos, and copy ready; a bit longer if we need to gather everything from scratch. We build with Claude Code and modern AI tooling, which compresses the timeline traditional agencies need."),
     ("What does 'AI-powered' actually mean?",
-     "Two things. First, we build faster using AI-assisted development (Claude Code), so custom features that would cost $10,000+ at a traditional agency can ship in days. Second, on Grow and Scale plans we install real AI tools on your site — a chatbot trained on your business, lead scoring, auto-drafted review responses, AI-generated content, and custom integrations with whatever software you already use."),
-    ("Can I move up or down between plans?",
-     "Yes. After the initial 12-month launch term, you can switch between Launch, Grow, and Scale any month. Most clients start on Launch and move to Grow once their site is bringing in leads."),
+     "Two things. First, we build faster using AI-assisted development (Claude Code), so custom features that would cost $10,000+ at a traditional agency can ship in days. Second, we install real AI tools on your site as needed — a chatbot trained on your business, lead scoring, auto-drafted review responses, AI-generated content, and custom integrations with whatever software you already use."),
+    ("Monthly or annual — which should I pick?",
+     "Annual saves you $500/year (two months free) and locks in your rate. Monthly gives you maximum flexibility and the same plan, same features. Either way, no payment is collected until your site is approved and ready to launch."),
     ("What if I already have a website?",
      "Even better — we can redesign and migrate it, often improving speed and SEO in the process. The $250/month plan still applies."),
     ("Can I cancel?",
@@ -247,13 +210,26 @@ STYLE = """<style>
 .lp-stack-total b{color:#fff;font-weight:800;}
 .lp-stack-total .you{color:#01f6f2;font-weight:800;}
 
-/* Pricing tiers (hosting-style grid) */
-.lp-tiers{display:grid;gap:1.3rem;grid-template-columns:repeat(auto-fit,minmax(17.5rem,1fr));align-items:stretch;max-width:1100px;margin:0 auto;}
-.lp-tier{position:relative;display:flex;flex-direction:column;background:#171518;border:1px solid rgba(255,255,255,.10);
-  border-radius:1.1rem;padding:2rem 1.7rem 1.7rem;transition:transform .2s,border-color .2s,box-shadow .2s;}
+/* Single Launch plan with billing toggle */
+.lp-billbox{display:flex;flex-direction:column;align-items:center;max-width:460px;margin:0 auto;}
+.lp-billtoggle{display:inline-flex;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.20);border-radius:2rem;padding:.32rem;gap:.25rem;margin-bottom:1.5rem;}
+.lp-billtoggle button{background:transparent;border:0;color:hsla(0,0%,100%,.75);font-family:inherit;font-weight:700;font-size:.92rem;
+  padding:.65rem 1.3rem;border-radius:2rem;cursor:pointer;transition:.18s;display:inline-flex;align-items:center;gap:.55rem;line-height:1;}
+.lp-billtoggle button:hover{color:#fff;}
+.lp-billtoggle button.on{background:linear-gradient(90deg,#01f6f2,#00d4ff);color:#03282a;box-shadow:0 6px 20px rgba(1,246,242,.35);}
+.lp-billtoggle .save{font-size:.6rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;background:rgba(255,210,74,.20);color:#ffd24a;
+  border:1px solid rgba(255,210,74,.4);padding:.22rem .5rem;border-radius:2rem;line-height:1;}
+.lp-billtoggle button.on .save{background:rgba(3,40,42,.20);color:#03282a;border-color:rgba(3,40,42,.35);}
+/* Toggle drives which price/save text is visible */
+.lp-billbox[data-bill="monthly"] [data-annual]{display:none;}
+.lp-billbox[data-bill="annual"] [data-monthly]{display:none;}
+.lp-tier{position:relative;display:flex;flex-direction:column;width:100%;background:#171518;border:1px solid rgba(255,255,255,.10);
+  border-radius:1.1rem;padding:2.3rem 1.9rem 1.8rem;transition:transform .2s,border-color .2s,box-shadow .2s;}
 .lp-tier:hover{transform:translateY(-4px);border-color:rgba(35,255,244,.35);box-shadow:0 18px 50px rgba(0,0,0,.45);}
 .lp-tier.featured{border:2px solid #01f6f2;background:linear-gradient(180deg,#1c1a21,#15131a);box-shadow:0 28px 70px rgba(1,246,242,.22);}
-@media(min-width:920px){.lp-tier.featured{transform:scale(1.05);}.lp-tier.featured:hover{transform:scale(1.05) translateY(-4px);}}
+.lp-tier-price .strike{display:block;color:hsla(0,0%,100%,.45);font-size:1rem;text-decoration:line-through;margin-bottom:.2rem;line-height:1;}
+.lp-tier-fine{margin:.9rem 0 0;text-align:center;color:hsla(0,0%,100%,.55);font-size:.78rem;line-height:1.45;}
+.lp-tier-fine b{color:#fff;}
 .lp-tier-tag{position:absolute;top:-.85rem;left:50%;transform:translateX(-50%);background:linear-gradient(90deg,#01f6f2,#00d4ff);
   color:#03282a;font-size:.66rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase;
   padding:.4rem .9rem;border-radius:2rem;box-shadow:0 6px 20px rgba(1,246,242,.5);white-space:nowrap;}
@@ -438,30 +414,59 @@ def section_compare():
 
 
 def section_tiers():
-    cards = ""
-    for t in TIERS:
-        feats = "".join(f"<li>{tu.esc(f)}</li>" for f in t["features"])
-        tag = f'<span class="lp-tier-tag">{tu.esc(t["tag"])}</span>' if t["tag"] else ""
-        feat = " featured" if t["featured"] else ""
-        cards += (
-            f'<div class="lp-tier{feat}">{tag}'
-            f'<h3>{tu.esc(t["name"])}</h3>'
-            f'<p class="sub">{tu.esc(t["subtitle"])}</p>'
-            f'<div class="lp-tier-price"><span class="amt">${t["price"]}</span><span class="per">/mo</span></div>'
-            f'<span class="lp-tier-save">{tu.esc(t["savings"])}</span>'
-            f"<ul>{feats}</ul>"
-            f'<a class="lp-tier-cta" href="#claim">Start sign-up →</a>'
-            "</div>"
-        )
+    p = LAUNCH_PLAN
+    feats = "".join(f"<li>{tu.esc(f)}</li>" for f in p["features"])
+    monthly_total = p["monthly_price"] * 12
+    save_amt = monthly_total - p["annual_price"]
+    card = (
+        '<div class="lp-billbox" data-bill="monthly">'
+        '<div class="lp-billtoggle" role="tablist" aria-label="Billing period">'
+        '  <button type="button" data-bill="monthly" class="on" role="tab" aria-selected="true">Monthly</button>'
+        '  <button type="button" data-bill="annual" role="tab" aria-selected="false">'
+        f'    Annual <span class="save">2 months free</span>'
+        '  </button>'
+        '</div>'
+        '<div class="lp-tier featured">'
+        f'<span class="lp-tier-tag">{tu.esc(p["tag"])}</span>'
+        f'<h3>{tu.esc(p["name"])}</h3>'
+        f'<p class="sub">{tu.esc(p["subtitle"])}</p>'
+        '<div class="lp-tier-price" data-monthly>'
+        f'<span class="amt">${p["monthly_price"]}</span><span class="per">/mo</span>'
+        '</div>'
+        '<div class="lp-tier-price" data-annual>'
+        f'<span class="strike">${monthly_total:,}</span>'
+        f'<span class="amt">${p["annual_price"]:,}</span><span class="per">/yr</span>'
+        '</div>'
+        '<span class="lp-tier-save" data-monthly>Save $5,000 up-front · billed monthly</span>'
+        f'<span class="lp-tier-save" data-annual>Save $5,000 up-front + <b>${save_amt} a year</b> ({tu.esc(p["annual_save_note"])})</span>'
+        f"<ul>{feats}</ul>"
+        '<a class="lp-tier-cta" href="#claim">Start my sign-up →</a>'
+        '<p class="lp-tier-fine">No credit card now. You only pay once your site is approved and ready to go live.</p>'
+        '</div>'
+        '</div>'
+    )
+    js = r"""<script>
+(function () {
+  var box = document.querySelector(".lp-billbox"); if (!box) return;
+  box.querySelectorAll(".lp-billtoggle [data-bill]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var mode = b.dataset.bill;
+      box.setAttribute("data-bill", mode);
+      box.querySelectorAll(".lp-billtoggle [data-bill]").forEach(function (x) {
+        var on = x.dataset.bill === mode;
+        x.classList.toggle("on", on); x.setAttribute("aria-selected", on ? "true" : "false");
+      });
+    });
+  });
+})();
+</script>"""
     return (
         '<section class="lp-section" id="pricing"><div class="fb-wrap">'
         '<div class="lp-head">'
-        '<h2>One flat monthly price — <span class="accent">pick your level of growth</span></h2>'
-        '<p>Every plan includes a custom website, premium hosting, monthly SEO, and a real local team. No up-front website cost on any plan.</p>'
+        '<h2>One simple plan — <span class="accent">monthly or annual</span></h2>'
+        '<p>Choose how you pay. Annual is the same plan, with two months on the house.</p>'
         '</div>'
-        f'<div class="lp-tiers">{cards}</div>'
-        '<p class="lp-tier-foot">All plans are <b>$0 up-front</b> — you only pay once your site is approved and live. '
-        'Move up or down anytime after the initial 12-month launch term.</p>'
+        f'{card}{js}'
         '</div></section>'
     )
 
@@ -477,7 +482,7 @@ def section_ai():
         '<div class="lp-head">'
         '<span class="lp-aibadge">🤖 AI-Powered · Built with Claude Code</span>'
         '<h2>Custom features other agencies <span class="accent">don\'t even quote</span></h2>'
-        "<p>Because we build with Claude Code and modern AI tooling, we can ship custom features in days that traditional agencies take months on — and charge $10,000+ for. Many of these are included in Grow and Scale.</p>"
+        "<p>Because we build with Claude Code and modern AI tooling, we can ship custom features in days that traditional agencies take months on — and charge $10,000+ for. Add any of these to your Launch plan; the development is included.</p>"
         '</div>'
         f'<div class="lp-ai">{cards}</div>'
         '</div></section>'
