@@ -28,11 +28,21 @@ DEAD_LINKS = [
     re.compile(r'\s*<link[^>]*href=["\'][^"\']*/feed/?["\'][^>]*>', re.I),
 ]
 
+# 3) Legacy All-in-One SEO schema script — left over from the WP shell on
+#    the homepage and /work/* case-study pages. It has broken URLs
+#    (e.g. "\/\/wp-content/...") and duplicates the clean schema we inject
+#    via enhance.py / theme_ui.py. Strip it everywhere.
+AIOSEO_SCHEMA = re.compile(
+    r'\s*<script[^>]*class=["\']aioseo-schema["\'][^>]*>.*?</script>',
+    re.S | re.I,
+)
+
 
 def clean(html):
     html = BYLINE.sub("", html)
     for pat in DEAD_LINKS:
         html = pat.sub("", html)
+    html = AIOSEO_SCHEMA.sub("", html)
     return html
 
 

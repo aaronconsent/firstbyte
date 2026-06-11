@@ -21,7 +21,11 @@ This guide explains how your site is built, hosted, and updated. You don't need 
 11. [Common tasks (cheat sheet)](#11-common-tasks-cheat-sheet)
 12. [Backups, rollbacks, and "oh no"](#12-backups-rollbacks-and-oh-no)
 13. [Domains, DNS, and SSL](#13-domains-dns-and-ssl)
-14. [Where to get help](#14-where-to-get-help)
+14. [SEO & AEO — what's already shipped](#14-seo--aeo--whats-already-shipped)
+15. [Keywords we're targeting](#15-keywords-were-targeting)
+16. [SEO improvement playbook (highest-impact next moves)](#16-seo-improvement-playbook-highest-impact-next-moves)
+17. [Known issues & polish list](#17-known-issues--polish-list)
+18. [Where to get help](#18-where-to-get-help)
 
 ---
 
@@ -401,7 +405,192 @@ You almost never need the full chain — for everyday edits, only run the one or
 
 ---
 
-## 14. Where to get help
+## 14. SEO & AEO — what's already shipped
+
+Both **traditional SEO** (Google) and **Answer-Engine Optimization** (ChatGPT, Claude, Perplexity, Gemini, Google AI Overviews) are baked into the site.
+
+### 14.1 Technical SEO
+- ✅ **Static HTML** — sub-second load times globally via Cloudflare edge, no database, no PHP
+- ✅ **HTTPS everywhere** — automatic free SSL, no mixed-content warnings
+- ✅ **Mobile-first responsive design** — works on every screen size
+- ✅ **Auto-generated `sitemap.xml`** — currently 232 URLs, updated on every build
+- ✅ **`robots.txt`** — properly allows search engines, points to sitemap
+- ✅ **Clean URL structure** — `/web-design-spring-tx/` not `?p=123`
+- ✅ **Canonical tags** — every page has one, no duplicate-content issues
+- ✅ **WebP images** — modern compressed format for faster load
+- ✅ **Alt text on every image** — `alt_text.py` keeps it that way
+- ✅ **No broken WP links** — `cleanup.py` strips dead `/author/`, `/feed/`, `/wp-json/` references and the legacy AIO SEO schema
+
+### 14.2 On-page SEO
+- ✅ **Unique title tag per page** — *"[Page Topic] | First Byte"*
+- ✅ **Unique meta description per page** — populated for all 232 pages
+- ✅ **Open Graph + Twitter Card meta** — for clean social-share previews
+- ✅ **Structured H1/H2/H3 hierarchy** — one H1 per page
+- ✅ **Internal linking** — services ↔ service-areas ↔ industries ↔ blog all cross-link
+- ✅ **Plain text > images for content** — readable by every engine
+
+### 14.3 Local SEO
+- ✅ **ProfessionalService / LocalBusiness schema** on every page, with:
+  - `name`, `telephone`, `priceRange`, `address` (city + region only — SAB model, no street address)
+  - `serviceArea` as a `GeoCircle` (radius 48 km from The Woodlands)
+  - `areaServed` listing every served city
+  - `hasOfferCatalog` listing all 7 services
+  - `sameAs` linking to Facebook + LinkedIn
+- ✅ **140 location pages** — 7 services × 20 cities
+- ✅ **Service-area hub** at `/service-areas/` with an embedded Google Map
+- ✅ **Tap-to-call phone in every footer** — `tel:` links throughout
+- ✅ **City name in title + H1 + body** of every geo page
+
+### 14.4 AEO (Answer Engine Optimization)
+- ✅ **`llms.txt`** — AI-engine-readable site summary at the root
+- ✅ **FAQPage schema** on every service, geo, and industry page — structured Q&A that ChatGPT and Perplexity quote
+- ✅ **Conversational H2 questions** — formatted the way AI engines parse
+- ✅ **Short, citation-ready paragraphs** — easy for AI to lift verbatim
+- ✅ **BreadcrumbList schema** — helps engines understand site structure
+- ✅ **BlogPosting schema** on every blog post
+
+### 14.5 Content depth
+- ✅ **52 blog posts** (500–850 words each), targeting long-tail local queries
+- ✅ **8 industry pages** (retail, technology, service, banking, e-commerce, live entertainment, hospitality, restaurants) — each cross-links to all 7 services
+- ✅ **`/launch/` landing page** with `Offer` schema for the $250/mo plan
+- ✅ Original content on every page (no spun/duplicate text)
+
+### 14.6 Analytics
+- ⚠️ **Google Analytics 4 hook installed but not configured** — set `GA4_ID` in `enhance.py` to enable
+- ✅ **Cloudflare Web Analytics** — already live, anonymous, no cookies
+
+---
+
+## 15. Keywords we're targeting
+
+### 15.1 Primary commercial queries — service + city
+Every combination of these is a dedicated landing page.
+
+**Services (7):**
+1. Web Design & Development
+2. Performance Marketing
+3. Brand Development
+4. Influencer Marketing
+5. Search Engine Optimization (SEO)
+6. Paid Advertising
+7. Public Relations
+
+**Cities (20 — Greater Houston):**
+The Woodlands · Spring · Conroe · Montgomery · Tomball · Magnolia · Houston · Atascocita · Cypress · Humble · Huntsville · Katy · Kingwood · New Caney · Oak Ridge North · Pearland · Pinehurst · Porter · Shenandoah · Sugar Land · Willis
+
+Example targeted queries:
+- *"web design in The Woodlands TX"*
+- *"SEO company Spring TX"*
+- *"performance marketing agency Conroe"*
+- *"public relations firm Katy TX"*
+- *"brand development Houston"*
+
+### 15.2 Industry queries
+Each industry page targets industry + service combinations:
+
+| Industry | Sample queries |
+|---|---|
+| Retail | *"marketing agency for retail businesses"* |
+| Technology | *"SaaS marketing The Woodlands"* |
+| Service businesses | *"local SEO for service businesses"* |
+| Banking | *"financial brand development agency"* |
+| E-commerce | *"e-commerce marketing Houston"* |
+| Live entertainment | *"event marketing Texas"* |
+| Hospitality | *"hotel marketing agency"* |
+| Restaurants | *"restaurant marketing Houston"* |
+
+### 15.3 Informational / blog queries (long-tail, AEO)
+The 52 blog posts target queries like:
+- *"how to rank in Google Map Pack"*
+- *"how to get more Google reviews"*
+- *"local SEO checklist for small business"*
+- *"how to show up in ChatGPT search"*
+- *"how much does a website cost in The Woodlands"*
+- *"DIY vs hiring a marketing agency"*
+- *"website mistakes costing customers"*
+- *"how to find the right influencer"*
+- *"facebook & instagram ads for local businesses"*
+
+### 15.4 Brand & competitor queries
+- *"First Byte agency"* / *"firstbyte.agency"*
+- *"alternative to [competing agency]"*
+
+### 15.5 Launch-page commercial queries
+- *"$0 down website"*
+- *"$250 per month website"*
+- *"website monthly subscription Houston"*
+- *"website without upfront cost"*
+- *"AI-powered website agency"*
+
+---
+
+## 16. SEO improvement playbook (highest-impact next moves)
+
+Roughly in order of expected ROI. Most of the biggest wins are **off-site** — the technical foundation is already strong; authority signals are what move you up.
+
+### 16.1 Off-site (the biggest needles)
+
+1. **🥇 Claim and optimize your Google Business Profile.** Single highest-impact local-SEO move. Hide the address (SAB model), set service area to your 20 cities, add 10+ photos, post weekly. Aaron has a written GBP playbook.
+2. **🥈 Get Google reviews — fast.** Aim for 25+ five-star reviews in the first 90 days. Reply to every one. Reviews are the strongest local ranking factor after GBP optimization.
+3. **🥉 Local citations.** Submit your business (NAP-consistent — same name, phone, *no* street address) to: BBB, Yelp, Foursquare, Apple Maps, Bing Places, Nextdoor Business, Houston Chamber of Commerce, The Woodlands Chamber, plus industry-specific directories. NAP must match GBP exactly.
+4. **Build local backlinks.** Local press, podcast guesting, sponsoring a Little League team and getting a link from their site, guest posts on Houston-area business blogs. Quality > quantity.
+5. **Set up Google Search Console + Bing Webmaster Tools.** Submit `sitemap.xml` to both. Watch indexation and ranking-keyword trends. Both are free.
+
+### 16.2 On-site (small wins, sometimes high effort)
+
+6. **Set `GA4_ID` and turn on analytics** — currently off. You can't improve what you don't measure.
+7. **Verify GBP geo coordinates.** Schema currently uses approximate `(30.1693, -95.4646)`. Once GBP is claimed, copy the exact lat/long from there into `enhance.py`.
+8. **Connect Resend** — set `RESEND_API_KEY`, `CONTACT_TO`, `CONTACT_FROM` env vars in Cloudflare Pages. Until then forms show *"not configured"* error.
+9. **Bind `LEADS_KV`** — gives the social-proof toasts real data instead of staying silent.
+10. **Add `AggregateRating` schema** — once you have 10+ Google reviews, add this block to the LocalBusiness schema. Triggers star ratings in search results.
+11. **Image SEO pass** — rename WP-era opaque filenames (e.g. `474564578_122...jpg`) to descriptive slugs like `web-design-team-the-woodlands.jpg`.
+12. **Page-weight cleanup on homepage + `/work/*`.** They still load the legacy WP theme bundle (jQuery, Foundation, Slick, Fancybox, Select2, lazyload). Re-template these as static pages to cut ~200 KB of unused JS.
+13. **Add `VideoObject` schema + a YouTube channel.** Video transcripts on the page are great for SEO and AEO. YouTube is the #2 search engine.
+14. **Add `HowTo` schema** to the most-helpful blog posts for rich-result eligibility.
+15. **Internal-link audit.** Spot-check that every blog post links to at least one service and one geo page, and vice versa.
+
+### 16.3 AEO extras
+
+16. **Expand `llms.txt`** with a concise FAQ block ("What does First Byte do?", "Where are you located?", "What are your prices?") — this is exactly what AI engines quote.
+17. **Add `Organization` schema** with `founder` + `numberOfEmployees` + `slogan` — AI engines parse these to characterize your business.
+18. **Add a "Press / News" section** even if it's 3–5 mentions. AEO engines weight third-party signals heavily.
+
+### 16.4 Paid (off-site, fast)
+
+19. **Google Ads on your strongest commercial queries** while organic ramps. Brand-name protection ads are cheap and convert.
+20. **Meta Ads retargeting** to anyone who visited `/launch/` and didn't sign up.
+
+---
+
+## 17. Known issues & polish list
+
+A running list of non-critical bugs, polish items, and "fix this someday" notes. Most are minor — the site is in good shape overall.
+
+### 17.1 Fixed in this update
+- ✅ **Legacy AIO SEO schema removed.** WP-shell pages (homepage + 17 case studies + 6 service-tax pages) were carrying a duplicate, broken legacy schema script with malformed URLs (`\/\/wp-content/...`). `cleanup.py` now strips it; the cleanup ran across 25 pages and brought homepage from 2 schema scripts down to 1 clean one.
+
+### 17.2 Open polish items
+
+| # | Item | Impact | Effort |
+|---|---|---|---|
+| 1 | Homepage + `/work/*` pages still load the legacy WP theme JS bundle (jQuery, Foundation, Slick, Fancybox, Select2, lazyload). | ~200 KB extra page weight. | Medium — needs a clean rebuild of those pages on the static theme. |
+| 2 | Approximate geo coordinates in `LocalBusiness` schema (`30.1693, -95.4646`). | Local SEO accuracy. | Trivial — verify against GBP, update `enhance.py`. |
+| 3 | `GA4_ID` not set in `enhance.py`. | No analytics, can't measure SEO progress. | Trivial — set the constant, rebuild. |
+| 4 | Cloudflare KV `LEADS_KV` not bound. | Social-proof toasts stay hidden. | Trivial — create namespace + bind. |
+| 5 | Resend env vars (`RESEND_API_KEY`, `CONTACT_TO`, `CONTACT_FROM`) not set in Cloudflare Pages. | Contact form shows graceful "not configured" error. | Trivial — set env vars, redeploy. |
+| 6 | Sign-up form on `/launch/` still offers *"2–3 weeks"* as a timeline option while build time copy says *"2–3 days"*. | Minor inconsistency. | Trivial — could rename to *"Within a week"*. |
+| 7 | Some geo pages may be slightly thinner than the recommended 700+ words. | Could leave ranking on the table for competitive cities. | Medium — expand the templates in `geo_pages.py`. |
+| 8 | No `AggregateRating` schema yet. | No star-rating rich results in Google. | Easy once you have 10+ Google reviews. |
+| 9 | `Organization` schema is missing `founder` / `numberOfEmployees` / `slogan`. | Minor AEO signal. | Trivial — extend `enhance.py`. |
+| 10 | Image filenames are mostly WP-era opaque IDs. | Image-search SEO. | Effort — rename + update references. |
+| 11 | No video content or `VideoObject` schema. | Missed AEO + video-search visibility. | High — create videos first. |
+| 12 | A few of Sean's social profiles aren't yet in `sameAs` (only Facebook + LinkedIn there). | Minor AEO signal. | Trivial — add Instagram / YouTube / TikTok URLs to the `sameAs` array in `enhance.py`. |
+
+Items #2–#5 are configuration changes you can knock out in 30 minutes total once you're ready.
+
+---
+
+## 18. Where to get help
 
 * **Aaron Phillips** built and manages this site. Email or call him — he has full context on every script and decision.
 * **Cloudflare Pages docs:** [developers.cloudflare.com/pages](https://developers.cloudflare.com/pages/)
