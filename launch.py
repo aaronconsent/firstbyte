@@ -749,7 +749,7 @@ def section_form():
       <div class="lp-field"><label>Desired launch timeline</label>
         <div class="lp-radios">
           <label><input type="radio" name="timeline" value="ASAP"> 🚀 ASAP</label>
-          <label><input type="radio" name="timeline" value="2–3 weeks"> ⚡ 2–3 weeks</label>
+          <label><input type="radio" name="timeline" value="Within a week"> ⚡ Within a week</label>
           <label><input type="radio" name="timeline" value="1 month"> 📅 1 month</label>
           <label><input type="radio" name="timeline" value="2+ months"> 🕒 2+ months</label>
           <label><input type="radio" name="timeline" value="Flexible — your recommendation"> 🤷 Flexible — your recommendation</label>

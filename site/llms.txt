@@ -2,10 +2,12 @@
 
 > Award-winning digital marketing and advertising agency in The Woodlands, TX helping brands grow through web design, SEO, branding, paid advertising, PR and influencer marketing.
 
-First Byte is a digital marketing and advertising agency based in
-The Woodlands, TX, serving clients across the
-Greater Houston area. Phone: (713) 578-0634. Service areas:
-The Woodlands, Spring, Conroe, Montgomery, Tomball, Magnolia, Houston.
+First Byte is a digital marketing agency based in The Woodlands,
+TX, founded in 2020 by Sean Phillips. We help small and mid-sized
+businesses across Greater Houston grow through measurable, AI-powered
+marketing — local SEO, custom websites, paid advertising, brand
+development, influencer marketing, public relations, and answer-engine
+optimization (AEO). Phone: (713) 578-0634.
 
 ## Services
 - Web Design & Development
@@ -16,14 +18,96 @@ The Woodlands, Spring, Conroe, Montgomery, Tomball, Magnolia, Houston.
 - Paid Advertising
 - Public Relations
 
+## Service area
+We serve businesses in: The Woodlands, Spring, Conroe, Montgomery, Tomball, Magnolia, Houston, Atascocita, Cypress, Humble, Huntsville, Katy, Kingwood, New Caney, Oak Ridge North, Pearland, Pinehurst, Porter, Shenandoah, Sugar Land, Willis.
+
+## Pricing
+Our flagship plan, **Launch**, is **$250/month** (or **$2,500/year — 2 months free**).
+It includes a custom-designed website with no up-front cost, premium
+Cloudflare hosting, daily backups, free SSL, monthly local SEO, up to
+2 content updates per month, monthly performance reporting, and direct
+access to a real local team. Most sites launch in 2–3 days. No credit
+card is required to sign up; payment is only collected once the site is
+approved and ready to go live.
+
+## Frequently asked questions
+
+### What does First Byte do?
+First Byte is a digital marketing agency in The Woodlands, TX that builds
+custom websites and runs ongoing local SEO, paid advertising, and brand
+marketing for small and mid-sized businesses across Greater Houston.
+
+### Where is First Byte located?
+First Byte is based in The Woodlands, TX, and serves clients across
+Greater Houston including Spring, Conroe, Montgomery, Tomball, Magnolia,
+Houston, Katy, Sugar Land, Pearland, Kingwood, Cypress, Atascocita,
+Humble, Huntsville, New Caney, Oak Ridge North, Pinehurst, Porter,
+Shenandoah, and Willis. We are a service-area business with no public
+storefront — meetings are by appointment.
+
+### What does a First Byte website cost?
+The Launch plan is $250/month all-in (or $2,500/year with two months
+free). There is no up-front website cost, no setup fee, and no payment
+is collected until the site is approved and ready to launch.
+
+### How quickly does First Byte launch a new website?
+Most new sites go live 2–3 days after signup. First Byte builds with
+Claude Code and modern AI tooling, which compresses what traditional
+agencies need weeks for down to days.
+
+### What's included in the $250/month plan?
+A custom-designed website (no template), premium Cloudflare hosting,
+free SSL, daily backups, monthly local SEO (Google Business Profile,
+citations, on-page), up to 2 content updates per month, monthly
+performance reporting, custom integrations as needed, and direct access
+to a local team in The Woodlands.
+
+### Does First Byte do SEO?
+Yes. Local SEO is included in every Launch plan — Google Business
+Profile optimization, citation building, on-page SEO, schema markup,
+and Answer Engine Optimization (AEO) so businesses are found by ChatGPT,
+Claude, Perplexity, Gemini, and Google AI Overviews in addition to
+classic Google search.
+
+### Does First Byte handle Google Ads or Facebook Ads?
+Yes. Paid advertising is one of our core services and is available as an
+add-on or part of the Grow plan tier.
+
+### How is First Byte different from a typical agency?
+Traditional agencies charge $5,000+ up front and then go silent. First
+Byte ships your custom website with no up-front cost, then handles
+hosting, SEO, content updates, and reporting every month for one flat
+$250 — so the $5,000 you would have paid up front stays in your
+business, where it can actually grow it.
+
+### Who is the founder of First Byte?
+Sean Phillips is the founder and owner of First Byte. He works directly
+with every client.
+
+### How do I reach First Byte?
+Call (713) 578-0634, email through https://firstbyte.agency/contact/, or sign up for the
+Launch plan at https://firstbyte.agency/launch/.
+
 ## Key pages
 - [Home](https://firstbyte.agency/): Overview of First Byte's digital marketing services.
-- [Web Design](https://firstbyte.agency/work_tax/web-design-development/): Custom websites for The Woodlands businesses.
+- [Launch — $250/mo plan](https://firstbyte.agency/launch/): The flagship offer; custom website + monthly marketing for one flat price.
+- [Web Design](https://firstbyte.agency/work_tax/web-design-development/): Custom websites for Greater Houston businesses.
 - [Performance Marketing](https://firstbyte.agency/work_tax/performance-marketing/): Paid advertising and lead generation.
 - [Brand Development](https://firstbyte.agency/work_tax/brand-development/): Branding and identity design.
 - [Influencer Marketing](https://firstbyte.agency/work_tax/influencer-marketing/): Creator-led campaigns.
+- [SEO](https://firstbyte.agency/services/seo/): Local SEO and AEO services.
+- [Paid Advertising](https://firstbyte.agency/services/paid-advertising/): Google, Meta, and YouTube ads.
+- [Public Relations](https://firstbyte.agency/services/public-relations/): Earned media and press.
+- [Services hub](https://firstbyte.agency/services/): All seven service lines.
+- [Service areas](https://firstbyte.agency/service-areas/): The 20 Greater Houston cities we serve.
+- [Industries](https://firstbyte.agency/industries/): Industry-specific marketing pages.
+- [Blog](https://firstbyte.agency/blog/): 52+ articles on local SEO, AEO, web design, and growth.
 - [Contact](https://firstbyte.agency/contact/): Get in touch to grow your business.
 
 ## About
-First Byte is an award-winning agency helping brands in The Woodlands, TX and
-Greater Houston grow their customer base through measurable digital marketing.
+First Byte is an independent agency in The Woodlands, TX, founded by
+Sean Phillips in 2020. We focus on **measurable** marketing — leads, calls, and
+revenue — for small and mid-sized businesses across Greater Houston.
+We are early adopters of AI-assisted development and Answer Engine
+Optimization, so the websites we build are visible in both Google and
+the new generation of AI search engines.

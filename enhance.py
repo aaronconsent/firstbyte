@@ -40,12 +40,31 @@ BUSINESS = {
         "https://www.facebook.com/FirstByteAgency",
         "https://www.linkedin.com/company/firstbyteagency/",
     ],
-    "areaServed": ["The Woodlands", "Spring", "Conroe", "Montgomery",
-                   "Tomball", "Magnolia", "Houston"],
+    # Full Greater-Houston coverage — matches the 20 geo pages we ship.
+    "areaServed": ["The Woodlands", "Spring", "Conroe", "Montgomery", "Tomball",
+                   "Magnolia", "Houston", "Atascocita", "Cypress", "Humble",
+                   "Huntsville", "Katy", "Kingwood", "New Caney",
+                   "Oak Ridge North", "Pearland", "Pinehurst", "Porter",
+                   "Shenandoah", "Sugar Land", "Willis"],
     "services": ["Web Design & Development", "Performance Marketing",
                  "Brand Development", "Influencer Marketing",
                  "Search Engine Optimization", "Paid Advertising",
                  "Public Relations"],
+    # AEO / Organization metadata.
+    "slogan": "Grow your business, one byte at a time.",
+    "founder": "Sean Phillips",
+    "foundingDate": "2020",
+    "numberOfEmployees": "2-10",
+    "knowsAbout": ["Local SEO", "Answer Engine Optimization",
+                   "Web Design", "Brand Development", "Paid Advertising",
+                   "Public Relations", "Influencer Marketing",
+                   "Conversion Rate Optimization", "Content Marketing",
+                   "Google Business Profile optimization"],
+    "keywords": "digital marketing agency, local SEO, web design, "
+                "The Woodlands TX, Greater Houston, AEO, paid advertising, "
+                "brand development, influencer marketing, public relations",
+    "paymentAccepted": "Credit Card, Bank Transfer",
+    "currenciesAccepted": "USD",
 }
 
 # ---- Money-page overrides: path -> (h1, title, meta) ----------------------
@@ -95,39 +114,78 @@ def rel_url(path):
 # ---------------------------------------------------------------------------
 def local_business_jsonld():
     b = BUSINESS
-    data = {
-        "@context": "https://schema.org",
-        "@type": "ProfessionalService",
-        "@id": BASE + "/#localbusiness",
-        "name": b["name"],
-        "description": b["description"],
-        "url": BASE + "/",
-        "telephone": b["telephone"],
-        "image": b["logo"],
-        "logo": b["logo"],
-        "priceRange": "$$",
-        "address": {
-            "@type": "PostalAddress",
-            "addressLocality": b["addressLocality"],
-            "addressRegion": b["addressRegion"],
-            "addressCountry": b["addressCountry"],
+    org_id = BASE + "/#organization"
+    graph = [
+        # Organization node — strong AEO signal so AI engines characterize the business.
+        {
+            "@type": "Organization",
+            "@id": org_id,
+            "name": b["name"],
+            "legalName": b["legalName"],
+            "url": BASE + "/",
+            "logo": {"@type": "ImageObject", "url": b["logo"]},
+            "image": b["logo"],
+            "description": b["description"],
+            "slogan": b["slogan"],
+            "foundingDate": b["foundingDate"],
+            "founder": {"@type": "Person", "name": b["founder"]},
+            "numberOfEmployees": b["numberOfEmployees"],
+            "knowsAbout": b["knowsAbout"],
+            "keywords": b["keywords"],
+            "sameAs": b["sameAs"],
+            "contactPoint": {
+                "@type": "ContactPoint",
+                "telephone": b["telephone"],
+                "contactType": "customer service",
+                "areaServed": "US",
+                "availableLanguage": ["English"],
+            },
         },
-        "serviceArea": {
-            "@type": "GeoCircle",
-            "geoMidpoint": {"@type": "GeoCoordinates", "latitude": b["lat"], "longitude": b["lng"]},
-            "geoRadius": str(b["serviceRadius_m"]),
+        # LocalBusiness / ProfessionalService node — local SEO + ranking signal.
+        {
+            "@type": "ProfessionalService",
+            "@id": BASE + "/#localbusiness",
+            "name": b["name"],
+            "description": b["description"],
+            "url": BASE + "/",
+            "telephone": b["telephone"],
+            "image": b["logo"],
+            "logo": b["logo"],
+            "priceRange": "$$",
+            "paymentAccepted": b["paymentAccepted"],
+            "currenciesAccepted": b["currenciesAccepted"],
+            "parentOrganization": {"@id": org_id},
+            "address": {
+                "@type": "PostalAddress",
+                "addressLocality": b["addressLocality"],
+                "addressRegion": b["addressRegion"],
+                "addressCountry": b["addressCountry"],
+            },
+            "serviceArea": {
+                "@type": "GeoCircle",
+                "geoMidpoint": {"@type": "GeoCoordinates", "latitude": b["lat"], "longitude": b["lng"]},
+                "geoRadius": str(b["serviceRadius_m"]),
+            },
+            "areaServed": [{"@type": "City", "name": c} for c in b["areaServed"]],
+            "sameAs": b["sameAs"],
+            "hasOfferCatalog": {
+                "@type": "OfferCatalog",
+                "name": "Digital Marketing Services",
+                "itemListElement": [
+                    {"@type": "Offer", "itemOffered": {"@type": "Service", "name": s}}
+                    for s in b["services"]
+                ],
+            },
+            "contactPoint": {
+                "@type": "ContactPoint",
+                "telephone": b["telephone"],
+                "contactType": "customer service",
+                "areaServed": [{"@type": "City", "name": c} for c in b["areaServed"]],
+                "availableLanguage": ["English"],
+            },
         },
-        "areaServed": [{"@type": "City", "name": c} for c in b["areaServed"]],
-        "sameAs": b["sameAs"],
-        "hasOfferCatalog": {
-            "@type": "OfferCatalog",
-            "name": "Digital Marketing Services",
-            "itemListElement": [
-                {"@type": "Offer", "itemOffered": {"@type": "Service", "name": s}}
-                for s in b["services"]
-            ],
-        },
-    }
+    ]
+    data = {"@context": "https://schema.org", "@graph": graph}
     return json.dumps(data, ensure_ascii=False, separators=(",", ":"))
 
 
@@ -257,28 +315,114 @@ def write_sitemap():
 
 def write_llms():
     b = BUSINESS
+    services_block = "".join(f"- {s}\n" for s in b["services"])
+    areas_block = ", ".join(b["areaServed"])
     txt = f"""# First Byte
 
 > {b['description']}
 
-First Byte is a digital marketing and advertising agency based in
-{b['addressLocality']}, {b['addressRegion']}, serving clients across the
-Greater Houston area. Phone: (713) 578-0634. Service areas:
-{', '.join(b['areaServed'])}.
+First Byte is a digital marketing agency based in {b['addressLocality']},
+{b['addressRegion']}, founded in {b['foundingDate']} by {b['founder']}. We help small and mid-sized
+businesses across Greater Houston grow through measurable, AI-powered
+marketing — local SEO, custom websites, paid advertising, brand
+development, influencer marketing, public relations, and answer-engine
+optimization (AEO). Phone: (713) 578-0634.
 
 ## Services
-""" + "".join(f"- {s}\n" for s in b["services"]) + f"""
+{services_block}
+## Service area
+We serve businesses in: {areas_block}.
+
+## Pricing
+Our flagship plan, **Launch**, is **$250/month** (or **$2,500/year — 2 months free**).
+It includes a custom-designed website with no up-front cost, premium
+Cloudflare hosting, daily backups, free SSL, monthly local SEO, up to
+2 content updates per month, monthly performance reporting, and direct
+access to a real local team. Most sites launch in 2–3 days. No credit
+card is required to sign up; payment is only collected once the site is
+approved and ready to go live.
+
+## Frequently asked questions
+
+### What does First Byte do?
+First Byte is a digital marketing agency in The Woodlands, TX that builds
+custom websites and runs ongoing local SEO, paid advertising, and brand
+marketing for small and mid-sized businesses across Greater Houston.
+
+### Where is First Byte located?
+First Byte is based in The Woodlands, TX, and serves clients across
+Greater Houston including Spring, Conroe, Montgomery, Tomball, Magnolia,
+Houston, Katy, Sugar Land, Pearland, Kingwood, Cypress, Atascocita,
+Humble, Huntsville, New Caney, Oak Ridge North, Pinehurst, Porter,
+Shenandoah, and Willis. We are a service-area business with no public
+storefront — meetings are by appointment.
+
+### What does a First Byte website cost?
+The Launch plan is $250/month all-in (or $2,500/year with two months
+free). There is no up-front website cost, no setup fee, and no payment
+is collected until the site is approved and ready to launch.
+
+### How quickly does First Byte launch a new website?
+Most new sites go live 2–3 days after signup. First Byte builds with
+Claude Code and modern AI tooling, which compresses what traditional
+agencies need weeks for down to days.
+
+### What's included in the $250/month plan?
+A custom-designed website (no template), premium Cloudflare hosting,
+free SSL, daily backups, monthly local SEO (Google Business Profile,
+citations, on-page), up to 2 content updates per month, monthly
+performance reporting, custom integrations as needed, and direct access
+to a local team in The Woodlands.
+
+### Does First Byte do SEO?
+Yes. Local SEO is included in every Launch plan — Google Business
+Profile optimization, citation building, on-page SEO, schema markup,
+and Answer Engine Optimization (AEO) so businesses are found by ChatGPT,
+Claude, Perplexity, Gemini, and Google AI Overviews in addition to
+classic Google search.
+
+### Does First Byte handle Google Ads or Facebook Ads?
+Yes. Paid advertising is one of our core services and is available as an
+add-on or part of the Grow plan tier.
+
+### How is First Byte different from a typical agency?
+Traditional agencies charge $5,000+ up front and then go silent. First
+Byte ships your custom website with no up-front cost, then handles
+hosting, SEO, content updates, and reporting every month for one flat
+$250 — so the $5,000 you would have paid up front stays in your
+business, where it can actually grow it.
+
+### Who is the founder of First Byte?
+{b['founder']} is the founder and owner of First Byte. He works directly
+with every client.
+
+### How do I reach First Byte?
+Call (713) 578-0634, email through {BASE}/contact/, or sign up for the
+Launch plan at {BASE}/launch/.
+
 ## Key pages
 - [Home]({BASE}/): Overview of First Byte's digital marketing services.
-- [Web Design]({BASE}/work_tax/web-design-development/): Custom websites for The Woodlands businesses.
+- [Launch — $250/mo plan]({BASE}/launch/): The flagship offer; custom website + monthly marketing for one flat price.
+- [Web Design]({BASE}/work_tax/web-design-development/): Custom websites for Greater Houston businesses.
 - [Performance Marketing]({BASE}/work_tax/performance-marketing/): Paid advertising and lead generation.
 - [Brand Development]({BASE}/work_tax/brand-development/): Branding and identity design.
 - [Influencer Marketing]({BASE}/work_tax/influencer-marketing/): Creator-led campaigns.
+- [SEO]({BASE}/services/seo/): Local SEO and AEO services.
+- [Paid Advertising]({BASE}/services/paid-advertising/): Google, Meta, and YouTube ads.
+- [Public Relations]({BASE}/services/public-relations/): Earned media and press.
+- [Services hub]({BASE}/services/): All seven service lines.
+- [Service areas]({BASE}/service-areas/): The 20 Greater Houston cities we serve.
+- [Industries]({BASE}/industries/): Industry-specific marketing pages.
+- [Blog]({BASE}/blog/): 52+ articles on local SEO, AEO, web design, and growth.
 - [Contact]({BASE}/contact/): Get in touch to grow your business.
 
 ## About
-First Byte is an award-winning agency helping brands in The Woodlands, TX and
-Greater Houston grow their customer base through measurable digital marketing.
+First Byte is an independent agency in The Woodlands, TX, founded by
+{b['founder']} in {b['foundingDate']}. We focus on **measurable** marketing — leads, calls, and
+revenue — for small and mid-sized businesses across Greater Houston.
+We are early adopters of AI-assisted development and Answer Engine
+Optimization, so the websites we build are visible in both Google and
+the new generation of AI search engines.
 """
     with open(os.path.join(OUT, "llms.txt"), "w") as f:
         f.write(txt)

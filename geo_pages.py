@@ -36,6 +36,11 @@ SERVICES = {
         "faq": ("How much does web design cost in {city}?",
                 "Most {city} small-business websites range from a few thousand dollars to the low five figures depending on scope. Book a call for a fixed quote."),
         "opener": "A slow or dated website quietly sends {city} customers to your competitors every day.",
+        "process": [
+            ("Discover", "We start with a short call to learn what {city} customers you want, how you want to be found, and what's working (or leaking leads) today."),
+            ("Design & build", "We design a custom site — no template — wired for speed, mobile, and conversion. You see and approve every page before it ships."),
+            ("Launch & grow", "We launch, hand it back ready to go, and keep it improving month after month with measurable SEO and content updates."),
+        ],
     },
     "performance-marketing": {
         "name": "Performance Marketing",
@@ -51,6 +56,11 @@ SERVICES = {
         "faq": ("What ad budget do {city} businesses need to start?",
                 "We recommend a minimum monthly media budget so campaigns gather enough data to optimize, then right-size it to the {city} market on a strategy call."),
         "opener": "Ad spend without strategy is just expensive guessing for {city} businesses.",
+        "process": [
+            ("Audit", "We audit your current funnel, offer, and any past ad data for {city} relevance, then map the customer journey end to end."),
+            ("Launch", "We build landing pages, dial in audience targeting around {city} and the surrounding market, and launch with full conversion tracking."),
+            ("Scale what works", "Weekly optimization rolls budget into the creatives and audiences delivering real {city} leads — and ruthlessly kills the rest."),
+        ],
     },
     "brand-development": {
         "name": "Brand Development",
@@ -66,6 +76,11 @@ SERVICES = {
         "faq": ("Can you refresh an existing {city} brand?",
                 "Absolutely. We do both ground-up brand builds and strategic refreshes for established {city} businesses."),
         "opener": "In {city}, a strong brand is the difference between being a choice and being the choice.",
+        "process": [
+            ("Position", "We start with how {city} customers actually choose, then craft positioning that makes the choice obvious."),
+            ("Design", "We build the full identity — logo, color, type, voice — wired for both digital and print, ready for the {city} market."),
+            ("Apply & launch", "Brand guidelines, asset libraries, and launch collateral so your team can stay consistent everywhere customers see you."),
+        ],
     },
     "influencer-marketing": {
         "name": "Influencer Marketing",
@@ -81,6 +96,11 @@ SERVICES = {
         "faq": ("Does influencer marketing work for {city} businesses?",
                 "Yes. Local and micro-influencers often drive the highest conversion for {city} service businesses because their audiences trust them and are nearby."),
         "opener": "The right creator can put your {city} brand in front of thousands of engaged local buyers.",
+        "process": [
+            ("Source", "We identify creators whose {city} audience actually overlaps with your customers — real engagement, not vanity follower counts."),
+            ("Brief & approve", "We brief, manage, and approve every piece of content so your brand stays on-message and FTC-compliant."),
+            ("Track & repeat", "We measure conversions, not just impressions, then re-invest in the creators delivering real {city} customers."),
+        ],
     },
     "seo": {
         "name": "SEO",
@@ -96,6 +116,11 @@ SERVICES = {
         "faq": ("How long does SEO take to work in {city}?",
                 "Local SEO usually shows movement in 3–6 months and compounds from there. We prioritize the fastest local wins first for {city} businesses."),
         "opener": "If customers can't find you on Google, growth in {city} stalls before it starts.",
+        "process": [
+            ("Audit & strategy", "We audit your site, Google Business Profile, citations, and the {city} competitive landscape, then map the fastest wins."),
+            ("Build the foundation", "Technical SEO, schema, on-page optimization, GBP cleanup, and AEO content tuned for {city} customer searches."),
+            ("Compound", "Monthly content and citation work that keeps you climbing in {city} search and the new AI engines."),
+        ],
     },
     "paid-advertising": {
         "name": "Paid Advertising",
@@ -111,6 +136,11 @@ SERVICES = {
         "faq": ("How fast will paid ads bring {city} leads?",
                 "Paid campaigns can generate {city} leads within days of launch, then improve as we optimize toward your best-performing audiences over the first 30–60 days."),
         "opener": "Want new customers in {city} this week, not next quarter?",
+        "process": [
+            ("Setup", "Account structure, conversion tracking, and {city}-tight targeting on day one so every dollar is measurable from the start."),
+            ("Launch", "Tightly-themed campaigns with landing pages built for the {city} customer journey — speed, clarity, single CTA."),
+            ("Optimize", "We move budget toward what's working weekly, with transparent reporting tied to leads and revenue, not impressions."),
+        ],
     },
     "public-relations": {
         "name": "Public Relations",
@@ -126,6 +156,11 @@ SERVICES = {
         "faq": ("Is PR worth it for a small {city} business?",
                 "Yes — local press and a strong reputation build the trust that turns {city} searchers into customers, and it amplifies every other channel you run."),
         "opener": "Great {city} businesses deserve to be known, not just found.",
+        "process": [
+            ("Position", "We find the story angles {city} press and customers actually care about — local impact, expertise, milestones."),
+            ("Pitch", "We pitch {city} and Greater-Houston media, manage interviews, and place the story in front of the right audience."),
+            ("Amplify", "We promote the coverage on your site, social, and search so it earns trust well beyond the original publication."),
+        ],
     },
 }
 
@@ -208,10 +243,43 @@ def inner_main(svc_slug, svc, city_slug, city):
          f"Yes — First Byte is based in nearby The Woodlands and regularly delivers {svc['name'].lower()} for {cn} businesses across every industry."),
         (f"Will this help my {cn} business get found online?",
          f"That's the goal of every engagement. We build with local search in mind so {cn} customers find you first."),
+        (f"How is First Byte different from other {cn} agencies?",
+         f"We're a local Greater-Houston team, not a national factory. Every {cn} project is led by a senior strategist, built with modern AI-assisted tooling so we ship in days instead of months, and tied to leads and revenue — not vanity metrics."),
+        (f"Do you serve businesses outside {cn}?",
+         "Yes — we serve the whole Greater Houston area from our base in The Woodlands, including Spring, Conroe, Montgomery, Tomball, Magnolia, Katy, Sugar Land, Pearland, Kingwood, Cypress, Atascocita, Humble, Huntsville and beyond."),
+        (f"What does it cost to get started?",
+         "Our flagship Launch plan is $250/month all-in, with no up-front website cost and no payment collected until your site is approved and ready to go live. See /launch/ for the full breakdown."),
     ]
     bullets = "".join(f"<li>{tu.esc(b)}</li>" for b in svc["benefits"])
     h1_html = f'{tu.esc(svc["name"])} in <span class="accent">{tu.esc(cn)}, TX</span>'
     lead = f"{opener} {svc['value']}"
+
+    # Per-service 3-step process, with city woven into each step.
+    proc_html = ""
+    if svc.get("process"):
+        steps = "".join(
+            f'<div class="fb-card"><div class="fb-ico"><b>{i+1}</b></div>'
+            f'<h3>{tu.esc(name)}</h3><p>{tu.esc(text.format(city=cn))}</p></div>'
+            for i, (name, text) in enumerate(svc["process"])
+        )
+        proc_html = (
+            '<section class="fb-section"><div class="fb-wrap">'
+            f'<div class="fb-section-head"><h2 class="fb-h2">How we deliver {tu.esc(svc["name"].lower())} for {tu.esc(cn)} businesses</h2>'
+            f'<p class="fb-sub">A clear, three-step approach so you always know what\'s next.</p></div>'
+            f'<div class="fb-grid">{steps}</div></div></section>'
+        )
+
+    # Related resources — internal-link audit cross-links to industries, blog, and other services.
+    related = (
+        '<section class="fb-section"><div class="fb-wrap fb-narrow"><div class="fb-prose">'
+        f'<h2 class="fb-h2" style="font-size:1.4rem;margin-bottom:.8rem">Related resources for {tu.esc(cn)} businesses</h2>'
+        f'<p>Explore our full <a href="/services/">services hub</a> or browse the <a href="/industries/">industries we serve</a>. '
+        f'Already have a website that\'s underperforming? Read <a href="/blog/10-website-mistakes-costing-customers/">10 website mistakes costing customers</a> '
+        f'or our <a href="/blog/local-seo-checklist-the-woodlands/">local SEO checklist</a>. '
+        f'Ready for a quote? Check out the <a href="/launch/">$250/mo Launch plan</a> or <a href="{tu.CONTACT}">get in touch</a>.</p>'
+        '</div></div></section>'
+    )
+
     inner = (
         tu.hero(svc["name"], h1_html, lead)
         + f'<section class="fb-section"><div class="fb-wrap fb-narrow"><div class="fb-prose">'
@@ -221,9 +289,11 @@ def inner_main(svc_slug, svc, city_slug, city):
         + f'<section class="fb-section"><div class="fb-wrap">'
           f'<div class="fb-section-head"><h2 class="fb-h2">What’s included</h2></div>'
           f'<ul class="fb-checklist">{bullets}</ul></div></section>'
+        + proc_html
         + f'<section class="fb-section"><div class="fb-wrap">'
           f'<div class="fb-section-head"><h2 class="fb-h2">{tu.esc(svc["name"])} in {tu.esc(cn)} — FAQs</h2></div>'
           f'{tu.faqlist(faqs)}</div></section>'
+        + related
         + tu.cta(f"Ready to grow your {cn} business?",
                  "Let’s talk about what First Byte can do for you.")
     )
