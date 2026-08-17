@@ -33,8 +33,8 @@ This guide explains how your site is built, hosted, and updated. You don't need 
 
 * **Public URL:** [firstbyte.agency](https://firstbyte.agency)
 * **What it is:** A static website — every page is a pre-built HTML file. No database, no PHP, no plugins, no admin login to babysit.
-* **Where the source lives:** GitHub — `github.com/aaronconsent/firstbyte`
-* **Where it's hosted:** Cloudflare Pages, served from 300+ edge cities worldwide.
+* **Where the source lives:** GitHub — `github.com/heyaaronmarketing/firstbyte`
+* **Where it's hosted:** Cloudflare Workers with Static Assets, served from 300+ edge cities worldwide. A tiny Worker script handles the two API endpoints (`/api/contact`, `/api/recent-leads`); everything else is served straight from the static `site/` directory.
 * **How updates work:** Edit on GitHub (or locally) → push to `main` branch → Cloudflare builds and deploys automatically.
 * **WordPress status:** The original WordPress site is **frozen and no longer the source of truth**. All edits happen in this static repo.
 * **Site size:** ~238 pages (home, services, geo pages, industries, blog, launch landing page, etc.).
@@ -46,11 +46,12 @@ This guide explains how your site is built, hosted, and updated. You don't need 
 | Layer | What it is | Where it lives |
 |---|---|---|
 | **Domain & DNS** | Registrar of record + DNS routing | Cloudflare DNS |
-| **CDN + hosting** | Edge cache + SSL + DDoS protection | Cloudflare Pages |
-| **Source code** | All files for the site | GitHub repo `aaronconsent/firstbyte` |
+| **CDN + hosting** | Edge cache + SSL + DDoS protection | Cloudflare Workers (Static Assets) |
+| **Source code** | All files for the site | GitHub repo `heyaaronmarketing/firstbyte` |
 | **Frontend** | Plain HTML, CSS, vanilla JavaScript | `site/` folder in repo |
 | **Build pipeline** | Python scripts that generate pages | Repo root (`*.py` files) |
-| **Server-side functions** | `/api/contact`, `/api/recent-leads` | `functions/api/*.js` (Cloudflare Workers) |
+| **Worker config** | `wrangler.jsonc` at repo root (assets binding, KV, env vars) | Repo root |
+| **Server-side (edge) API** | `/api/contact`, `/api/recent-leads` | `src/worker.js` (single Worker script) |
 | **Email send** | Transactional email | Resend (resend.com) |
 | **Social proof storage** | Anonymized recent-lead names | Cloudflare KV (namespace `LEADS_KV`) |
 | **Analytics (optional)** | Google Analytics 4 | Set `GA4_ID` in `enhance.py` |
@@ -63,15 +64,15 @@ Nothing is on a self-managed server. Nothing requires updates or security patche
 
 ### 3.1 The repository
 
-* **URL:** [github.com/aaronconsent/firstbyte](https://github.com/aaronconsent/firstbyte)
-* **Main branch:** `main` — every commit here triggers a production deploy on Cloudflare.
+* **URL:** [github.com/heyaaronmarketing/firstbyte](https://github.com/heyaaronmarketing/firstbyte)
+* **Main branch:** `main` — every commit here triggers a production deploy on Cloudflare (via the Workers Builds GitHub integration).
 
 ### 3.2 Getting access
 
 If you're not already a collaborator on the repo, ask Aaron to add your GitHub username:
 1. Create a free account at [github.com](https://github.com) if you don't have one.
 2. Send Aaron your GitHub username.
-3. He'll send you an invite from `github.com/aaronconsent/firstbyte/settings/access`. Click **Accept**.
+3. He'll send you an invite from `github.com/heyaaronmarketing/firstbyte/settings/access`. Click **Accept**.
 
 You'll now have full read/write access via the GitHub web UI — no developer tools required for everyday edits.
 
@@ -81,7 +82,7 @@ If you want to edit on your own computer:
 
 ```bash
 # Install git first if you don't have it: https://git-scm.com/downloads
-git clone https://github.com/aaronconsent/firstbyte.git
+git clone https://github.com/heyaaronmarketing/firstbyte.git
 cd firstbyte
 ```
 
@@ -154,30 +155,43 @@ Each script is idempotent — safe to re-run.
 ```
 You commit to main on GitHub
         ↓
-Cloudflare Pages sees the push
+Cloudflare Workers Builds sees the push
         ↓
-It runs the build (none needed — site/ is shipped as-is)
+It reads wrangler.jsonc + deploys the Worker
         ↓
-Files copied to 300+ edge cities worldwide
+site/ files uploaded as static assets
+        ↓
+src/worker.js deployed to 300+ edge cities
         ↓
 Live at firstbyte.agency (~30–60 seconds total)
 ```
 
 You can watch the deploy in real-time:
 
-* **Cloudflare dashboard** → Pages → `firstbyte` (or whatever the project is named) → Deployments.
+* **Cloudflare dashboard** → Workers & Pages → `firstbyte` → Deployments.
 
 If a deploy fails, the previous version stays live — your site never goes down because of a broken commit.
 
 ---
 
-## 6. Cloudflare Pages — what to know
+## 6. Cloudflare Workers — what to know
 
-* **Dashboard:** [dash.cloudflare.com](https://dash.cloudflare.com) → Pages → your project.
-* **Build settings:** Build command is empty. Build output directory is `site`. Source branch is `main`.
-* **Custom domain:** `firstbyte.agency` is mapped under **Custom domains**. SSL is automatic.
-* **Preview deployments:** Every commit to any branch other than `main` gets its own preview URL — useful for testing changes before merging.
-* **Logs:** Each deployment has its own build log under **Deployments**.
+* **Dashboard:** [dash.cloudflare.com](https://dash.cloudflare.com) → Workers & Pages → your project.
+* **Deployment model:** This project uses **Workers with Static Assets** — the `site/` folder is served directly from Cloudflare's asset store, and a small Worker script (`src/worker.js`) only runs for the two API endpoints (`/api/contact`, `/api/recent-leads`).
+* **Config file:** `wrangler.jsonc` at the repo root controls the Worker's name, entry file, static-assets binding, env vars, and KV binding. Committing changes to this file redeploys the Worker.
+* **Custom domain:** `firstbyte.agency` is mapped under **Domains & Routes**. SSL is automatic.
+* **Preview deployments:** Commits to non-`main` branches get their own preview URL — useful for testing before merging.
+* **Logs:** Each deployment has its own build log; live Worker logs are under **Logs** in the dashboard (observability is enabled in `wrangler.jsonc`).
+
+### Manual deploy (rarely needed)
+
+If GitHub isn't hooked up or you want to deploy from your own machine:
+
+```bash
+npx wrangler deploy
+```
+
+That reads `wrangler.jsonc`, uploads `site/`, and ships `src/worker.js`.
 
 ---
 
@@ -185,37 +199,40 @@ If a deploy fails, the previous version stays live — your site never goes down
 
 ### 7.1 Contact + Launch sign-up forms
 
-Both forms POST to `/api/contact`, which is a small Cloudflare Pages Function (`functions/api/contact.js`). It uses **Resend** to send the email to **`sean@firstbyte.agency`**.
+Both forms POST to `/api/contact`, which is served by the Worker script at `src/worker.js`. It uses **Resend** to send the email to **`sean@firstbyte.agency`**.
 
-### 7.2 Required environment variables
+### 7.2 Environment variables + secrets
 
-These are set in Cloudflare, **not** in the code. Dashboard path:
-**Cloudflare Pages → your project → Settings → Environment variables**.
+Two of these are declared in `wrangler.jsonc` (versioned in git), one is a secret set via CLI or dashboard (never versioned):
 
-| Variable | What it is | Where to get it |
-|---|---|---|
-| `RESEND_API_KEY` | API key from Resend (secret) | resend.com → API Keys |
-| `CONTACT_TO` | Where to send leads | usually `sean@firstbyte.agency` |
-| `CONTACT_FROM` | Verified sender address | something like `noreply@firstbyte.agency` (Resend must verify the domain) |
+| Name | Type | Where it lives | What it is |
+|---|---|---|---|
+| `RESEND_API_KEY` | **Secret** | Set with `wrangler secret put RESEND_API_KEY`, or Cloudflare dashboard → Workers → firstbyte → **Settings → Variables and Secrets** → Add secret. | Your Resend API key from resend.com → API Keys. |
+| `CONTACT_TO` | Var | `wrangler.jsonc` under `vars` (currently `sean@firstbyte.agency`) | Recipient email for lead notifications. |
+| `CONTACT_FROM` | Var | `wrangler.jsonc` under `vars` (currently `First Byte <noreply@firstbyte.agency>`) | Verified Resend sender. |
 
-After adding/editing env vars, you must **trigger a redeploy** for them to take effect (just re-deploy the latest commit from the dashboard).
+Changing a `var` requires a redeploy (push a commit or run `npx wrangler deploy`). Changing a `secret` takes effect immediately.
 
 ### 7.3 Resend setup
 
 1. Sign in at [resend.com](https://resend.com).
-2. Add `firstbyte.agency` as a verified sending domain (Resend will give you DNS records to add to Cloudflare DNS — paste them in).
-3. Create an API key → paste it into `RESEND_API_KEY` in Cloudflare Pages env vars.
+2. Add `firstbyte.agency` as a verified sending domain (Resend gives you DNS records to add to Cloudflare DNS — paste them in).
+3. Create an API key → set it as the `RESEND_API_KEY` secret on the Worker:
+   ```bash
+   npx wrangler secret put RESEND_API_KEY
+   # paste the key when prompted
+   ```
 4. Test by submitting the Contact form on the live site.
 
-### 7.4 Social-proof toasts (optional)
+### 7.4 Social-proof toasts (optional but recommended)
 
-The Lead Engine can show real recent leads on the site (e.g. *"Mike R. in Conroe requested a free audit"*). For this to show real (not labeled-sample) data, you need:
+The Lead Engine can show real recent leads on the site (e.g. *"Mike R. requested a free audit"*). For this to show real (not labeled-sample) data:
 
-1. In Cloudflare → Workers & Pages → KV → Create a namespace called `LEADS_KV`.
-2. In your Pages project → Settings → Functions → KV bindings → bind it as `LEADS_KV`.
-3. Redeploy.
+1. Create a KV namespace: Cloudflare dashboard → Workers & Pages → **KV** → **Create a namespace** → any name (e.g. `firstbyte-leads`). Copy the resulting namespace ID.
+2. Edit `wrangler.jsonc` at the repo root, find the `kv_namespaces` block, and replace `REPLACE_WITH_YOUR_KV_ID` with the ID you just copied.
+3. Commit + push. The next deploy picks up the binding as `LEADS_KV` inside the Worker.
 
-Once bound, `contact.js` writes anonymized first-name+timestamp records to KV, and `recent-leads.js` reads them so the social-proof widget shows real recent activity. Without KV, the widget shows nothing (it does **not** fabricate fake data).
+Once bound, `src/worker.js` writes anonymized first-name+timestamp records to KV when someone submits a form, and `/api/recent-leads` reads them so the social-proof widget shows real recent activity. Without KV, the widget shows nothing — the code **refuses to fabricate fake social proof**.
 
 ---
 
@@ -232,14 +249,14 @@ Once bound, `contact.js` writes anonymized first-name+timestamp records to KV, a
 | Inline `<script>` in `site/contact/index.html` | Contact form submit handler (POSTs to `/api/contact`). | Only on `/contact/`. |
 | Inline JSON-LD scripts in every page | Structured data for SEO/AEO — `LocalBusiness`, `Service`, `FAQPage`, `BlogPosting`, `BreadcrumbList`, `Offer`, etc. | Not executable JS — data only. Read by Google, ChatGPT, Perplexity. |
 
-### 8.2 Cloudflare Pages Functions (server-side, run on Workers)
+### 8.2 Cloudflare Worker (server-side, edge-executed)
 
 | File | What it does |
 |---|---|
-| `functions/api/contact.js` | Receives form POSTs, validates fields, sends an email via Resend, writes an anonymized lead record to KV. |
-| `functions/api/recent-leads.js` | Returns the last few anonymized leads from KV so the social-proof widget can display them. |
+| `src/worker.js` | Single Worker script. Routes `POST /api/contact` (validates → Resend → optional KV write) and `GET /api/recent-leads` (KV read). Every other URL falls through to static assets. |
+| `wrangler.jsonc` | Worker config — assets binding, KV binding, env vars, deployment settings. |
 
-These run on Cloudflare's edge — no separate server. They're triggered by browser requests to `/api/contact` and `/api/recent-leads`.
+The Worker runs on Cloudflare's edge — no separate server, no cold starts. It's invoked only for the two `/api/*` routes; static assets skip the Worker entirely and stream straight from Cloudflare's asset store.
 
 ### 8.3 Inherited WordPress theme scripts (still present on some pages)
 
@@ -591,7 +608,7 @@ A running list of non-critical items. The site is in good shape overall.
 | 1 | Verify GBP geo coordinates | Need exact lat/long after you claim Google Business Profile |
 | 2 | Turn on Google Analytics 4 | Need your GA4 measurement ID to paste into `enhance.py` |
 | 3 | Connect Resend for forms | Need `RESEND_API_KEY`, `CONTACT_TO`, `CONTACT_FROM` set in Cloudflare Pages → Settings → Environment variables |
-| 4 | Bind `LEADS_KV` for social-proof toasts | Need a KV namespace created + bound in Cloudflare Pages dashboard |
+| 4 | Bind `LEADS_KV` for social-proof toasts | Need to create a KV namespace in Cloudflare dashboard and paste its ID into `wrangler.jsonc` |
 | 5 | `AggregateRating` schema | Need 10+ Google reviews to source the data |
 | 6 | Add Instagram / YouTube / TikTok to `sameAs` | Need the URLs of your active social profiles |
 
@@ -637,10 +654,9 @@ firstbyte/
 │  ├─ sitemap.xml              ← Auto-generated
 │  ├─ robots.txt               ← Auto-generated
 │  └─ llms.txt                 ← AI-engine-readable site summary
-├─ functions/
-│  └─ api/
-│     ├─ contact.js            ← Lead-form receiver → Resend → KV
-│     └─ recent-leads.js       ← Social-proof JSON endpoint
+├─ src/
+│  └─ worker.js                ← Single Cloudflare Worker: /api/contact + /api/recent-leads
+├─ wrangler.jsonc              ← Worker config (assets, KV, env vars)
 ├─ *.py                        ← The build pipeline (see Section 10)
 └─ README.md                   ← Project notes (technical)
 ```

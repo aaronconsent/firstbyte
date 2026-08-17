@@ -1,15 +1,35 @@
-// Cloudflare Pages Function — POST /api/contact
-// Sends contact-form submissions as email via the Resend API.
-// Env vars (set in Pages → Settings → Environment variables):
-//   RESEND_API_KEY  (secret, REQUIRED) — your Resend API key
-//   CONTACT_TO      (optional) — recipient; defaults to sean@firstbyte.agency
-//   CONTACT_FROM    (optional) — verified Resend sender; defaults below
-//                    (must be on a domain you've verified in Resend)
+// Cloudflare Worker for firstbyte.agency.
+//
+// Serves the static site from ./site via env.ASSETS, and handles two API routes:
+//   POST /api/contact       -> Resend email + optional KV write for social proof
+//   GET  /api/recent-leads  -> anonymized recent leads for social-proof toasts
+//
+// Required secret (set with `wrangler secret put RESEND_API_KEY`):
+//   RESEND_API_KEY
+// Optional bindings / vars (see wrangler.jsonc):
+//   CONTACT_TO, CONTACT_FROM, LEADS_KV
+//
+// Ported verbatim from the earlier Pages Functions at
+// functions/api/{contact,recent-leads}.js.
+
 const DEFAULT_TO = "sean@firstbyte.agency";
 const DEFAULT_FROM = "First Byte <noreply@firstbyte.agency>";
 
-export async function onRequestPost(context) {
-  const { request, env } = context;
+export default {
+  async fetch(request, env, ctx) {
+    const url = new URL(request.url);
+    if (url.pathname === "/api/contact" && request.method === "POST") {
+      return handleContact(request, env);
+    }
+    if (url.pathname === "/api/recent-leads" && request.method === "GET") {
+      return handleRecentLeads(env);
+    }
+    // Anything else: static asset (or 404 if none matches).
+    return env.ASSETS.fetch(request);
+  },
+};
+
+async function handleContact(request, env) {
   try {
     const data = await readBody(request);
 
@@ -58,6 +78,7 @@ export async function onRequestPost(context) {
     if (!res.ok) {
       return respond(request, false, "Couldn’t send your message. Please call us at (713) 578-0634.", 502);
     }
+
     // Record an anonymized entry for social-proof toasts (only if KV is bound).
     try {
       if (env.LEADS_KV) {
@@ -68,10 +89,31 @@ export async function onRequestPost(context) {
         await env.LEADS_KV.put("recent", JSON.stringify(list.slice(0, 20)));
       }
     } catch (_e) { /* never block the lead on logging */ }
+
     return respond(request, true, "Thanks! We’ll be in touch shortly.", 200);
   } catch (_e) {
     return respond(request, false, "Something went wrong. Please try again or call (713) 578-0634.", 500);
   }
+}
+
+async function handleRecentLeads(env) {
+  let items = [];
+  try {
+    if (env.LEADS_KV) {
+      const raw = await env.LEADS_KV.get("recent");
+      if (raw) items = JSON.parse(raw);
+    }
+  } catch (_e) { items = []; }
+
+  // Only expose first name + action + timestamp (no email/phone/last name).
+  const safe = (Array.isArray(items) ? items : []).slice(0, 8).map((x) => ({
+    n: String(x.n || "Someone").slice(0, 40),
+    a: String(x.a || "requested a free plan").slice(0, 80),
+    t: Number(x.t) || Date.now(),
+  }));
+  return new Response(JSON.stringify(safe), {
+    headers: { "content-type": "application/json", "cache-control": "no-store" },
+  });
 }
 
 async function readBody(request) {
@@ -97,7 +139,9 @@ function respond(request, ok, msg, status) {
 function json(obj, status = 200) {
   return new Response(JSON.stringify(obj), { status, headers: { "content-type": "application/json" } });
 }
+
 function str(v) { return (v == null ? "" : String(v)).trim(); }
+
 function esc(s) {
   return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }

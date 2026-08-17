@@ -1,0 +1,48 @@
+// Cloudflare Worker config for firstbyte.agency.
+//
+// This project is deployed as a Worker with Static Assets:
+//   - The `site/` directory is served directly from Cloudflare's edge.
+//   - `src/worker.js` handles two API endpoints:
+//       POST /api/contact       -> sends email via Resend + optional KV write
+//       GET  /api/recent-leads  -> reads anonymized recent leads for social-proof toasts
+//   - Every other URL is a static asset (no Worker invocation, no cost).
+//
+// Setup checklist (dashboard):
+//   1. Set RESEND_API_KEY as a secret:
+//        wrangler secret put RESEND_API_KEY
+//      or Dashboard -> Workers & Pages -> firstbyte -> Settings -> Variables and Secrets.
+//   2. Create a KV namespace named "firstbyte-leads" (or any name), then paste its
+//      id below in the `kv_namespaces` section, replacing REPLACE_WITH_YOUR_KV_ID.
+//      Without this, the social-proof toast widget just stays silent (no fake data).
+//   3. Confirm the custom domain `firstbyte.agency` is routed to this Worker.
+//
+// Deploying:
+//   - Auto-deploys on push to `main` if this repo is connected via
+//     Cloudflare's "Workers Builds" GitHub integration.
+//   - Manual deploy: `npx wrangler deploy` from this repo root.
+
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "firstbyte",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-08-01",
+  "assets": {
+    "directory": "./site",
+    "binding": "ASSETS",
+    "not_found_handling": "none",
+    "run_worker_first": ["/api/*"]
+  },
+  "vars": {
+    "CONTACT_TO": "sean@firstbyte.agency",
+    "CONTACT_FROM": "First Byte <noreply@firstbyte.agency>"
+  },
+  "kv_namespaces": [
+    {
+      "binding": "LEADS_KV",
+      "id": "REPLACE_WITH_YOUR_KV_ID"
+    }
+  ],
+  "observability": {
+    "enabled": true
+  }
+}
