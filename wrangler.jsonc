@@ -11,10 +11,18 @@
 //   1. Set RESEND_API_KEY as a secret:
 //        wrangler secret put RESEND_API_KEY
 //      or Dashboard -> Workers & Pages -> firstbyte -> Settings -> Variables and Secrets.
-//   2. Create a KV namespace named "firstbyte-leads" (or any name), then paste its
-//      id below in the `kv_namespaces` section, replacing REPLACE_WITH_YOUR_KV_ID.
-//      Without this, the social-proof toast widget just stays silent (no fake data).
-//   3. Confirm the custom domain `firstbyte.agency` is routed to this Worker.
+//   2. Set the admin inbox credentials as secrets:
+//        wrangler secret put ADMIN_USER      (e.g. "sean")
+//        wrangler secret put ADMIN_PASS      (a strong password)
+//      These gate /admin/leads and /api/leads.
+//   3. Create a KV namespace, then add the binding below. From the dashboard:
+//        Workers & Pages -> KV -> Create a namespace -> any name ("firstbyte-leads")
+//      Copy the namespace ID, then UNCOMMENT the kv_namespaces block below
+//      (marked "// KV binding — enable when ready") and paste the id in.
+//      Until this is done: the social-proof toast widget stays silent (no fake data)
+//      AND the /admin/leads inbox shows the "bind LEADS_KV to start capturing" message.
+//      The contact form still sends email via Resend either way.
+//   4. Confirm the custom domain `firstbyte.agency` is routed to this Worker.
 //
 // Deploying:
 //   - Auto-deploys on push to `main` if this repo is connected via
@@ -36,12 +44,15 @@
     "CONTACT_TO": "sean@firstbyte.agency",
     "CONTACT_FROM": "First Byte <noreply@firstbyte.agency>"
   },
-  "kv_namespaces": [
-    {
-      "binding": "LEADS_KV",
-      "id": "REPLACE_WITH_YOUR_KV_ID"
-    }
-  ],
+  // KV binding — enable when ready.
+  // Uncomment the block below AND paste your real KV namespace id after you
+  // create the namespace in the Cloudflare dashboard (see step 3 above).
+  // "kv_namespaces": [
+  //   {
+  //     "binding": "LEADS_KV",
+  //     "id": "PASTE_YOUR_KV_NAMESPACE_ID_HERE"
+  //   }
+  // ],
   "observability": {
     "enabled": true
   }
