@@ -44,15 +44,12 @@
     "CONTACT_TO": "sean@firstbyte.agency",
     "CONTACT_FROM": "First Byte <noreply@firstbyte.agency>"
   },
-  // KV binding — enable when ready.
-  // Uncomment the block below AND paste your real KV namespace id after you
-  // create the namespace in the Cloudflare dashboard (see step 3 above).
-  // "kv_namespaces": [
-  //   {
-  //     "binding": "LEADS_KV",
-  //     "id": "PASTE_YOUR_KV_NAMESPACE_ID_HERE"
-  //   }
-  // ],
+  "kv_namespaces": [
+    {
+      "binding": "LEADS_KV",
+      "id": "c2da8fa70e7a4eff9768c39e5dcd065e"
+    }
+  ],
   "observability": {
     "enabled": true
   }
