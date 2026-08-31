@@ -1,0 +1,46 @@
+name: Deploy Worker
+
+# Every push to main deploys the Worker to production (auto-promoted).
+# Also runnable manually from the Actions tab (workflow_dispatch).
+#
+# Required GitHub secrets (Settings -> Secrets and variables -> Actions):
+#   CLOUDFLARE_API_TOKEN  - a Cloudflare API token with these permissions:
+#                             Account > Workers Scripts       : Edit
+#                             Account > Workers KV Storage    : Edit
+#                             Account > Workers R2 Storage    : Read   (optional)
+#                             Account > Account Analytics     : Read   (optional)
+#                           Create at https://dash.cloudflare.com/profile/api-tokens
+#                           using the "Edit Cloudflare Workers" template.
+#   CLOUDFLARE_ACCOUNT_ID - your Cloudflare account ID (visible in the sidebar
+#                           of any Workers page, or under Account Home -> right sidebar).
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Cancel any in-flight deploy for the same branch when a newer push arrives.
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy
