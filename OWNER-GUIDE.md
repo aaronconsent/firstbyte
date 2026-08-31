@@ -234,6 +234,33 @@ The Lead Engine can show real recent leads on the site (e.g. *"Mike R. requested
 
 Once bound, `src/worker.js` writes anonymized first-name+timestamp records to KV when someone submits a form, and `/api/recent-leads` reads them so the social-proof widget shows real recent activity. Without KV, the widget shows nothing — the code **refuses to fabricate fake social proof**.
 
+### 7.5 The lead inbox — see every past lead at `/admin/leads`
+
+Once the KV namespace above is bound, the Worker **also stores every full lead submission** (name, email, phone, message, source page, country, timestamp) as a rolling history — the last **500 leads**, newest first. You can browse them at:
+
+🔒 **`https://firstbyte.agency/admin/leads`** *(Basic Auth protected)*
+
+Two setup steps needed once:
+
+1. Set an admin username and password as Worker secrets (used only for this endpoint):
+   ```bash
+   npx wrangler secret put ADMIN_USER
+   # type any username, e.g. "sean"
+   npx wrangler secret put ADMIN_PASS
+   # type a strong password
+   ```
+   Or via the Cloudflare dashboard → Workers → `firstbyte` → **Settings → Variables and Secrets → Add secret**.
+
+2. Confirm `LEADS_KV` is bound (see 7.4 above).
+
+Then visit `/admin/leads` in your browser — you'll get a native login prompt for the credentials you set. After login you'll see a clean dark-themed inbox: newest lead first, click any row to expand and see the full message, source page, country, and IP. Every email and phone in the list is a `mailto:` / `tel:` link so you can respond in one tap.
+
+**For raw JSON** (integrations / exports): `GET https://firstbyte.agency/api/leads` returns the same list, protected by the same Basic Auth.
+
+**Retention:** capped at 500 leads (rolling window). If you expect to blow past that, export the JSON periodically. Every lead is *also* in Sean's inbox and in Resend's history as a permanent record.
+
+**Important:** if `ADMIN_USER` / `ADMIN_PASS` aren't set, the endpoint returns *"Admin credentials not configured"* — the inbox stays inaccessible. It's never left open to the public.
+
 ---
 
 ## 8. All JavaScript installed on the site
@@ -253,10 +280,10 @@ Once bound, `src/worker.js` writes anonymized first-name+timestamp records to KV
 
 | File | What it does |
 |---|---|
-| `src/worker.js` | Single Worker script. Routes `POST /api/contact` (validates → Resend → optional KV write) and `GET /api/recent-leads` (KV read). Every other URL falls through to static assets. |
+| `src/worker.js` | Single Worker script. Routes: `POST /api/contact` (validates → Resend → KV write of full lead + anonymized recent lead), `GET /api/recent-leads` (public — anonymized data for social-proof toasts), `GET /api/leads` (Basic Auth — full JSON lead history), `GET /admin/leads` (Basic Auth — HTML lead inbox). Every other URL falls through to static assets. |
 | `wrangler.jsonc` | Worker config — assets binding, KV binding, env vars, deployment settings. |
 
-The Worker runs on Cloudflare's edge — no separate server, no cold starts. It's invoked only for the two `/api/*` routes; static assets skip the Worker entirely and stream straight from Cloudflare's asset store.
+The Worker runs on Cloudflare's edge — no separate server, no cold starts. It's invoked only for the `/api/*` and `/admin/*` routes; static assets skip the Worker entirely and stream straight from Cloudflare's asset store.
 
 ### 8.3 Inherited WordPress theme scripts (still present on some pages)
 
